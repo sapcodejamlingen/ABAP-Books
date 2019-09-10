@@ -1,0 +1,81 @@
+REPORT  z_teilnehmerliste03.
+*Einstieg in ABAP S. 108
+
+*Tabellen deklarieren
+TABLES zteilnehmer.
+
+*Zeichenketten deklarieren
+DATA: geschlaecht VALUE 'W',
+      familienname LIKE zteilnehmer-tname,
+      telefon(8) TYPE n VALUE '887766',
+      national_vorwahl(5) TYPE n VALUE '09876',
+      international_vorwahl(4) VALUE '+49',
+      telefon_international(25).
+
+*Kontrollausgabe der Ursprünglichen Feldinhalte
+WRITE / 'Ursprüngliche Feldinhalte'.
+WRITE: 30 telefon,
+       40 national_vorwahl,
+       50 international_vorwahl,
+       60 telefon_international.
+ULINE.
+*SHIFT-Anweisung
+WRITE / 'SHIFT'.
+SHIFT telefon LEFT DELETING LEADING '0'.
+WRITE 30 telefon.
+SHIFT telefon BY 2 PLACES RIGHT.
+WRITE /30 telefon.
+ULINE.
+*Replace Anweisung
+WRITE / 'Replace'.
+telefon_international = ' 887766'.
+REPLACE ' ' WITH national_vorwahl INTO telefon_international.
+WRITE 60 telefon_international.
+REPLACE '0' WITH '+49-(0)' INTO telefon_international.
+WRITE /60 telefon_international.
+ULINE.
+*Condense-Anweisung
+WRITE / 'Condense'.
+telefon_international = '+49 - (0)9876 887766'.
+CONDENSE telefon_international.
+WRITE 60 telefon_international.
+CONDENSE telefon_international NO-GAPS.
+WRITE /60 telefon_international.
+ULINE.
+*Concatenate-Anweisung
+WRITE / 'Concatenate'.
+telefon = '887766'.
+SHIFT telefon LEFT DELETING LEADING '0'.
+telefon_international = space.
+CONCATENATE international_vorwahl
+            national_vorwahl telefon
+            INTO
+            telefon_international
+            SEPARATED BY '-'.
+WRITE 60 telefon_international.
+ULINE.
+*Split anweisung
+WRITE / 'Split'.
+international_vorwahl = space.
+national_vorwahl = space.
+telefon = space.
+SPLIT telefon_international AT '-'
+      INTO
+        international_vorwahl
+        national_vorwahl
+        telefon.
+WRITE: 30 telefon,
+       40 national_vorwahl,
+       50 international_vorwahl.
+ULINE.
+* Direktes Positionieren
+WRITE / 'Direktes Positionieren'.
+international_vorwahl = space.
+international_vorwahl = telefon_international(3).
+WRITE 50 international_vorwahl.
+telefon_international = '+49-(0)9876-887766'.
+national_vorwahl = space.
+national_vorwahl = telefon_international+4(7).
+WRITE 40 national_vorwahl.
+telefon_international+1(2) = '33'.
+WRITE 60 telefon_international.
