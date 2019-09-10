@@ -1,0 +1,194 @@
+REPORT  z_teilnehmerliste12_itab_kopfz.
+*Einstieg in ABAP S. 346
+
+
+*Tabellenarbeitsbereiche deklarieren
+DATA wa_zteilnehmer2 TYPE zteilnehmer2.
+
+*Felder Deklarieren
+DATA: zeilen_itab01 TYPE i.
+
+*Datentypen für Zeilen deklarieren
+TYPES: BEGIN OF zeile01_typ,
+        zzkurstitel LIKE
+        zteilnehmer2-zzkurstitel,
+        tkurspreis LIKE
+        zteilnehmer2-tkurspreis,
+  END OF zeile01_typ.
+
+TYPES BEGIN OF zeile02_typ.
+INCLUDE TYPE zeile01_typ.
+TYPES minteiln TYPE i.
+TYPES END OF zeile02_typ.
+
+TYPES: BEGIN OF zeile03_typ,
+        bezeichnung LIKE zteilnehmer2-zzkurstitel,
+        preis LIKE zteilnehmer2-tkurspreis,
+        maxteil TYPE i,
+  END OF zeile03_typ.
+
+TYPES zeile04_typ TYPE zteilnehmer2.
+
+*Datentypen für interne Tabellen deklarieren
+TYPES itab01_typ TYPE STANDARD TABLE OF zeile01_typ.
+TYPES itab02_typ TYPE STANDARD TABLE OF zeile02_typ.
+TYPES itab03_typ TYPE STANDARD TABLE OF zeile03_typ.
+TYPES itab04_typ TYPE STANDARD TABLE OF zeile04_typ.
+
+*Interne Tabellen deklarieren ohne Kopfzeile
+DATA itab01 TYPE itab01_typ.
+DATA itab02 TYPE itab02_typ.
+DATA itab03 TYPE itab03_typ.
+DATA itab04 TYPE itab04_typ.
+
+*Workarea für interne Tabelle deklarieren
+DATA wa_itab01 TYPE zeile01_typ.
+DATA wa_itab02 TYPE zeile02_typ.
+DATA wa_itab03 TYPE zeile03_typ.
+DATA wa_itab04 TYPE zeile04_typ.
+
+
+*Selektionsbildschirm deklarieren
+
+
+*___________________________________________*
+*Initialization
+
+*---------------------------------------------*
+*At selection screen
+
+*---------------------------------------------*
+
+START-OF-SELECTION.
+
+
+
+*DBTab lesen und itab01 füllen über Workarea
+  SELECT * FROM zteilnehmer2
+            INTO wa_zteilnehmer2.
+    MOVE-CORRESPONDING wa_zteilnehmer2 TO wa_itab01.
+    APPEND wa_itab01 TO itab01.
+
+  ENDSELECT.
+
+
+*DBtab lesen und itab02 füllen über Array-Fetch
+  SELECT * FROM zteilnehmer2
+    INTO CORRESPONDING FIELDS OF TABLE itab02.
+
+*DBTab lesen und itab03 füllen über Kopfzeile und Zuweisung
+  wa_itab03-maxteil = 10.
+  SELECT * FROM zteilnehmer2 INTO wa_zteilnehmer2.
+    wa_itab03-bezeichnung =
+    wa_zteilnehmer2-zzkurstitel.
+    wa_itab03-preis = wa_zteilnehmer2-tkurspreis.
+    APPEND wa_itab03 TO itab03.
+  ENDSELECT.
+
+*DBtab lesen und itab04 füllen über array-fetch
+  SELECT * FROM zteilnehmer2
+          INTO CORRESPONDING FIELDS OF TABLE itab04.
+
+*------------------------------*
+
+END-OF-SELECTION.
+
+*Zahl der Rumpfzeileneinträge für itab01 lesen und ausgeben
+  DESCRIBE TABLE itab01 LINES zeilen_itab01.
+  SKIP.
+  WRITE: / 'Anzahl Zeilen itab01:',
+           zeilen_itab01.
+
+
+*Wa initilaisieren, füllen und neue Zeile in itab01 anhängen.
+  CLEAR itab01.
+  zeilen_itab01 = zeilen_itab01 + 1.
+
+  wa_itab01-zzkurstitel = 'LINUX-GRUNDLAGEN'.
+  wa_itab01-tkurspreis  = '456.78'.
+
+  INSERT wa_itab01 INTO itab01 INDEX zeilen_itab01.
+
+*Itab01 in Liste ausgeben
+  SKIP.
+  WRITE: / 'sy-tabix, itab01-zzkurstitel, itab01-tkkurspreis'."Überschr
+  LOOP AT itab01 INTO wa_itab01.
+    WRITE: / sy-tabix,
+             wa_itab01-zzkurstitel,
+             wa_itab01-tkurspreis.
+  ENDLOOP.
+
+
+*ITAB02 verarbeiten und in liste ausgeben
+  SKIP.
+  WRITE: / 'itab02-zzkurstitel, itab02-tkkurspreis, itab02-minteiln'.
+  LOOP AT itab02 INTO wa_itab02
+              WHERE zzkurstitel = 'PC-GRUNDLAGEN'.
+    wa_itab02-minteiln = 2.
+    WRITE: / wa_itab02-zzkurstitel,
+             wa_itab02-tkurspreis,
+             wa_itab02-minteiln.
+  ENDLOOP.
+
+*itab03 verarbeiten, ausgeben und Rumpf modifizieren
+  SKIP.
+  WRITE: / 'itab03-bezeichnung, itab03-preis, itab-maxteil'.
+  LOOP AT itab03 INTO wa_itab03.
+    IF wa_itab03-bezeichnung = 'PC-GRUNDLAGEN'.
+      wa_itab03-preis = 567.
+      MODIFY itab03 FROM wa_itab03.
+    ENDIF.
+    WRITE: / wa_itab03-bezeichnung,
+             wa_itab03-preis,
+             wa_itab03-maxteil.
+  ENDLOOP.
+
+*Einen Satz aus itab03 mit index lesen und ausgebene
+  READ TABLE itab03 INDEX 3 INTO wa_itab03.
+  SKIP.
+* write: / 'gelesen von itab03 Zeile, sy-tabix,
+  WRITE: / 'gelesen von itab03',
+            sy-tabix NO-GAP, '.Zeile:',
+            wa_itab03-bezeichnung,
+            wa_itab03-preis,
+            wa_itab03-maxteil.
+
+* Einen Satz aus itab04 mit Schlüssel lesen und ausgeben
+  READ TABLE itab04 INTO wa_itab04 WITH KEY
+              mandant = sy-mandt tnummer = 5.
+  SKIP.
+  WRITE: / 'gelesen von itab04',
+            wa_itab04-mandant,
+            wa_itab04-tnummer,
+            wa_itab04-tname,
+            wa_itab04-tgeburtsdatum,
+            wa_itab04-tgeschlecht.
+
+*einen Satz aus itab01 über index lesen.löschen protokollieren
+  READ TABLE itab01 INTO wa_itab01 INDEX 3.
+  DELETE itab01 INDEX 3.
+  SKIP.
+  WRITE: / 'gelöscht von itab01',
+              sy-tabix NO-GAP, '.Zeile:',
+              wa_itab01-zzkurstitel,
+              wa_itab01-tkurspreis.
+
+*gezielt einzelnen Satz aus itab02 über Schlüssel
+*lesen, löschen, protokollieren
+  READ TABLE itab02 INTO wa_itab02
+  WITH KEY zzkurstitel = 'SAP-GRUNDLAGEN'.
+  DELETE TABLE itab02 FROM wa_itab02.
+  SKIP.
+
+
+break-point.
+*Wirkung von Clear, refresh und free bei internen Tabellen m. Kopfzeile
+  CLEAR itab01. "Initialisiert Kopfzeile
+  CLEAR itab01[]. "löscht Rumpfzeilen
+
+  CLEAR itab02. "Initialisiert Kopfzeile
+  REFRESH itab02. "löscht Rumpfzeile
+
+  CLEAR itab03. "Initialisiert Kopfzeile
+  FREE itab03. " Löscht Rumpfzeilen und gibt Speicherplatz frei
+  SKIP.
