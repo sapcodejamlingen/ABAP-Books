@@ -1,0 +1,204 @@
+REPORT  z_teilnehmerliste12_itab_kopfz.
+*Einstieg in ABAP S. 346
+
+*Tabellen deklarieren
+TABLES zteilnehmer2.
+
+*Felder Deklarieren
+DATA: zeilen_itab01 TYPE i.
+
+*Interne Tabellen deklarieren, beispiele mit Kopfzeile
+DATA: BEGIN OF itab01 OCCURS 0,
+        zzkurstitel LIKE
+        zteilnehmer2-zzkurstitel,
+        tkurspreis LIKE
+        zteilnehmer2-tkurspreis,
+      END OF itab01.
+
+DATA BEGIN OF itab02 OCCURS 0.
+        INCLUDE STRUCTURE itab01.
+DATA minteiln TYPE i.
+DATA END OF itab02.
+
+DATA: BEGIN OF itab03 OCCURS 0,
+        bezeichnung LIKE zteilnehmer2-zzkurstitel,
+        preis LIKE zteilnehmer2-tkurspreis,
+        maxteil TYPE i VALUE 10,
+      END OF itab03.
+
+DATA BEGIN OF itab04 OCCURS 0.
+        INCLUDE STRUCTURE zteilnehmer2.
+DATA END OF itab04.
+
+*Workarea Deklarieren
+
+*Selektionsbildschirm deklarieren
+
+
+*___________________________________________*
+*Initialization
+
+*---------------------------------------------*
+*At selection screen
+
+*---------------------------------------------*
+*Start of selection
+
+*DBTab lesen und itab01 füllen über Kopfzeile
+SELECT * FROM zteilnehmer2.
+  MOVE-CORRESPONDING zteilnehmer2 TO itab01.
+  APPEND itab01.
+ENDSELECT.
+
+
+*DBtab lesen und itab02 füllen über Array-Fetch
+SELECT * FROM zteilnehmer2
+  INTO CORRESPONDING FIELDS OF TABLE itab02.
+
+*DBTab lesen und itab03 füllen über Kopfzeile und Zuweisung
+SELECT * FROM zteilnehmer2.
+  itab03-bezeichnung =
+  zteilnehmer2-zzkurstitel.
+
+  itab03-preis = zteilnehmer2-tkurspreis.
+  APPEND itab03.
+ENDSELECT.
+
+*DBtab lesen und itab04 füllen über array-fetch
+SELECT * FROM zteilnehmer2 INTO CORRESPONDING FIELDS OF TABLE itab04.
+
+*------------------------------*
+
+END-OF-SELECTION.
+
+*Zahl der Rumpfzeileneinträge für itab01 lesen und ausgeben
+  DESCRIBE TABLE itab01 LINES zeilen_itab01.
+  SKIP.
+  WRITE: / 'Anzahl Zeilen itab01:', zeilen_itab01.
+
+*Kopfzeile initilaisieren, füllen und neue Zeile in itab01 anhängen.
+  CLEAR itab01.
+  itab01-zzkurstitel = 'LINUX-GRUNDLAGEN'.
+  itab01-tkurspreis = '456.78'.
+  zeilen_itab01 = zeilen_itab01 + 1.
+  INSERT itab01 INDEX zeilen_itab01.
+
+*Itab01 in Liste ausgeben
+  SKIP.
+  WRITE: / 'sy-tabix, itab01-zzkurstitel, itab01-tkkurspreis'.
+  LOOP AT itab01.
+    WRITE: / sy-tabix, itab01-zzkurstitel, itab01-tkurspreis.
+  ENDLOOP.
+
+
+*ITAB02 verarbeiten und in liste ausgeben
+  SKIP.
+  WRITE: / 'itab02-zzkurstitel, itab02-tkkurspreis, itab02-minteiln'.
+  LOOP AT itab02 WHERE zzkurstitel = 'PC-GRUNDLAGEN'.
+
+
+    itab02-minteiln = 2.
+    WRITE: / itab02-zzkurstitel,
+             itab02-tkurspreis,
+             itab02-minteiln.
+
+  ENDLOOP.
+
+*itab03 verarbeiten, ausgeben und Rumpf modifizieren
+  SKIP.
+  WRITE: / 'itab03-bezeichnung, itab03-preis, itab-maxteil'.
+  LOOP AT itab03.
+    IF itab03-bezeichnung = 'PC-GRUNDLAGEN'.
+      itab03-preis = 567.
+      MODIFY itab03.
+    ENDIF.
+    WRITE: / itab03-bezeichnung, itab03-preis, itab03-maxteil.
+  ENDLOOP.
+
+*Einen Satz aus itab03 mit index lesen und ausgebene
+  READ TABLE itab03 INDEX 3.
+  SKIP.
+* write: / 'gelesen von itab03 Zeile, sy-tabix,
+  WRITE: / 'gelesen von itab03',
+            sy-tabix NO-GAP, '.Zeile:',
+            itab03-bezeichnung, itab03-preis,
+            itab03-maxteil.
+
+* Einen Satz aus itab04 mit Schlüssel lesen und ausgeben
+  READ TABLE itab04 WITH KEY mandant = sy-mandt tnummer = 5.
+  SKIP.
+  WRITE: / 'gelesen von itab04',
+  itab04-mandant, itab04-tnummer,
+  itab04-tname, itab04-tgeburtsdatum, itab04-tgeschlecht.
+
+*einen Satz aus itab01 über index lesen.löschen protokollieren
+  READ TABLE itab01 INDEX 3.
+  DELETE itab01 INDEX 3.
+  SKIP.
+  WRITE: / 'gelöscht von itab01',
+            sy-tabix NO-GAP, '.Zeile:',
+            itab01-zzkurstitel,
+            itab01-tkurspreis.
+
+*gezielt einzelnen Satz aus itab02 über Schlüssel
+*lesen, löschen, protokollieren
+  READ TABLE itab02 WITH KEY zzkurstitel = 'SAP-GRUNDLAGEN'.
+  DELETE itab02 WHERE zzkurstitel = 'SAP-GRUNDLAGEN'.
+  SKIP.
+
+  WRITE: / 'gelöscht von itab02',
+  sy-tabix NO-GAP, '.Zeile:',
+  itab02-zzkurstitel.
+
+* Interne Tabelle sortieren
+  SORT itab04 BY zzkurstitel.
+  SKIP.
+
+  LOOP AT itab04.
+    WRITE: / itab04-zzkurstitel,
+             itab04-tkurspreis,
+             itab04-tnummer,
+             itab04-tname.
+  ENDLOOP.
+
+  SORT itab04 AS TEXT BY zzkurstitel.
+  SKIP.
+
+  LOOP AT itab04.
+    WRITE: / itab04-zzkurstitel,
+             itab04-tkurspreis,
+             itab04-tnummer,
+             itab04-tname.
+  ENDLOOP.
+
+  SORT itab04 AS TEXT BY zzkurstitel tname.
+  SKIP.
+
+  LOOP AT itab04.
+    WRITE: / itab04-zzkurstitel,
+           itab04-tkurspreis,
+           itab04-tnummer,
+           itab04-tname.
+  ENDLOOP.
+
+  SORT itab04 DESCENDING AS TEXT BY zzkurstitel tname.
+  SKIP.
+
+  LOOP AT itab04.
+    WRITE: / itab04-zzkurstitel,
+       itab04-tkurspreis,
+       itab04-tnummer,
+       itab04-tname.
+  ENDLOOP.
+
+  BREAK-POINT.
+*Wirkung von Clear, refresh und free bei internen Tabellen m. Kopfzeile
+  CLEAR itab01. "Initialisiert Kopfzeile
+  CLEAR itab01[]. "löscht Rumpfzeilen
+
+  CLEAR itab02. "Initialisiert Kopfzeile
+  REFRESH itab02. "löscht Rumpfzeile
+
+  CLEAR itab03. "Initialisiert Kopfzeile
+  FREE itab03. " Löscht Rumpfzeilen und gibt Speicherplatz frei
+  SKIP.
