@@ -1,0 +1,91 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_DYNAMIC_DATA_OBJECTS
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_dynamic_data_objects.
+
+************************************************************************
+* Report Name  : Z_DYNAMIC_DATA_OBJECTS                               *
+* Report Title : Beispiel zu dynamischen Datenobjecten    *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/24/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.208               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+TYPES: BEGIN OF t_item,
+          content TYPE i,
+          next TYPE REF TO data,
+        END OF t_item.
+
+DATA: dref_start TYPE REF TO data,
+      dref_new TYPE REF TO data.
+
+FIELD-SYMBOLS <fs_new> TYPE t_item.
+
+* Create dynamic list
+
+DO 10 TIMES.
+  CREATE DATA dref_new TYPE t_item.
+
+  ASSIGN dref_new->* TO <fs_new>.
+  <fs_new>-content = sy-index ** 2.
+  IF sy-index = 1.
+    dref_start = dref_new.
+  ENDIF.
+  PERFORM append_item USING dref_start
+                            dref_new.
+ENDDO.
+
+PERFORM show_list_content USING dref_start.
+
+* Subroutines
+
+FORM append_item USING dref_start TYPE REF TO data
+                       dref_new TYPE REF TO data.
+  FIELD-SYMBOLS <fs_curitem> TYPE t_item.
+  DATA dref_cur TYPE REF TO data.
+  IF dref_start = dref_new.
+    EXIT.
+  ENDIF.
+  dref_cur = dref_start.
+  ASSIGN dref_cur->* TO <fs_curitem>.
+  WHILE NOT <fs_curitem>-next IS INITIAL.
+    dref_cur = <fs_curitem>-next.
+    ASSIGN dref_cur->* TO <fs_curitem>.
+  ENDWHILE.
+  <fs_curitem>-next = dref_new.
+ENDFORM.                    "append_item
+
+*&---------------------------------------------------------------------*
+*&      Form  show_list_content
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->DREF_START     text
+*      -->FIELD-SYMBOLS  text
+*      --><FS_CURITEM>   text
+*----------------------------------------------------------------------*
+FORM show_list_content USING dref_start TYPE REF TO data.
+  FIELD-SYMBOLS <fs_curitem> TYPE t_item.
+  DATA dref_cur TYPE REF TO data.
+  dref_cur = dref_start.
+  WHILE NOT dref_cur IS INITIAL.
+    ASSIGN dref_cur->* TO <fs_curitem>.
+    WRITE: / <fs_curitem>-content.
+    dref_cur = <fs_curitem>-next.
+  ENDWHILE.
+ENDFORM.                    "show_list_content

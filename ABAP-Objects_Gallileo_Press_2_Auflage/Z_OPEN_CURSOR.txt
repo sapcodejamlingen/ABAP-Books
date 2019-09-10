@@ -1,0 +1,54 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_OPEN_CURSOR
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_open_cursor.
+
+************************************************************************
+* Report Name  : Z_OPEN_CURSOR                                                 *
+* Report Title : Explizite Cursor-Behandlung bei SELECT                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/27/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects 2. Aufl. S. 580                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.27.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS p_carrid TYPE spfli-carrid.
+DATA: cur TYPE cursor,
+      wa_carrid TYPE spfli-carrid,
+      wa_connid TYPE spfli-connid,
+      wa_cityfrom TYPE spfli-cityfrom,
+      wa_cityto TYPE spfli-cityto.
+
+* Processing Blocks
+
+START-OF-SELECTION.
+
+  OPEN CURSOR cur FOR
+  SELECT carrid connid cityfrom cityto
+   FROM spfli
+   WHERE carrid = p_carrid
+   ORDER BY carrid.
+
+  DO.
+    FETCH NEXT CURSOR cur
+    INTO (wa_carrid, wa_connid, wa_cityfrom, wa_cityto).
+
+    IF sy-subrc <> 0.
+      CLOSE CURSOR cur.
+      EXIT.
+    ENDIF.
+  ENDDO.

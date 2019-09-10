@@ -1,0 +1,47 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_GENERIC_FIELD_SYMBOL
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_generic_field_symbol.
+
+************************************************************************
+* Report Name  : Z_GENERIC_FIELD_SYMBOL                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 99/99/9999 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:99.99.99 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+TYPES: BEGIN OF t_address,
+        street(30) TYPE c,
+        no(5) TYPE n,
+       END OF t_address.
+
+DATA: wa_address TYPE t_address,
+      address_tab TYPE HASHED TABLE
+      OF t_address
+      WITH UNIQUE KEY no,
+      key(4) TYPE c VALUE 'NO'.
+FIELD-SYMBOLS <fs> TYPE ANY TABLE.
+
+ASSIGN address_tab TO <fs>.
+
+* Syntaxfehler
+*READ TABLE <fs> WITH TABLE KEY no = '1' INTO wa_address.
+
+*So gehts
+READ TABLE <fs> WITH TABLE KEY (key) = '1' INTO wa_address.

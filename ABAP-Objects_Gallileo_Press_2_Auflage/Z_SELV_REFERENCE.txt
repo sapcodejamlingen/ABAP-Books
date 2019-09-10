@@ -1,0 +1,79 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SELV_REFERENCE
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_selv_reference.
+
+************************************************************************
+* Report Name  : Z_SELV_REFERENCE                                     *
+* Report Title : Verwendungsbeispiel für die Selbstreferenz           *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/25/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects 2. Aufl. S. 297                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.25.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS client DEFINITION.
+  PUBLIC SECTION.
+    DATA name(10) TYPE c VALUE 'Master' READ-ONLY.
+    METHODS create_server.
+ENDCLASS.                    "client DEFINITION
+
+*Class definition
+CLASS server DEFINITION.
+  PUBLIC SECTION.
+    METHODS acknowledge
+    IMPORTING creator TYPE REF TO client.
+  PRIVATE SECTION.
+    DATA name(10) TYPE c VALUE 'Servant'.
+ENDCLASS.                    "server DEFINITION
+
+
+*class implementation
+CLASS client IMPLEMENTATION.
+  METHOD create_server.
+    DATA server_ref TYPE REF TO server.
+    CREATE OBJECT server_ref.
+    CALL METHOD server_ref->acknowledge
+      EXPORTING
+        creator = me.
+  ENDMETHOD.                    "create_server
+ENDCLASS.                    "client IMPLEMENTATION
+
+
+*----------------------------------------------------------------------*
+*       CLASS server IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS server IMPLEMENTATION.
+  METHOD acknowledge.
+    DATA name TYPE string.
+    name = creator->name.
+    WRITE: me->name, 'created by', name.
+  ENDMETHOD.                    "acknowledge
+ENDCLASS.                    "server IMPLEMENTATION
+
+
+* Global Data
+
+DATA client_ref TYPE REF TO client.
+
+*Classical Processing Block
+
+START-OF-SELECTION.
+  CREATE OBJECT client_ref.
+  CALL METHOD client_ref->create_server.

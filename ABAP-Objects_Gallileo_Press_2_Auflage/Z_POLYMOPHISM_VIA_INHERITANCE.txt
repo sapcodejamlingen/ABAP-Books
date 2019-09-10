@@ -1,0 +1,157 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_POLYMOPHISM_VIA_INHERITANCE
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_polymophism_via_inheritance.
+
+************************************************************************
+* Report Name  : Z_POLYMOPHISM_VIA_INHERITANCE                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/25/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.354              *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.25.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+CLASS ship DEFINITION ABSTRACT.
+  PUBLIC SECTION.
+    METHODS: get_max_range ABSTRACT
+      RETURNING value(r_range) TYPE f,
+    get_name
+      RETURNING value(r_name) TYPE string.
+  PROTECTED SECTION.
+    DATA name TYPE string.
+ENDCLASS.                    "ship DEFINITION
+
+
+
+*----------------------------------------------------------------------*
+*       CLASS motorship DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS motorship DEFINITION INHERITING FROM ship.
+  PUBLIC SECTION.
+    METHODS: constructor IMPORTING
+              value(i_name) TYPE string
+              value(i_fuel_consumption) TYPE f
+              value(i_fuel_amount) TYPE f,
+             get_max_range REDEFINITION.
+  PROTECTED SECTION.
+    DATA: fuel_consumption TYPE f,
+          fuel_amount TYPE f.
+ENDCLASS.                    "motorship DEFINITION
+
+
+
+*----------------------------------------------------------------------*
+*       CLASS sailingship DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS sailingship DEFINITION INHERITING FROM ship.
+  PUBLIC SECTION.
+    METHODS: constructor IMPORTING
+      value(i_name) TYPE string
+      value(i_range_per_wind_speed) TYPE f
+      value(i_wind_speed) TYPE f
+      value(i_wind_duration) TYPE f,
+      get_max_range REDEFINITION.
+  PROTECTED SECTION.
+    DATA: range_per_wind_speed TYPE f,
+          wind_speed TYPE f,
+          wind_duration TYPE f.
+ENDCLASS.                    "sailingship DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS ship IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS ship IMPLEMENTATION.
+  METHOD get_name.
+    r_name = name.
+  ENDMETHOD.                    "get_name
+ENDCLASS.                    "ship IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS motorship IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS motorship IMPLEMENTATION.
+  METHOD constructor.
+    CALL METHOD super->constructor.
+
+    name = i_name.
+    fuel_consumption = i_fuel_consumption.
+    fuel_amount = i_fuel_amount.
+  ENDMETHOD.                    "constructor
+  METHOD get_max_range.
+    r_range = fuel_amount / fuel_consumption.
+  ENDMETHOD.                    "get_max_range
+ENDCLASS.                    "motorship IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS sailingship IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS sailingship IMPLEMENTATION.
+  METHOD constructor.
+    CALL METHOD super->constructor.
+    name = i_name.
+    range_per_wind_speed = i_range_per_wind_speed.
+    wind_speed = i_wind_speed.
+    wind_duration = i_wind_duration.
+  ENDMETHOD.                    "constructor
+  METHOD get_max_range.
+    r_range = wind_speed / range_per_wind_speed *
+    wind_duration.
+  ENDMETHOD.                    "get_max_range
+ENDCLASS.                    "sailingship IMPLEMENTATION
+
+
+DATA: o_ship TYPE REF TO ship,
+      ship_tab TYPE TABLE OF REF TO ship,
+      name TYPE string,
+      range TYPE f.
+
+
+* Classical Processing blocs
+
+START-OF-SELECTION.
+  CREATE OBJECT o_ship TYPE motorship
+            EXPORTING i_name = 'Motor Ship Wanda'
+              i_fuel_consumption = '0.2'
+              i_fuel_amount = 80.
+  APPEND o_ship TO ship_tab.
+
+  CREATE  OBJECT o_ship TYPE sailingship
+            EXPORTING i_name = 'Sailing Ship Black Magic'
+              i_range_per_wind_speed = 25
+              i_wind_speed = 60
+              i_wind_duration = 5.
+  APPEND o_ship TO ship_tab.
+
+  LOOP AT ship_tab INTO o_ship.
+    name = o_ship->get_name( ).
+    range = o_ship->get_max_range( ).
+    WRITE: / 'range of', name, 'is',
+              range EXPONENT 0 DECIMALS 2, 'Miles'.
+
+  ENDLOOP.

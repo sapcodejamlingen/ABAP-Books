@@ -1,0 +1,48 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_USING_MAKROS
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_using_makros.
+
+************************************************************************
+* Report Name  : Z_USING_MAKROS                                                 *
+* Report Title : Verwenden von Makros               *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/25/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.271               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.25.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+CONSTANTS: pi TYPE f VALUE '3.14159265'.
+DATA dimension TYPE f.
+
+DEFINE shape_dimension.
+  case &1.
+    when 'Square'.
+      dimension = &2 * &2.
+    when 'Circle'.
+      dimension = &2 * &2 * pi.
+  endcase.
+END-OF-DEFINITION.
+
+*Prozessing Blocks
+
+START-OF-SELECTION.
+  shape_dimension 'Square' 10.
+  WRITE: / 'Fläche Quadrat:', dimension.
+  shape_dimension  'Circle' 10.
+  WRITE: / 'Fläche Kreis:', dimension.

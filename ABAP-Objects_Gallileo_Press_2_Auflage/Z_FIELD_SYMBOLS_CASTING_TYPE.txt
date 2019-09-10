@@ -1,0 +1,48 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_FIELD_SYMBOLS_CASTING_TYPE
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_field_symbols_casting_type.
+
+************************************************************************
+* Report Name  : Z_FIELD_SYMBOLS_CASTING_TYPE                                                 *
+* Report Title : Casting mit expliziter Typangabe                     *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/24/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.204               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+TYPES: BEGIN OF t_date,
+          year(4) TYPE n,
+          month(2) TYPE n,
+          day(2) TYPE n,
+       END OF t_date.
+
+FIELD-SYMBOLS: <fs> TYPE ANY,
+              <f> TYPE n.
+
+ASSIGN sy-datum TO <fs> CASTING TYPE t_date.
+
+WRITE: / sy-datum.
+DO.
+  ASSIGN COMPONENT sy-index OF STRUCTURE <fs> TO <f>.
+  IF sy-subrc <> 0.
+    EXIT.
+  ENDIF.
+  WRITE / <f>.
+ENDDO.

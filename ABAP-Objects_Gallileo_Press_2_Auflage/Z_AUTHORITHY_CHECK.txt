@@ -1,0 +1,41 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_AUTHORITHY_CHECK
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_authorithy_check MESSAGE-ID sabapdocu.
+
+************************************************************************
+* Report Name  : Z_AUTHORITHY_CHECK                                                 *
+* Report Title : Berechtigungsprüfung                                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/27/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.622               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.27.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS p_carrid TYPE sflight-carrid.
+
+AT SELECTION-SCREEN.
+
+  AUTHORITY-CHECK OBJECT 'S_CARRID'
+    ID 'CARRID' FIELD p_carrid
+    ID 'ACTVT' FIELD '03'.
+
+  IF sy-subrc = 4.
+    MESSAGE e045(sabapdocu) WITH p_carrid.
+  ELSEIF sy-subrc <> 0.
+    MESSAGE a888(sabapdocu) WITH 'ERROR!'.
+  ENDIF.

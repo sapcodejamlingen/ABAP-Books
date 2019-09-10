@@ -1,0 +1,73 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SIMPLE_FORMS
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_simple_forms.
+
+************************************************************************
+* Report Name  : Z_SIMPLE_FORMS                                                 *
+* Report Title : Einface Unterprogramme               *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/24/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.170               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+START-OF-SELECTION.
+
+  PERFORM write_one.
+  PERFORM write_two.
+  PERFORM write_three.
+  PERFORM write_one_two_three.
+
+*&---------------------------------------------------------------------*
+*&      Form  write_one
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM write_one.
+  WRITE / 'One'.
+ENDFORM.                    "write_one
+
+*&---------------------------------------------------------------------*
+*&      Form  write_two
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM write_two.
+  WRITE / 'Two'.
+ENDFORM.                    "write_two
+
+*&---------------------------------------------------------------------*
+*&      Form  write_three
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM write_three.
+  WRITE / 'Three'.
+ENDFORM.                    "write_three
+
+*&---------------------------------------------------------------------*
+*&      Form  write_one_two_tree
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM write_one_two_three.
+  PERFORM write_one.
+  PERFORM write_two.
+  PERFORM write_three.
+ENDFORM.                    "write_one_two_tree

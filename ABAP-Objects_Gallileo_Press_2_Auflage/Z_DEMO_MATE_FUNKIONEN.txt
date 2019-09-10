@@ -1,0 +1,41 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_DEMO_MATE_FUNKIONEN
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_demo_mate_funkionen.
+
+************************************************************************
+* Report Name  : Z_DEMO_MATE_FUNKIONEN                                                 *
+* Report Title : Mathematische Funktionen               *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/24/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.170               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+DATA: result(20) TYPE c,
+      float TYPE f VALUE '2.5E00'.
+result = TRUNC( float ).
+
+WRITE result.
+
+
+DATA: result1(20) TYPE c,
+      int TYPE i VALUE 2.
+result1 = SQRT( int ).
+
+WRITE result1.

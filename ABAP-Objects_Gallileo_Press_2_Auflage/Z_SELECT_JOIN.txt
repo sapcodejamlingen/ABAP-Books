@@ -1,0 +1,41 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SELECT_JOIN
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_select_join.
+
+************************************************************************
+* Report Name  : Z_SELECT_JOIN                                        *
+* Report Title : Zugriff auf mehrere DB Tabellen über einen Join     *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/27/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects 2. Aufl. S. 580                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.27.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS p_cityfr TYPE spfli-cityfrom DEFAULT 'Frankfurt'.
+
+DATA: wa_carrid TYPE spfli-carrid,
+      wa_connid TYPE spfli-connid,
+      wa_carrname TYPE scarr-carrname.
+
+SELECT spfli~carrid scarr~carrname spfli~connid
+  FROM spfli
+  INNER JOIN scarr ON scarr~carrid = spfli~carrid
+  INTO (wa_carrid, wa_carrname, wa_connid)
+  WHERE spfli~cityfrom = p_cityfr.
+
+ENDSELECT.

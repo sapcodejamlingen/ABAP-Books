@@ -1,0 +1,44 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_DATA_REFERENCE
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_data_reference.
+
+************************************************************************
+* Report Name  : Z_DATA_REFERENCE                                                 *
+* Report Title : Datenreferenzen       *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/24/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.207               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+DATA: dref TYPE REF TO data,
+      dref_int TYPE REF TO data,
+      dref_pack TYPE REF TO data,
+            int TYPE i VALUE 5,
+            pack TYPE p DECIMALS 2 VALUE '123.45'.
+FIELD-SYMBOLS <fs> TYPE ANY.
+
+GET REFERENCE OF int INTO dref.
+dref_int = dref.
+ASSIGN dref_int->* TO <fs>.
+WRITE / <fs>.
+
+GET REFERENCE OF pack INTO dref.
+dref_pack = dref.
+ASSIGN dref_pack->* TO <fs>.
+WRITE / <fs>.

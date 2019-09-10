@@ -1,0 +1,74 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_INTERFACE_NARROWING_CAST
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_interface_narrowing_cast.
+
+************************************************************************
+* Report Name  : Z_INTERFACE_NARROWING_CAST                           *
+* Report Title : Narrowing Cast für für Interfacereferencen            *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/25/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects 2. Aufl. S. 375                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.25.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+INTERFACE i1.
+  METHODS meth.
+ENDINTERFACE.                    "i1
+
+*----------------------------------------------------------------------*
+*       INTERFACE i2
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+INTERFACE i2.
+  INTERFACES i1.
+  METHODS meth.
+ENDINTERFACE.                    "i1
+
+*----------------------------------------------------------------------*
+*       CLASS c1 DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS c1 DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES i2.
+ENDCLASS.                    "i2 DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS c1 IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS c1 IMPLEMENTATION.
+  METHOD i1~meth.
+    WRITE / 'Method of interface i1.'.
+  ENDMETHOD.                                                "i1~meth
+  METHOD i2~meth.
+    WRITE / 'Method of Inteface i2'.
+  ENDMETHOD.                                                "i2~meth
+ENDCLASS.                    "c1 IMPLEMENTATION
+
+DATA: iref1 TYPE REF TO i1,
+      iref2 TYPE REF TO i2.
+
+START-OF-SELECTION.
+  CREATE OBJECT iref2 TYPE c1.
+  iref1 = iref2.
+  CALL METHOD iref1->meth.
+  CALL METHOD iref2->meth.

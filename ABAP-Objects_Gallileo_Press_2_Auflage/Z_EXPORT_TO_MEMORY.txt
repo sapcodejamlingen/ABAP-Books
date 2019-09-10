@@ -1,0 +1,43 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_EXPORT_TO_MEMORY
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  Z_EXPORT_TO_MEMORY.
+
+************************************************************************
+* Report Name  : Z_EXPORT_TO_MEMORY                                                 *
+* Report Title : Daten-Cluster im ABAP Memory abspeichern                                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/27/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S. 615               *
+*              : z_import_from_memory zum auslesen                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.27.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+data: spfli_tab TYPE STANDARD TABLE OF spfli,
+      sflight_tab TYPE HASHED TABLE OF sflight
+      WITH UNIQUE key carrid connid fldate.
+data mem_id(50) type c.
+
+SELECT * from spfli into table spfli_tab.
+SELECT * from sflight into table sflight_tab.
+
+  CONCATENATE sy-repid sy-datum sy-uzeit into mem_id.
+
+  export table1 = spfli_tab
+         table2 = sflight_tab
+         to MEMORY id mem_id.
+
+  SUBMIT z_import_from_memory with p_id = mem_id.

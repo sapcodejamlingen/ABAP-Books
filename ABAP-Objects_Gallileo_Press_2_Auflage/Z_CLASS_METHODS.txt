@@ -1,0 +1,53 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_CLASS_METHODS
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_class_methods.
+
+************************************************************************
+* Report Name  : Z_CLASS_METHODS                                       *
+* Report Title : Einfache Methodendeklaration und -implementierung     *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/25/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2.Aufl. S. 291                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.25.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS attributes_and_methods DEFINITION.
+  PUBLIC SECTION.
+    METHODS:
+    set_object_value
+    IMPORTING value(i_object_value) TYPE i,
+      get_object_value
+      EXPORTING value(e_object_value) TYPE i.
+  PRIVATE SECTION.
+    DATA object_value TYPE i.
+    CLASS-DATA object_count TYPE i.
+ENDCLASS.                    "attributes_and_methods DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS attributes_and_methods IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS attributes_and_methods IMPLEMENTATION.
+  METHOD set_object_value.
+    object_value = i_object_value.
+  ENDMETHOD.                    "set_object_value
+  METHOD get_object_value.
+    e_object_value = object_value.
+  ENDMETHOD.                    "get_object_value
+ENDCLASS. "attributes_and_methods IMPLEMENTATION

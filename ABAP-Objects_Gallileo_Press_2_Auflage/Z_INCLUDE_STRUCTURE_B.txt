@@ -1,0 +1,57 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_INCLUDE_STRUCTURE_B
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_include_structure_b.
+
+************************************************************************
+* Report Name  : Z_INCLUDE_STRUCTURE_B                                 *
+* Report Title : Einfügen von Strukturkomponenten                 *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/24/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.134               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+DATA: BEGIN OF street,
+        name(40) TYPE c,
+        no(4) TYPE c,
+  END OF street.
+
+DATA: BEGIN OF city,
+        zipcode(5) TYPE n,
+        name(40) TYPE c,
+  END OF city.
+
+DATA: BEGIN OF address,
+        name(30) TYPE c.
+        INCLUDE STRUCTURE street AS str
+              RENAMING WITH SUFFIX _str.
+        INCLUDE STRUCTURE city AS city
+              RENAMING WITH SUFFIX _cty.
+DATA END OF address.
+
+address-name        = 'Han Solo'.
+address-name_str    = 'Crab Nebula'.
+address-no_str      = '18'.
+address-zipcode_cty = '69121'.
+address-name_cty    = 'Dark Star'.
+
+WRITE: / address-name,
+       / address-str-name,
+       / address-no_str,
+       / address-zipcode_cty,
+       / address-name_cty.

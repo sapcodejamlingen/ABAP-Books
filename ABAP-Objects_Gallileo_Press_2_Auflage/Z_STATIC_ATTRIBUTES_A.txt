@@ -1,0 +1,45 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_STATIC_ATTRIBUTES_A
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_static_attributes_a.
+
+************************************************************************
+* Report Name  : Z_STATIC_ATTRIBUTES_A                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/25/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.334              *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.25.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS c1 DEFINITION.
+  PUBLIC SECTION.
+    CLASS-DATA a1 TYPE string.
+ENDCLASS.                    "c1 DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS c2 DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS c2 DEFINITION INHERITING FROM c1.
+
+ENDCLASS.                    "c2 DEFINITION
+
+START-OF-SELECTION.
+  c2=>a1 = 'ABAP Objects'.
+  WRITE c1=>a1.

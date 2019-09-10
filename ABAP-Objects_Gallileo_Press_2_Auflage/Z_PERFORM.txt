@@ -1,0 +1,78 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_PERFORM
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_perform.
+
+************************************************************************
+* Report Name  : Z_PERFORM                                                 *
+* Report Title : Aufruf von Unterprogrammen               *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/24/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.170               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+PARAMETERS: p_carrid TYPE sflight-carrid,
+            p_connid TYPE sflight-connid.
+
+TYPES t_sflight_tab TYPE STANDARD TABLE OF sflight
+                  WITH KEY carrid connid fldate.
+
+DATA sflight_tab TYPE t_sflight_tab.
+
+START-OF-SELECTION.
+  PERFORM select_data USING p_carrid
+                            p_connid
+                    CHANGING sflight_tab.
+
+  PERFORM write_data USING sflight_tab.
+*&---------------------------------------------------------------------*
+*&      Form  select_data
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->U_CARRID       text
+*      -->U_CONNID       text
+*      -->C_SFLIGHT_TAB  text
+*----------------------------------------------------------------------*
+FORM select_data USING u_carrid LIKE p_carrid
+                       u_connid LIKE p_connid
+  CHANGING c_sflight_tab TYPE t_sflight_tab.
+
+  SELECT *
+    FROM sflight
+    INTO TABLE c_sflight_tab
+    WHERE carrid = u_carrid AND
+          connid = u_connid.
+ENDFORM.                    "select_data
+
+*&---------------------------------------------------------------------*
+*&      Form  write_data
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->U_SFLIGHT_TAB  text
+*----------------------------------------------------------------------*
+FORM write_data USING u_sflight_tab TYPE t_sflight_tab.
+  FIELD-SYMBOLS <fs_sflight> LIKE LINE OF u_sflight_tab.
+  LOOP AT u_sflight_tab ASSIGNING <fs_sflight>.
+    WRITE: / <fs_sflight>-carrid,
+    <fs_sflight>-connid,
+    <fs_sflight>-fldate.
+  ENDLOOP.
+ENDFORM.                    "select_data

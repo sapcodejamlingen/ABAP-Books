@@ -1,0 +1,38 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_FIELD_SYMBOLS_CASTING
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_field_symbols_casting.
+
+************************************************************************
+* Report Name  : Z_FIELD_SYMBOLS_CASTING                                                 *
+* Report Title : Casting mit impliziter Typangabe                     *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/24/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.202               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+TYPES: BEGIN OF t_date,
+  year(4) TYPE n,
+  month(2) TYPE n,
+  day(2) TYPE n,
+  END OF t_date.
+
+FIELD-SYMBOLS <fs> TYPE t_date.
+ASSIGN sy-datum TO <fs> CASTING.
+WRITE: / sy-datum,
+       / <fs>-year, / <fs>-month, / <fs>-day.

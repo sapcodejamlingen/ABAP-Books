@@ -1,0 +1,107 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_CLASS_ABSTRACT
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_class_abstract.
+
+************************************************************************
+* Report Name  : Z_CLASS_ABSTRACT                                   *
+* Report Title : Abstracte Klassen und Methoden                       *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/25/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2.Aufl. S. 331                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.25.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS vehicle DEFINITION ABSTRACT.
+  PUBLIC SECTION.
+    METHODS: accelerate,
+             write_status abstract.
+  PROTECTED SECTION.
+    DATA speed TYPE i.
+ENDCLASS.                    "vehicle DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS plane DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS plane DEFINITION INHERITING FROM vehicle.
+  PUBLIC SECTION.
+    METHODS: rise,
+            write_status REDEFINITION.
+  PROTECTED SECTION.
+    DATA altitude TYPE i.
+ENDCLASS.                    "plane DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS ship DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS ship DEFINITION INHERITING FROM vehicle.
+  PUBLIC SECTION.
+    METHODS write_status REDEFINITION.
+ENDCLASS.                    "ship DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle IMPLEMENTATION.
+  METHOD accelerate.
+    speed = speed + 1.
+  ENDMETHOD.                    "accelerate
+ENDCLASS.                    "vehicle IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS plane IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS plane IMPLEMENTATION.
+  METHOD rise.
+    altitude = altitude + 1.
+  ENDMETHOD.                    "rise
+  METHOD write_status.
+    WRITE: / 'Plane speed:',  speed.
+    WRITE: / 'Altitude:', altitude.
+  ENDMETHOD.                    "write_status
+ENDCLASS.                    "plane IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS ship IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS ship IMPLEMENTATION.
+  METHOD write_status.
+    WRITE: / 'Ship speed:', speed.
+  ENDMETHOD.                    "write_status
+ENDCLASS.                    "ship IMPLEMENTATION
+
+DATA: plane_ref TYPE REF TO plane,
+      ship_ref TYPE REF TO ship.
+
+START-OF-SELECTION.
+  CREATE OBJECT: plane_ref,
+                 ship_ref.
+  CALL METHOD: plane_ref->accelerate,
+               plane_ref->rise,
+               plane_ref->write_status,
+               ship_ref->accelerate,
+               ship_ref->write_status.

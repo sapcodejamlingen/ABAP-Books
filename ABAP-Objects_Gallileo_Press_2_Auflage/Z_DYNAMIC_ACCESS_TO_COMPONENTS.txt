@@ -1,0 +1,54 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_DYNAMIC_ACCESS_TO_COMPONENTS
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_dynamic_access_to_components.
+
+************************************************************************
+* Report Name  : Z_DYNAMIC_ACCESS_TO_COMPONENTS                       *
+* Report Title : Strukturen komponentenweise zuweisen                 *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/24/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.201               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+DATA: wa_spfli TYPE spfli.
+
+SELECT SINGLE *
+  FROM spfli
+  INTO wa_spfli.
+
+PERFORM write_any_line USING wa_spfli.
+
+*&---------------------------------------------------------------------*
+*&      Form  write_any_line
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->U_LINE     text
+*----------------------------------------------------------------------*
+FORM write_any_line USING u_line TYPE any.
+  FIELD-SYMBOLS: <fs_component> TYPE ANY.
+  DO.
+    ASSIGN COMPONENT sy-index
+    OF STRUCTURE u_line TO <fs_component>.
+    IF sy-subrc <> 0.
+      EXIT.
+    ENDIF.
+    WRITE / <fs_component>.
+  ENDDO.
+ENDFORM.                    "

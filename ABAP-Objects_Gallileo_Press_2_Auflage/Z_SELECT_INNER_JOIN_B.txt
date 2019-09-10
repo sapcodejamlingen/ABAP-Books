@@ -1,0 +1,52 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SELECT_INNER_JOIN_B
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_select_inner_join_b.
+
+************************************************************************
+* Report Name  : Z_SELECT_INNER_JOIN_B                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 99/99/9999 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:99.99.99 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS p_fldate TYPE sflight-fldate.
+
+TYPES: BEGIN OF t_flights,
+        cityfrom  TYPE spfli-cityfrom,
+        cityto    TYPE spfli-cityto,
+        seatsmax  TYPE sflight-seatsmax,
+        seatsocc  TYPE sflight-seatsocc,
+        bookid    TYPE sbook-bookid,
+  END OF t_flights.
+
+DATA flight_tab TYPE TABLE OF t_flights.
+
+SELECT p~cityfrom p~cityto f~seatsmax f~seatsocc b~bookid
+  INTO TABLE flight_tab
+  FROM ( ( spfli AS p
+            INNER JOIN sflight AS f
+              ON p~carrid = f~carrid AND
+                 p~connid = f~connid )
+            INNER JOIN sbook AS b
+             ON b~carrid = f~carrid AND
+                b~connid = f~connid AND
+                b~fldate = f~fldate )
+  WHERE f~fldate = p_fldate AND
+        f~seatsmax > f~seatsocc.

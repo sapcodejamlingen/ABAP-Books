@@ -1,0 +1,56 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SELECT_FOR_ALL_ENTRIES_B
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_select_for_all_entries_b.
+
+************************************************************************
+* Report Name  : Z_SELECT_FOR_ALL_ENTRIES_B                            *
+* Report Title : Zugriff auf mehrere DB Tabellen mit FOR ALL ENTRIES  *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/27/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects 2. Aufl. S. 578                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.27.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS p_cityfr TYPE spfli-cityfrom DEFAULT 'Frankfurt'.
+
+DATA: BEGIN OF wa_spfli,
+        carrid TYPE spfli-carrid,
+        connid TYPE spfli-connid,
+      END OF wa_spfli,
+      BEGIN OF wa_scarr,
+        carrid TYPE scarr-carrid,
+        carrname TYPE scarr-carrname,
+      END OF wa_scarr,
+    spfli_tab LIKE TABLE OF wa_spfli.
+
+
+SELECT carrid connid
+  FROM spfli
+  INTO TABLE spfli_tab
+  WHERE cityfrom = p_cityfr.
+
+
+
+
+SELECT carrid carrname
+  FROM scarr
+  INTO wa_scarr
+  FOR ALL ENTRIES IN spfli_tab
+  WHERE carrid = spfli_tab-carrid.
+
+ENDSELECT.

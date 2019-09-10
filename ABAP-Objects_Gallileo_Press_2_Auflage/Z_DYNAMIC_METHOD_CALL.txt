@@ -1,0 +1,70 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_DYNAMIC_METHOD_CALL
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_dynamic_method_call.
+
+************************************************************************
+* Report Name  : Z_DYNAMIC_METHOD_CALL                                                 *
+* Report Title : Dynamischer Methodenaufruf                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/25/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.269               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.25.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS table_content DEFINITION.
+  PUBLIC SECTION.
+    METHODS: get_spfli,
+             get_sflight.
+  PRIVATE SECTION.
+    DATA: wa_spfli TYPE spfli,
+          wa_sflight TYPE sflight.
+ENDCLASS.                    "table_content DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS table_content IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS table_content IMPLEMENTATION.
+  METHOD get_spfli.
+    SELECT * FROM spfli INTO wa_spfli.
+      WRITE: / wa_spfli-carrid,
+               wa_spfli-connid.
+    ENDSELECT.
+  ENDMETHOD.                    "get_spfli
+  METHOD get_sflight.
+    SELECT * FROM sflight INTO wa_sflight.
+      WRITE: / wa_sflight-carrid,
+               wa_sflight-connid,
+               wa_sflight-fldate.
+    ENDSELECT.
+  ENDMETHOD.                    "get_sflight
+ENDCLASS.                    "table_content IMPLEMENTATION
+
+PARAMETERS table(20) TYPE c.
+DATA  o_table TYPE REF TO table_content.
+
+START-OF-SELECTION.
+  CREATE OBJECT o_table.
+  CONCATENATE 'GET_' table INTO table.
+  CATCH SYSTEM-EXCEPTIONS dyn_call_meth_not_found = 4.
+    CALL METHOD o_table->(table).
+  ENDCATCH.
+  IF sy-subrc = 4.
+    WRITE 'Wrong Method Name!'.
+  ENDIF.

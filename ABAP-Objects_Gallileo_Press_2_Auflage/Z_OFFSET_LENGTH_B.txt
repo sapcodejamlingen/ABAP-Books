@@ -1,0 +1,51 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_OFFSET_LENGTH_B
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_offset_length_b.
+
+************************************************************************
+* Report Name  : Z_OFFSET_LENGTH_B                                                 *
+* Report Title : Offset und Längenangabe                 *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/24/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.194              *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+SELECTION-SCREEN BEGIN OF SCREEN 500.
+PARAMETERS: day(2) TYPE c,
+            month(2) TYPE c,
+            year(4) TYPE c.
+SELECTION-SCREEN END OF SCREEN 500.
+
+DATA new_date TYPE d.
+
+year  = sy-datum(4).
+month = sy-datum+4(2).
+day   = sy-datum+6(2).
+
+CALL SELECTION-SCREEN 500 STARTING AT 10 10.
+
+new_date(4) = year.
+new_date+4(2) = month.
+new_date+6(2) = day.
+
+IF new_date <> 0.
+  WRITE new_date DD/MM/YY.
+ELSE.
+  WRITE 'Wrong Date!'.
+ENDIF.

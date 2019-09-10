@@ -1,0 +1,39 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SIMPLE_FIELD_SYMBOL
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_simple_field_symbol.
+
+************************************************************************
+* Report Name  : Z_SIMPLE_FIELD_SYMBOL                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 99/99/9999 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:99.99.99 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+FIELD-SYMBOLS <fs> TYPE ANY.
+DATA: city(30) TYPE c,
+      zipcode(5) TYPE n.
+
+ASSIGN city TO <fs>.
+<fs> = 'cologne'.
+
+ASSIGN zipcode TO <fs>.
+<fs> = '50931'.
+
+WRITE: / zipcode, city.

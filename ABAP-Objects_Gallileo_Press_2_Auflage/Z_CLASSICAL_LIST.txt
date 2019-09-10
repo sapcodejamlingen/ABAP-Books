@@ -1,0 +1,35 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_CLASSICAL_LIST
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_classical_list.
+
+************************************************************************
+* Report Name  : Z_CLASSICAL_LIST                                      *
+* Report Title : Klassische Listenausgabe wäh. eines Datenbankzugriffes*
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/26/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.     486          *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.26.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+DATA wa_spfli TYPE spfli.
+
+SELECT carrid connid
+  FROM spfli
+  INTO (wa_spfli-carrid, wa_spfli-connid).
+  WRITE: / wa_spfli-carrid, wa_spfli-connid.
+ENDSELECT.

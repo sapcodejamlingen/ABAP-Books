@@ -1,0 +1,74 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_INTERFACE_WIDENING_1
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_interface_widening_1.
+
+************************************************************************
+* Report Name  : Z_INTERFACE_WIDENING_1                               *
+* Report Title : Widening Cast auf Klassenreferenz                     *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/23/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects 2. Aufl. S. 377                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+
+INTERFACE object_status.
+  METHODS write_status.
+ENDINTERFACE.                    "OBJECT_status
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES object_status.
+    METHODS accelerate.
+  PROTECTED SECTION.
+    DATA speed TYPE i.
+ENDCLASS.                    "vehicle DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle IMPLEMENTATION.
+  METHOD accelerate.
+    speed = speed + 1.
+  ENDMETHOD.                    "accelerate
+  METHOD object_status~write_status.
+    WRITE: / 'speed:', speed.
+  ENDMETHOD.                    "OBJECT_status~write_status
+ENDCLASS.                    "vehicle IMPLEMENTATION
+
+DATA: vehicle_ref TYPE REF TO vehicle,
+      status_ref TYPE REF TO object_status.
+
+START-OF-SELECTION.
+  CREATE OBJECT status_ref TYPE vehicle.
+
+  CATCH SYSTEM-EXCEPTIONS move_cast_error = 4.
+    vehicle_ref ?= status_ref.
+  ENDCATCH.
+  IF sy-subrc = 0.
+    CALL METHOD: vehicle_ref->accelerate,
+                 status_ref->write_status.
+  ENDIF.

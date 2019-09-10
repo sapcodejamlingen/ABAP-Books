@@ -1,0 +1,64 @@
+method CONSTRUCTOR.
+* ABAP ObJEcTs 2. Aufl. S. 403
+count = I_start.
+endmethod.
+
+
+METHOD decrement.
+* ABAP ObJEcTs 2. Aufl. S. 404
+  count = count - 1.
+ENDMETHOD.
+
+
+method GET_COUNT.
+* ABAP ObJEcTs 2. Aufl. S. 404
+r_count = count.
+endmethod.
+
+METHOD increment.
+* ABAP ObJEcTs 2. Aufl. S. 403
+  count = count + 1.
+ENDMETHOD.
+
+
+
+*&---------------------------------------------------------------------*
+*& Report  Z_GLOBAL_CLASS_USAGE
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_global_class_usage.
+
+************************************************************************
+* Report Name  : Z_GLOBAL_CLASS_USAGE                                                 *
+* Report Title : Verwendung einer Globalen Klasse                                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/25/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects 2. Aufl. S. 405                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.25.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+DATA: o_counter TYPE REF TO z_cl_counter,
+      count TYPE i.
+
+*Classical Processing Blocks
+
+START-OF-SELECTION.
+  CREATE OBJECT o_counter EXPORTING i_start = 5.
+  DO 10 TIMES.
+    CALL METHOD o_counter->increment.
+  ENDDO.
+  count = o_counter->get_count( ).
+  WRITE / count.

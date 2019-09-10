@@ -1,0 +1,43 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_EXTRACT
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_extract.
+
+************************************************************************
+* Report Name  : Z_EXTRACT                                                 *
+* Report Title : Extractdatenbestand füllen und bearbeiten                *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/24/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.217               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+DATA: f1 TYPE i,
+      f2 TYPE i.
+
+FIELD-GROUPS header.
+INSERT f1 f2 INTO header.
+DO 10 TIMES.
+  f1 = sy-index.
+  f2 = sy-index ** 2.
+  EXTRACT header.
+ENDDO.
+SORT DESCENDING.
+LOOP.
+  WRITE: / f1, f2.
+ENDLOOP.

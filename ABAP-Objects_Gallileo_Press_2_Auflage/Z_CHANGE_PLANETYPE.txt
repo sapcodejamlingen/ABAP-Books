@@ -1,0 +1,182 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_CHANGE_PLANETYPE
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  Z_CHANGE_PLANETYPE.
+
+************************************************************************
+* Report Name  : Z_CHANGE_PLANETYPE                                                 *
+* Report Title : Change Planetype                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/26/9999 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP ObJEcTs  2. Auflage S. 444                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.26.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+INCLUDE: z_change_planetypetop,    " Global Data Declarations
+         z_change_planetypef1.     " Klassen
+
+
+INCLUDE: z_change_planetypee01,    " Runtime events
+         z_change_planetypeo01,    " PBO Moduls
+         z_change_planetypei01.    " PAI Moduls
+
+*&---------------------------------------------------------------------*
+*&  Include           Z_CHANGE_PLANETYPETOP
+*&---------------------------------------------------------------------*
+*ABAP ObJEcTS S.450
+TABLES demo_conn.
+DATA: ok_code TYPE sy-ucomm,
+      save_ok TYPE sy-ucomm.
+
+
+
+*&---------------------------------------------------------------------*
+*&  Include           Z_CHANGE_PLANETYPEE01
+*&---------------------------------------------------------------------*
+*ABAP ObJEcTS S.450
+START-OF-SELECTION.
+  CALL SCREEN 100.
+
+
+
+*&---------------------------------------------------------------------*
+*&  Include           Z_CHANGE_PLANETYPEO01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&      Module  set_STATUS  OUTPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*ABAP ObJEcTS S.451
+MODULE set_status OUTPUT.
+  CASE sy-dynnr.
+    WHEN 100.
+      SET TITLEBAR 'TIT_100_200'.
+      SET PF-STATUS 'SCREEN_100_200' EXCLUDING 'UPDATE'.
+    WHEN 200.
+      SET TITLEBAR 'TIT_100_200'.
+      SET PF-STATUS 'SCREEN_100_200' EXCLUDING 'CHANGE'.
+    WHEN 300.
+      SET TITLEBAR 'TIT_210'.
+      SET PF-STATUS 'SCREEN_210'.
+  ENDCASE.
+ENDMODULE.                 " set_STATUS  OUTPUT
+
+
+
+
+*&---------------------------------------------------------------------*
+*&  Include           Z_CHANGE_PLANETYPEI01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&      Module  cancel  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*ABAP ObJEcTS S.452
+MODULE cancel INPUT.
+  CASE sy-dynnr.
+    WHEN 100.
+      LEAVE TO SCREEN 0.
+    WHEN 200.
+      LEAVE TO SCREEN 100.
+  ENDCASE.
+ENDMODULE.                 " cancel  INPUT
+*&---------------------------------------------------------------------*
+*&      Module  handle_user_command  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE handle_user_command INPUT.
+  save_ok = ok_code.
+  CLEAR ok_code.
+  CASE save_ok.
+    WHEN 'CHANGE'.
+      CALL METHOD change_planetype=>get_data
+        EXPORTING
+          i_carrid    = demo_conn-carrid
+          i_connid    = demo_conn-connid
+          i_fldate    = demo_conn-fldate
+          i_seatsmax  = demo_conn-seatsmax
+        IMPORTING
+          e_cityfrom  = demo_conn-cityfrom
+          e_cityto    = demo_conn-cityto
+          e_seatsmax  = demo_conn-seatsmax
+          e_seatsocc  = demo_conn-seatsocc
+          e_planetype = demo_conn-planetype.
+      SET SCREEN 200.
+    WHEN 'UPDATE'.
+      CALL METHOD change_planetype=>check_planetype
+        EXPORTING
+          i_planetype = demo_conn-planetype
+          i_seatsocc  = demo_conn-seatsocc
+        IMPORTING
+          e_seatsmax  = demo_conn-seatsmax.
+
+      CALL METHOD change_planetype=>update_planetype
+        EXPORTING
+          i_carrid    = demo_conn-carrid
+          i_connid    = demo_conn-connid
+          i_fldate    = demo_conn-fldate
+          i_planetype = demo_conn-planetype
+          i_seatsmax  = demo_conn-seatsmax.
+      SET SCREEN 200.
+    WHEN 'BACK' OR 'EXIT'.
+      CASE sy-dynnr.
+        WHEN 100.
+          LEAVE TO SCREEN 0.
+        WHEN 200.
+          CALL METHOD change_planetype=>security_check
+            EXPORTING
+              i_planetype = demo_conn-planetype
+              i_ok_code   = save_ok.
+      ENDCASE.
+  ENDCASE.
+
+ENDMODULE.                 " handle_user_command  INPUT
+
+
+
+*ABAP Objects 2. Auflage S. 446
+PROCESS BEFORE OUTPUT.
+ MODULE set_STATUS.
+*
+PROCESS AFTER INPUT.
+module cancel at exit-command.
+  field demo_conn-fldate module handle_user_command.
+* MODULE USER_COMMAND_0100.
+
+
+
+*ABAP Objects 2. Auflage S. 446
+PROCESS BEFORE OUTPUT.
+ MODULE set_STATUS.
+*
+PROCESS AFTER INPUT.
+module cancel at exit-command.
+  field demo_conn-planetype module handle_user_command.
+* MODULE USER_COMMAND_0100.
+
+
+*ABAP Objects 2. Auflage S. 446
+PROCESS BEFORE OUTPUT.
+ MODULE set_STATUS.
+*
+PROCESS AFTER INPUT.
+
+* MODULE USER_COMMAND_0100.

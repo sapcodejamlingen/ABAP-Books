@@ -1,0 +1,48 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_STRUCTURED_DATA_B
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  Z_STRUCTURED_DATA_B.
+
+************************************************************************
+* Report Name  : Z_STRUCTURED_DATA_B                                   *
+* Report Title : Strukturierte Datentypen und Objecte                  *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/24/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.132               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+types: begin of t_street,
+  name(40) type c,
+  no(4) type c,
+  end of t_street.
+
+  data: begin of address,
+    name(30) type c,
+    street type t_street,
+    begin of city,
+      zipcode(5) type n,
+      name(40) type c,
+      end of city,
+      country(3) type c value 'SOL',
+      end of address.
+
+    address-name          = 'Luke Skywalker'.
+    address-street-name   = 'Milky Way'.
+    address-street-no     = '123d'.
+    address-city-zipcode  = '64283'.
+    address-city-name     = 'Tatooine'.

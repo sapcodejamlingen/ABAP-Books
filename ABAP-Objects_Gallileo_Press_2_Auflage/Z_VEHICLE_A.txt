@@ -1,0 +1,39 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_VEHICLE_A
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+*REPORT  z_vehicle_a.
+
+************************************************************************
+* Report Name  : Z_VEHICLE_A                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/25/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2.Aufl. S.                 *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.25.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+FUNCTION-POOL z_vehicle.
+
+DATA speed TYPE i VALUE 0.
+
+FUNCTION accelerate.
+  speed = speed + 1.
+ENDFUNCTION.
+
+FUNCTION show_speed.
+  WRITE speed.
+ENDFUNCTION.

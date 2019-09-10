@@ -1,0 +1,40 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_OPEN_TRANSFER_CLOSE
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  Z_OPEN_TRANSFER_CLOSE.
+
+************************************************************************
+* Report Name  : Z_OPEN_TRANSFER_CLOSE                                                 *
+* Report Title : Daten in eine Datei Schreiben                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                             *
+* Create Date  : 01/26/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S. 609               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.26.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS file(39) type c DEFAULT 'C:\TEMP\MYFILE.txt'.
+data: wa_sflight type sflight,
+      sflight_tab like table of wa_sflight.
+
+
+open dataset file for input in BINARY MODE. " ENCODING UTF-8.
+do.
+  read DATASET file into wa_sflight.
+  if sy-subrc <> 0.
+    exit.
+    endif.
+    APPEND wa_sflight to sflight_tab.
+    enddo.
+    close dataset file.

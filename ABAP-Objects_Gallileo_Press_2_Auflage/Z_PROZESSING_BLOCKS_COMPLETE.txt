@@ -1,0 +1,72 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_PROZESSING_BLOCKS_COMPLETE
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_prozessing_blocks_complete.
+
+************************************************************************
+* Report Name  : Z_PROZESSING_BLOCKS                                       *
+* Report Title : Verarbeitungsblöcke                               *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/24/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.45               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+* Global Data Declarations ---------------------------------------------
+DATA: wa_spfli TYPE spfli,
+      wa_sflight TYPE sflight.
+
+* Standard Event   -----------------------------------------------------
+
+
+SELECT SINGLE *
+  FROM spfli
+  INTO wa_spfli
+  WHERE carrid = 'LH' AND
+  connid = '0400'.
+
+PERFORM output USING wa_spfli.
+
+
+* Subroutine for List Output -------------------------------------------
+
+
+*&---------------------------------------------------------------------*
+*&      Form  output
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->L_SPFLI    text
+*----------------------------------------------------------------------*
+FORM output USING l_spfli TYPE spfli.
+  WRITE: / l_spfli-cityfrom, l_spfli-cityto.
+ENDFORM.                    "output
+
+* Reaction on Mouse Doubleclick   ---------------------------------------
+
+
+AT LINE-SELECTION.
+  SELECT *
+    FROM sflight
+    INTO wa_sflight
+    WHERE carrid = 'LH' AND
+          connid = '0400'.
+    WRITE: / wa_sflight-fldate,
+    wa_sflight-seatsmax,
+    wa_sflight-seatsocc.
+  ENDSELECT.

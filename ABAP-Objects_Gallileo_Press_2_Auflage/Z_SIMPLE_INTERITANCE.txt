@@ -1,0 +1,93 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SIMPLE_INTERITANCE
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_simple_interitance.
+
+************************************************************************
+* Report Name  : Z_SIMPLE_INTERITANCE                                                 *
+* Report Title : Einfaches Beispiel zur Vererbung                                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/25/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2.Aufl. S. 325                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.25.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS vehicle DEFINITION INHERITING FROM object.
+  PUBLIC SECTION.
+    METHODS: accelerate,
+             write_status.
+  PROTECTED SECTION.
+    DATA speed TYPE i.
+ENDCLASS.                    "vehicle DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS plane DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS plane DEFINITION INHERITING FROM vehicle.
+  PUBLIC SECTION.
+    METHODS rise.
+  PROTECTED SECTION.
+    DATA altitude TYPE i.
+ENDCLASS.                    "plane DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS ship DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS ship DEFINITION INHERITING FROM vehicle.
+ENDCLASS.                    "ship DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle IMPLEMENTATION.
+  METHOD accelerate.
+    speed = speed + 1.
+  ENDMETHOD.                    "accelerate
+  METHOD write_status.
+    WRITE: / 'Speed:', speed.
+  ENDMETHOD.                    "write_status
+ENDCLASS.                    "vehicle IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS plane IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS plane IMPLEMENTATION.
+  METHOD rise.
+    altitude = altitude + 1.
+  ENDMETHOD.                    "rise
+ENDCLASS.                    "plane IMPLEMENTATION
+
+
+DATA: plane_ref TYPE REF TO plane,
+      ship_ref TYPE REF TO ship.
+
+START-OF-SELECTION.
+  CREATE OBJECT: plane_ref,
+                 ship_ref.
+  CALL METHOD: plane_ref->accelerate,
+               plane_ref->rise,
+               plane_ref->write_status,
+               ship_ref->accelerate,
+               ship_ref->write_status.

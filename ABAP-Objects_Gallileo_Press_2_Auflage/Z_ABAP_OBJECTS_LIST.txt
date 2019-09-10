@@ -1,0 +1,40 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_ABAP_OBJECTS_LIST
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  Z_ABAP_OBJECTS_LIST.
+
+************************************************************************
+* Report Name  : Z_ABAP_OBJECTS_LIST                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 99/99/9999 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:99.99.99 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+DATA spfli_tab type TABLE OF spfli.
+data  alv_list type ref TO cl_gui_alv_grid.
+
+select * from spfli
+  into table spfli_tab.
+
+  CREATE OBJECT alv_list
+  EXPORTING i_parent = cl_gui_container=>screen0.
+  call METHOD alv_list->set_table_for_first_display
+  exporting i_structure_name = 'SPFLI'
+    changing it_outtab = spfli_tab.
+  call SCREEN 100.

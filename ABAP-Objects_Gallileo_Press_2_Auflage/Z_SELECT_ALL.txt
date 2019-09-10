@@ -1,0 +1,40 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SELECT_ALL
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_select_all.
+
+************************************************************************
+* Report Name  : Z_SELECT_ALL                                       *
+* Report Title : Lesen aller Spalten mehrerer Zeilen in interne Tabelle
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/27/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects 2. Aufl. S. 568                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.27.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS: p_carrid TYPE spfli-carrid,
+            p_connid TYPE spfli-connid.
+
+DATA: wa_cityfrom TYPE spfli-cityfrom,
+      wa_cityto   TYPE spfli-cityto.
+DATA wa_spfli TYPE spfli.
+
+DATA spfli_tab TYPE TABLE OF spfli.
+SELECT *
+  FROM spfli
+  INTO TABLE spfli_tab
+  WHERE carrid = p_carrid.

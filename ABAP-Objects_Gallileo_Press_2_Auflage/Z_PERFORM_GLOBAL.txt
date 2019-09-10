@@ -1,0 +1,67 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_PERFORM_GLOBAL
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_perform_global.
+
+************************************************************************
+* Report Name  : Z_PERFORM_GLOBAL                                                 *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/25/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2.Aufl. S. 279                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.25.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS: p_carrid TYPE sflight-carrid,
+            p_connid TYPE sflight-connid.
+
+TYPES t_sflight_tab TYPE STANDARD TABLE OF sflight
+                  WITH KEY carrid connid fldate.
+
+DATA sflight_tab TYPE t_sflight_tab.
+
+START-OF-SELECTION.
+  PERFORM select_data.
+  PERFORM write_data.
+
+*&---------------------------------------------------------------------*
+*&      Form  select_data
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM select_data.
+
+  SELECT *
+    FROM sflight
+    INTO TABLE sflight_tab
+    WHERE carrid = p_carrid AND
+          connid = p_connid.
+ENDFORM.                    "select_data
+
+
+*&---------------------------------------------------------------------*
+*&      Form  write_data
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM write_data.
+  FIELD-SYMBOLS <fs_sflight> LIKE LINE OF sflight_tab.
+  LOOP AT sflight_tab ASSIGNING <fs_sflight>.
+    WRITE: / <fs_sflight>-carrid,
+             <fs_sflight>-connid,
+             <fs_sflight>-fldate.
+  ENDLOOP.
+ENDFORM.                    "select_data

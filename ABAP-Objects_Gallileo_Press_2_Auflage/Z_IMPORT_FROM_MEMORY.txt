@@ -1,0 +1,39 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_IMPORT_FROM_MEMORY
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_import_from_memory.
+
+************************************************************************
+* Report Name  : Z_IMPORT_FROM_MEMORY                                *
+* Report Title : Daten aus dem ABAP Memory einlesen                    *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/27/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S. 615               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.27.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+PARAMETERS p_id(50) TYPE c.
+
+DATA: connection_tab TYPE SORTED TABLE OF spfli
+          WITH UNIQUE KEY carrid connid,
+      flight_tab type sorted table of sflight
+          with unique key carrid connid fldate.
+
+IMPORT table1 = connection_tab
+       table2 = flight_tab
+       FROM MEMORY ID p_id.

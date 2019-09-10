@@ -1,0 +1,59 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_NATIVE_SQL_B
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_native_sql_b.
+
+************************************************************************
+* Report Name  : Z_NATIVE_SQL_B                                                 *
+* Report Title : Native SQL in ABAP einbinden                                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                             *
+* Create Date  : 01/26/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S. 544               *
+*              : Hilfsprogramm zum Hochladen des Bildes ist            *
+*              : REPORT  z_picture_save.               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.26.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+DATA: wa1(10) TYPE c,
+      wa2(10) TYPE c,
+      key(10) TYPE c.
+
+    EXEC SQL.
+      create table mytab (
+      val1 char(10) not null,
+      val2 char(10) not null,
+      primary key (val1) )
+    ENDEXEC.
+
+DO 10 TIMES.
+  wa1 = sy-index.
+  wa2 = sy-index ** 2.
+  EXEC SQL.
+    insert into mytab values (:wa1, :wa2)
+  ENDEXEC.
+ENDDO.
+
+key = 5.
+EXEC SQL.
+  SELECT val1, val2
+    into :wa1, :wa2
+    from mytab
+    where val1 = :key
+ENDEXEC.
+WRITE: / wa1, wa2.
+
+EXEC SQL.
+  drop table mytab
+ENDEXEC.

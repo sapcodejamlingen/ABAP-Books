@@ -1,0 +1,40 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SELECT_SINGLE_CORRESPONDING
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_select_single_corresponding.
+
+************************************************************************
+* Report Name  : Z_SELECT_SINGLE_CORRESPONDING                                                 *
+* Report Title : Lesen bestimmter Spalten ein. Zeile in einer Struktur                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/27/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects 2. Aufl. S. 568                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.27.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS: p_carrid TYPE spfli-carrid,
+            p_connid TYPE spfli-connid.
+
+DATA: wa_cityfrom TYPE spfli-cityfrom,
+      wa_cityto   TYPE spfli-cityto.
+DATA  wa_spfli TYPE spfli.
+
+SELECT SINGLE cityfrom cityto
+  FROM spfli
+  INTO CORRESPONDING FIELDS OF wa_spfli
+  WHERE carrid = p_carrid AND
+        connid = p_connid.

@@ -1,0 +1,39 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_RTTI_B
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  Z_RTTI_B.
+
+************************************************************************
+* Report Name  : Z_RTTI_B                                                 *
+* Report Title : rtti mit globalen Klassen                 *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/24/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.159               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+types my_type type p decimals 2.
+
+data: my_data type my_type,
+      descr_ref type ref to cl_abap_typedescr.
+
+descr_ref = cl_abap_typedescr=>describe_by_data( my_data ).
+
+write: / 'Typname',   descr_ref->absolute_name,
+       / 'Kind',      descr_ref->type_kind,
+       / 'length :',  descr_ref->length,
+       / 'Decimals:', descr_ref->decimals.

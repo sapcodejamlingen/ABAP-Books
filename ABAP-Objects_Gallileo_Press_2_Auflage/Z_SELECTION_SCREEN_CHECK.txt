@@ -1,0 +1,54 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SELECTION_SCREEN_CHECK
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_selection_screen_check.
+
+************************************************************************
+* Report Name  : Z_SELECTION_SCREEN_CHECK                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 99/99/9999 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:99.99.99 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+DATA wa_sflight TYPE sflight.
+
+
+* Selection Screen
+
+PARAMETERS: p_carrid TYPE sflight-carrid,
+            p_connid TYPE sflight-connid,
+            p_fldate TYPE sflight-fldate.
+
+
+* Runtime events
+
+AT SELECTION-SCREEN ON p_fldate.
+  SELECT SINGLE seatsocc seatsmax
+    FROM sflight
+    INTO (wa_sflight-seatsocc, wa_sflight-seatsmax)
+    WHERE carrid = p_carrid AND
+          connid = p_connid.
+
+  IF wa_sflight-seatsocc < wa_sflight-seatsmax.
+    MESSAGE i888(sabapdocu) WITH text-010.
+  ELSEIF wa_sflight-seatsocc = wa_sflight-seatsmax.
+    MESSAGE i888(sabapdocu) WITH text-020.
+  ELSEIF wa_sflight-seatsocc > wa_sflight-seatsmax.
+    MESSAGE i888(sabapdocu) WITH text-030.
+  ENDIF.

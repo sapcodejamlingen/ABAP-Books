@@ -1,0 +1,35 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_DO_ENDDO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_do_enddo.
+
+************************************************************************
+* Report Name  : Z_DO_ENDDO                                                 *
+* Report Title : Verwendung der Anweisung CHECK.         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/23/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects 2. Aufl. S. 186                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+DATA: is_zero TYPE i.
+DO 2 TIMES.
+  is_zero = sy-index MOD 2.
+  CHECK is_zero = 0.
+  WRITE: / sy-index, 'ist gerade.'.
+ENDDO.

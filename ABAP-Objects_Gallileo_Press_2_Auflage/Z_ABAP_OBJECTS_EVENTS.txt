@@ -1,0 +1,140 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_ABAP_OBJECTS_EVENTS
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_abap_objects_events.
+
+************************************************************************
+* Report Name  : Z_ABAP_OBJECTS_EVENTS                                *
+* Report Title : Definition und auslösen von Ereignissen              *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/25/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.388              *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.25.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS pilot DEFINITION.
+  PUBLIC SECTION.
+    METHODS call_flight_attendant.
+    EVENTS call_button_pressed.
+ENDCLASS.                    "pilot DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS passenger DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS passenger DEFINITION.
+  PUBLIC SECTION.
+    METHODS: constructor IMPORTING
+                value(i_seatnumber) TYPE i,
+                call_for_help.
+    EVENTS call_button_pressed EXPORTING
+                value(e_seatnumber) TYPE i.
+  PROTECTED SECTION.
+    DATA seatnumber TYPE i.
+ENDCLASS.                    "passenger DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS flight_attendant DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS flight_attendant DEFINITION.
+  PUBLIC SECTION.
+    METHODS: constructor
+    IMPORTING i_id TYPE string,
+      help_the_pilot FOR EVENT
+      call_button_pressed OF pilot,
+      help_a_passenger FOR EVENT
+      call_button_pressed OF passenger
+      IMPORTING e_seatnumber.
+  PROTECTED SECTION.
+    DATA id TYPE string.
+ENDCLASS.                    "flight_attendant DEFINITION
+
+
+*----------------------------------------------------------------------*
+*       CLASS pilot IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS pilot IMPLEMENTATION.
+
+  METHOD call_flight_attendant.
+    RAISE EVENT call_button_pressed.
+  ENDMETHOD.                    "call_flight_attendant
+ENDCLASS.                    "pilot IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS passenger IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS passenger IMPLEMENTATION.
+  METHOD constructor.
+    seatnumber = i_seatnumber.
+  ENDMETHOD.                    "constructor
+  METHOD call_for_help.
+    RAISE EVENT call_button_pressed
+    EXPORTING e_seatnumber = seatnumber.
+  ENDMETHOD.                    "call_for_help
+ENDCLASS.                    "passenger IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS flight_attendant IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS flight_attendant IMPLEMENTATION.
+  METHOD constructor.
+    id = i_id.
+  ENDMETHOD.                    "constructor
+  METHOD help_the_pilot.
+    WRITE: / id, 'helps Pilot'.
+  ENDMETHOD.                    "help_the_pilot
+  METHOD help_a_passenger.
+    WRITE: / id, 'helps Passenger on Seat',
+    e_seatnumber.
+  ENDMETHOD.                    "help_a_passenger
+ENDCLASS.                    "flight_attendant IMPLEMENTATION
+
+DATA: purser TYPE REF TO flight_attendant,
+      stewardess TYPE REF TO flight_attendant,
+      pilot TYPE REF TO pilot,
+      passenger_1 TYPE REF TO passenger,
+      passenger_2 TYPE REF TO passenger.
+
+* Classical Processing Blocks
+
+START-OF-SELECTION.
+  CREATE OBJECT: pilot,
+                 passenger_1 EXPORTING i_seatnumber = 11,
+                 passenger_2 EXPORTING i_seatnumber = 17.
+
+  CREATE OBJECT: purser
+        EXPORTING i_id = 'Purser',
+                          stewardess
+        EXPORTING i_id = 'Stewardess'.
+
+  SET HANDLER: purser->help_the_pilot
+                FOR pilot,
+                stewardess->help_a_passenger
+                FOR ALL INSTANCES.
+
+  CALL METHOD: pilot->call_flight_attendant,
+               passenger_1->call_for_help,
+               passenger_2->call_for_help.

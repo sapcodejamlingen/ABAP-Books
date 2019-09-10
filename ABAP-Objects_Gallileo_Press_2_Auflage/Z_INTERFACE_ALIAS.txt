@@ -1,0 +1,66 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_INTERFACE_ALIAS
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  Z_INTERFACE_ALIAS.
+
+************************************************************************
+* Report Name  : Z_INTERFACE_ALIAS                                                 *
+* Report Title : Aliasnamen in Klassen                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/25/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.368              *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.25.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+INTERFACE object_status.
+  METHODS write_status.
+ENDINTERFACE.                    "OBJECT_status
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES object_status.
+    aliases write_status for OBJECT_status~write_status.
+    METHODS accelerate.
+  PROTECTED SECTION.
+    DATA speed TYPE i.
+ENDCLASS.                    "vehicle DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle IMPLEMENTATION.
+  METHOD accelerate.
+    speed = speed + 1.
+  ENDMETHOD.                    "accelerate
+  METHOD object_status~write_status.
+    WRITE: / 'speed:', speed.
+  ENDMETHOD.                    "OBJECT_status~write_status
+ENDCLASS.                    "vehicle IMPLEMENTATION
+
+DATA vehicle_ref TYPE REF TO vehicle.
+
+START-OF-SELECTION.
+  CREATE OBJECT vehicle_ref.
+  CALL METHOD: vehicle_ref->accelerate,
+               vehicle_ref->object_status~write_status.

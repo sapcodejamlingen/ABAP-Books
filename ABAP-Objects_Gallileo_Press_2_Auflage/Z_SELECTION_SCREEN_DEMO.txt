@@ -1,0 +1,54 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SELECTION_SCREEN_DEMO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_selection_screen_demo.
+
+************************************************************************
+* Report Name  : Z_SELECTION_SCREEN_DEMO                           *
+* Report Title : Definition und aufruf eines Selektionsbildes          *
+* Report Title : Abfangbarer Laufzeitfehler                *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/26/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.  460             *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.26.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+*Selection Screen
+
+SELECTION-SCREEN BEGIN OF SCREEN 500
+                  AS WINDOW TITLE text-010.
+PARAMETERS p_input(16) TYPE c.
+
+SELECTION-SCREEN: SKIP,
+                  BEGIN OF BLOCK b1
+                    WITH FRAME TITLE text-020.
+
+PARAMETERS: check1 AS CHECKBOX,
+            check2 AS CHECKBOX,
+            check3 AS CHECKBOX.
+
+SELECTION-SCREEN: END OF BLOCK b1,
+                  SKIP,
+                  BEGIN OF BLOCK b2
+                  WITH FRAME TITLE text-030.
+PARAMETERS: radio1 RADIOBUTTON GROUP rad,
+            radio2 RADIOBUTTON GROUP rad,
+            radio3 RADIOBUTTON GROUP rad.
+SELECTION-SCREEN: END OF BLOCK b2,
+                  END OF SCREEN 500.
+* Processing blocks called by the runtime enviroment
+START-OF-SELECTION.
+  CALL  SELECTION-SCREEN 500 STARTING AT 10 10.

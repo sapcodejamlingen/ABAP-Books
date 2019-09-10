@@ -1,0 +1,37 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_CONCATENATE
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_concatenate.
+
+************************************************************************
+* Report Name  : Z_CONCATENATE                                                 *
+* Report Title : Anweisung Concatenate         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/23/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects 2. Aufl. S. 187                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+DATA: s1(72) TYPE c,
+      s2(72) TYPE c,
+      s3 TYPE string.
+
+s1 = 'ABAP'.
+s2 = 'Objects'.
+
+CONCATENATE s1 s2 INTO s3 SEPARATED BY space.
+WRITE: / s3.

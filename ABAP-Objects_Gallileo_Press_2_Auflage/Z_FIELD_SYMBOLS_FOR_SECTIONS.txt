@@ -1,0 +1,43 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_FIELD_SYMBOLS_FOR_SECTIONS
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_field_symbols_for_sections.
+
+************************************************************************
+* Report Name  : Z_FIELD_SYMBOLS_FOR_SECTIONS                          *
+* Report Title : Statisches ASSIGN mit Teilfeldadressierung           *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/24/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.199               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+DATA: BEGIN OF address,
+          street(20)  TYPE c VALUE 'Woodway',
+          no(4)       TYPE c VALUE '1234',
+          zip(5)      TYPE c VALUE '98765',
+          city(20)    TYPE c VALUE 'Horse Village',
+      END OF address.
+
+FIELD-SYMBOLS: <street_no> TYPE c,
+               <zip_city> TYPE c.
+
+ASSIGN: address(24) TO <street_no>,
+        address+24(25) TO <zip_city>.
+
+WRITE: / <street_no>,
+       / <zip_city>.

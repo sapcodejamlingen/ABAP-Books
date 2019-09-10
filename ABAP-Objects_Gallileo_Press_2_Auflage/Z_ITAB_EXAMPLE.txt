@@ -1,0 +1,109 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_ITAB_EXAMPLE
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_itab_example.
+
+************************************************************************
+* Report Name  : Z_ITAB_EXAMPLE                                                 *
+* Report Title : Definitionen Interner Tabellen                *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/24/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.217               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+TYPES: BEGIN OF t_address,
+        street(20) TYPE c ,
+        city(20) TYPE c,
+       END OF t_address.
+
+TYPES  t_address_tab TYPE STANDARD TABLE
+                      OF t_address
+                      WITH NON-UNIQUE KEY city.
+
+DATA: BEGIN OF company,
+        name(20) TYPE c,
+        addresses TYPE t_address_tab,
+      END OF company.
+DATA company_tab LIKE HASHED TABLE
+        OF company
+        WITH UNIQUE KEY name.
+DATA company_sorted_tab LIKE SORTED TABLE
+            OF company
+            WITH UNIQUE KEY name.
+DATA address TYPE t_address.
+DATA   idx     TYPE sy-tabix.
+
+FIELD-SYMBOLS <fs> LIKE company.
+* Text output
+
+* internal table filling
+company-name        = 'Racing Bikes Inc.'.
+address-street      = 'Fifth Avenue'.
+address-city        = 'New York'.
+APPEND address TO company-addresses.
+address-street      = 'Second Street'.
+address-city        = 'Boston'.
+APPEND address TO company-addresses.
+INSERT company INTO TABLE company_tab.
+CLEAR company.
+company-name        = 'Chocolatiers Suisse'.
+address-street      = 'Avenue des Forets'.
+address-city        = 'Geneve'.
+APPEND address TO company-addresses.
+address-street      = 'Kleine Bachgasse'.
+address-city        = 'Basel'.
+APPEND address TO company-addresses.
+address-street      = 'Piazza di Lago'.
+address-city        = 'Como'.
+APPEND address TO company-addresses.
+INSERT company INTO TABLE company_tab.
+*Internal Tabel reading
+READ TABLE company_tab
+  WITH TABLE KEY name = 'Racing Bikes Inc.'
+ ASSIGNING <fs>.
+WRITE <fs>-name.
+
+LOOP AT <fs>-addresses INTO address.
+
+  WRITE: / sy-tabix       ,
+          address-street  ,
+          address-city    .
+ENDLOOP.
+uline.
+
+*mod int Tables
+address-street = 'Rue des Montagnes'.
+address-city = 'Geneve'.
+READ TABLE company_tab WITH TABLE KEY
+name = 'Chocolatiers Suisse' INTO company.
+READ TABLE company-addresses TRANSPORTING NO FIELDS
+WITH TABLE KEY city = address-city.
+idx = sy-tabix.
+MODIFY company-addresses FROM address INDEX idx.
+MODIFY TABLE company_tab FROM company.
+* Moving and sorting Table
+company_sorted_tab = company_tab.
+LOOP AT company_sorted_tab INTO company.
+  WRITE company-name.
+  SORT company-addresses.
+  LOOP AT company-addresses INTO address.
+    WRITE: /  sy-tabix,
+            address-street ,
+            address-city .
+  ENDLOOP.
+ENDLOOP.

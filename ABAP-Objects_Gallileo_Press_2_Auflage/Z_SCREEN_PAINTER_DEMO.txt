@@ -1,0 +1,82 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SCREEN_PAINTER_DEMO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_screen_painter_demo.
+
+************************************************************************
+* Report Name  : Z_SCREEN_PAINTER_DEMO                                                 *
+* Report Title : screen painter demo                                        *
+* Report Title : Abfangbarer Laufzeitfehler                *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/26/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.26.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+DATA: input(22) TYPE c,
+      check1(1) TYPE c,
+      check2(1) TYPE c,
+      radio1(1) TYPE c,
+      radio2(1) TYPE c,
+      radio3(1) TYPE c,
+      ok_code TYPE sy-ucomm.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+  "  save_ok = ok_code.
+  "  CLEAR ok_code.
+  "  CASE save_ok.
+  "    WHEN 'BACK'.
+  "      leave to screen.
+  "    WHEN 'EXIT'.
+  "      LEAVE PROGRAM.
+  "    WHEN 'cancel'.
+  "      LEAVE SCREEN.
+  "    WHEN 'PRESS'.
+  "      CALL METHOD screen_100=>handle_push_button.
+  "  ENDCASE.
+
+ENDMODULE.                 " USER_COMMAND_0100  INPUT
+
+*&---------------------------------------------------------------------*
+*&      Form  on_ctmenue_input
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->L_MENU     text
+*----------------------------------------------------------------------*
+FORM on_ctmenue_input USING l_menu TYPE REF TO cl_ctmenu.
+  CALL METHOD l_menu->add_function
+    EXPORTING
+      fcode = 'PRESS'
+      text  = text-020.
+ENDFORM.                    "on_ctmenue_input
+
+
+
+*ABAP Objects 2. Auflage S.
+PROCESS BEFORE OUTPUT.
+* MODULE STATUS_0100.
+*
+PROCESS AFTER INPUT.
+ MODULE USER_COMMAND_0100.
+
+
+

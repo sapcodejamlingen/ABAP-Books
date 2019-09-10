@@ -1,0 +1,148 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_DEMO_TRANSACTION_ENQUEUE
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_demo_transaction_enqueue message-id sabapdocu..
+
+************************************************************************
+* Report Name  : Z_DEMO_TRANSACTION_ENQUEUE                                                 *
+* Report Title : Setzen einer SAP Sperre                                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                             *
+* Create Date  : 01/26/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S. 604               *              *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.26.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+TABLES sflight.
+
+
+DATA text(8) TYPE c.
+DATA ok_code TYPE sy-ucomm.
+CALL SCREEN 100.
+
+*----------------------------------------------------------------------*
+*  MODULE init OUTPUT
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+MODULE init OUTPUT.
+  SET PF-STATUS 'BASIC'.
+  sflight-carrid = 'LH'.
+  sflight-connid = '400'.
+ENDMODULE.                    "init OUTPUT
+
+*----------------------------------------------------------------------*
+*  MODULE exit INPUT
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+MODULE exit INPUT.
+  LEAVE PROGRAM.
+ENDMODULE.                    "exit INPUT
+
+*----------------------------------------------------------------------*
+*  MODULE enqueue INPUT
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+MODULE enqueue INPUT.
+  CASE ok_code.
+    WHEN 'ENQUEUE'.
+
+      CALL FUNCTION 'ENQUEUE_EZ_DEMOFLIGHT'
+       EXPORTING
+         mode_sflight         = 'X'
+*   MODE_SBOOK           = 'E'
+*   MANDT                = SY-MANDT
+         carrid               = sflight-carrid
+         connid               = sflight-connid
+         fldate               = sflight-fldate
+*   BOOKID               =
+*   X_CARRID             = ' '
+*   X_CONNID             = ' '
+*   X_FLDATE             = ' '
+*   X_BOOKID             = ' '
+*   _SCOPE               = '2'
+*   _WAIT                = ' '
+*   _COLLECT             = ' '
+       EXCEPTIONS
+         foreign_lock         = 1
+         system_failure       = 2
+         OTHERS               = 3
+                .
+      IF sy-subrc <> 0.
+* MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+*         WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+      ENDIF.
+
+
+      CASE sy-subrc.
+        WHEN 0.
+          MESSAGE i888 WITH 'Enqueue successful'(001).
+        WHEN 1.
+          text = sy-msgv1.
+          MESSAGE e888 WITH 'Record already'(002) 'locked by'(003)
+                                                   text.
+          CALL TRANSACTION 'SM12'.
+        WHEN 2 OR 3.
+          MESSAGE e888 WITH 'Error in enqueue!'(004)
+                            'SY-SUBRC:' sy-subrc.
+      ENDCASE.
+
+    WHEN 'DEQUEUE'.
+      CALL FUNCTION 'DEQUEUE_EZ_DEMOFLIGHT'
+       EXPORTING
+         mode_sflight       = 'E'
+*     MODE_SBOOK         = 'E'
+*     MANDT              = SY-MANDT
+         carrid             = sflight-carrid
+         connid             = sflight-connid
+         fldate             = sflight-fldate
+*     BOOKID             =
+*     X_CARRID           = ' '
+*     X_CONNID           = ' '
+*     X_FLDATE           = ' '
+*     X_BOOKID           = ' '
+*     _SCOPE             = '3'
+*     _SYNCHRON          = ' '
+*     _COLLECT           = ' '
+                EXCEPTIONS
+                  OTHERS = 1.
+
+      CASE sy-subrc.
+        WHEN 0.
+          MESSAGE i888 WITH 'Dequeue successful'(004).
+        WHEN 1.
+          MESSAGE e888 WITH 'Error in dequeue!'(005).
+      ENDCASE.
+    WHEN 'SM12'.
+      CALL TRANSACTION 'SM12'.
+  ENDCASE.
+ENdmodule.
+*----------------------------------------------------------------------*
+*  MODULE select INPUT
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+MODULE select INPUT.
+  CASE ok_code.
+    WHEN 'SELECT'.
+      SELECT * FROM sflight WHERE carrid = sflight-carrid
+                              AND connid = sflight-connid
+                              AND fldate = sflight-fldate.
+      ENDSELECT.
+      MESSAGE i888 WITH 'SY-SUBRC:' sy-subrc.
+  ENDCASE.
+ENDMODULE.                    "select INPUT

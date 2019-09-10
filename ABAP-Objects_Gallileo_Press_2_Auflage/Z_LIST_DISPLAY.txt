@@ -1,0 +1,102 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_LIST_DISPLAY
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_list_display.
+
+************************************************************************
+* Report Name  : Z_LIST_DISPLAY                                          *
+* Report Title : Programmgesteuerte Listenanzeige              *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/26/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S. 496               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.26.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+TABLES demo_conn.
+
+DATA: wa_spfli TYPE spfli.
+
+START-OF-SELECTION.
+  CALL SCREEN 100.
+*&---------------------------------------------------------------------*
+*&      Module  STATUS_0100  OUTPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+  SET PF-STATUS 'SCREEN_100'.
+*  SET TITLEBAR 'xxx'.
+
+ENDMODULE.                 " STATUS_0100  OUTPUT
+*&---------------------------------------------------------------------*
+*&      Module  cancel  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE cancel INPUT.
+  LEAVE PROGRAM.
+ENDMODULE.                 " cancel  INPUT
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+  CALL SCREEN 500.
+  SET SCREEN 100.
+ENDMODULE.                 " USER_COMMAND_0100  INPUT
+
+*----------------------------------------------------------------------*
+*  MODULE create_list OUTPUT
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+MODULE create_list OUTPUT.
+  LEAVE TO LIST-PROCESSING AND RETURN TO SCREEN 0.
+  SET PF-STATUS space.
+  SELECT carrid connid cityfrom cityto
+    FROM spfli
+    INTO (wa_spfli-carrid, wa_spfli-connid,
+          wa_spfli-cityfrom, wa_spfli-cityto)
+    WHERE carrid = demo_conn-carrid.
+    WRITE: / wa_spfli-carrid, wa_spfli-connid,
+             wa_spfli-cityfrom, wa_spfli-cityto.
+  ENDSELECT.
+  LEAVE SCREEN.
+ENDMODULE.                    "create_list OUTPUT
+
+TOP-OF-PAGE.
+  WRITE text-001 COLOR COL_HEADING.
+  ULINE.
+
+
+*ABAP Objects 2. Auflage S. 497
+PROCESS BEFORE OUTPUT.
+ MODULE STATUS_0100.
+*
+PROCESS AFTER INPUT.
+module cancel AT EXIT-COMMAND.
+ MODULE USER_COMMAND_0100.
+
+
+*ABAP Objects 2. Auflage S. 497
+PROCESS BEFORE OUTPUT.
+* MODULE STATUS_0500.
+  MODULE create_list.
+
+PROCESS AFTER INPUT.
+* MODULE USER_COMMAND_0500.

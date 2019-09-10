@@ -1,0 +1,64 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_GARBAGE_COLLECTOR
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  Z_GARBAGE_COLLECTOR.
+
+************************************************************************
+* Report Name  : Z_GARBAGE_COLLECTOR                                   *
+* Report Title : Garbage Collector aktivieren                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/25/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects 2. Aufl. S. 304               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.25.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS vehicle DEFINITION.
+  PUBLIC SECTION.
+    METHODS: accelerate,
+             show_speed.
+  PRIVATE SECTION.
+    DATA speed TYPE i VALUE 0.
+ENDCLASS.                    "vehicle DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle IMPLEMENTATION.
+  METHOD accelerate.
+    speed = speed + 1.
+  ENDMETHOD.                    "accelerate
+  METHOD show_speed.
+    WRITE speed.
+  ENDMETHOD.                    "show_speed
+ENDCLASS.                    "vehicle IMPLEMENTATION
+
+* Global Data
+
+      Data: ov1 type ref TO vehicle,
+            ov2 like ov1.
+
+* Classical Processing Blocks
+
+START-OF-SELECTION.
+
+CREATE OBJECT: ov1,
+               ov2.
+
+ov1 = ov2.
+clear ov2.

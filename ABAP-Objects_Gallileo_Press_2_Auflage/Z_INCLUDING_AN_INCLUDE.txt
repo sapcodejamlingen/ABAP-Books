@@ -1,0 +1,31 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_INCLUDING_AN_INCLUDE
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_including_an_include.
+
+************************************************************************
+* Report Name  : Z_INCLUDING_AN_INCLUDE                                                 *
+* Report Title : Einbinden eines Include-Programmes               *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/25/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.271               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.25.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+WRITE: / 'Ihr Benutzername lautet:'.
+
+INCLUDE z_include_demo_a.

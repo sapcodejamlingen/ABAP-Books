@@ -1,0 +1,63 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SELECTION_SCREEN_FUNCT
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_selection_screen_funct.
+
+************************************************************************
+* Report Name  : Z_SELECTION_SCREEN_FUNCT                              *
+* Report Title : Definition von Selektionsbildern                *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/26/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S. 480              *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.26.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+DATA: wa_connid TYPE s_conn_id,
+      index TYPE i.
+FIELD-SYMBOLS <fs> TYPE sscrfields-functxt_01.
+
+TABLES sscrfields.
+
+PARAMETERS p_carrid TYPE s_carr_id.
+SELECT-OPTIONS s_connid FOR wa_connid NO INTERVALS.
+
+DATA s_connid_line LIKE LINE OF s_connid.
+SELECTION-SCREEN FUNCTION KEY: 1, 2, 3, 4, 5.
+
+*Runtime Events
+INITIALIZATION.
+  sscrfields-functxt_01 = 'AC'.
+  sscrfields-functxt_02 = 'LH'.
+  sscrfields-functxt_03 = 'SHS'.
+  sscrfields-functxt_04 = 'THA'.
+  sscrfields-functxt_05 = 'UA'.
+
+AT SELECTION-SCREEN.
+  IF sscrfields-ucomm(3) = 'FC0'.
+    index = sscrfields-ucomm+3(1) + 3.
+    ASSIGN COMPONENT index OF STRUCTURE sscrfields TO <fs>.
+    p_carrid = <fs>.
+    CLEAR s_connid[].
+    s_connid_line-sign = 'I'.
+    s_connid_line-option = 'EQ'.
+    SELECT connid
+      FROM spfli
+      INTO s_connid_line-low
+      WHERE carrid = p_carrid.
+      APPEND s_connid_line TO s_connid.
+    ENDSELECT.
+  ENDIF.

@@ -1,0 +1,101 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_INHERITANCE_CONSTRUCTORS
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  Z_INHERITANCE_CONSTRUCTORS.
+
+************************************************************************
+* Report Name  : Z_INHERITANCE_CONSTRUCTORS                                                 *
+* Report Title : Instanzkonstruktoren in der Vererbung                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/25/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.338              *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.25.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+CLASS vessel DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor IMPORTING i_name TYPE string.
+  PROTECTED SECTION.
+    DATA name TYPE string.
+ENDCLASS.                    "vessel DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS ship DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS ship DEFINITION INHERITING FROM vessel.
+
+ENDCLASS.                    "ship DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS motorship DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS motorship DEFINITION INHERITING FROM ship.
+  PUBLIC SECTION.
+    METHODS constructor IMPORTING i_name TYPE string
+                            i_fuelamount TYPE i.
+  PRIVATE SECTION.
+    DATA fuelamount TYPE i.
+ENDCLASS.                    "motorship DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS vessel IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vessel IMPLEMENTATION.
+  METHOD constructor.
+    name = i_name.
+  ENDMETHOD.                    "constructor
+ENDCLASS.                    "vessel IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS motorship IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS motorship IMPLEMENTATION.
+  METHOD constructor.
+    call method super->constructor
+    exporting i_name = i_name.
+    fuelamount = i_fuelamount.
+  ENDMETHOD.                    "constructor
+ENDCLASS.                    "motorship IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+
+    DATA: o_vessel    TYPE REF TO vessel,
+          o_ship      TYPE REF TO ship,
+          o_motorship TYPE REF TO motorship.
+
+
+
+START-OF-SELECTION.
+
+  CREATE OBJECT:
+    o_vessel    EXPORTING i_name        = 'Vincent',
+    o_ship      EXPORTING i_name        = 'Mia',
+    o_motorship EXPORTING i_name        = 'Jules'
+                          i_fuelamount  = 12000.

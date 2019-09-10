@@ -1,0 +1,64 @@
+*&---------------------------------------------------------------------*
+*& Report  z_serval_objects
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_serval_objects.
+
+************************************************************************
+* Report Name  : Z_SERVAL_OBJECTS                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/25/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2.Aufl. S. 301                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.25.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS vehicle DEFINITION.
+  PUBLIC SECTION.
+    METHODS: accelerate,
+             show_speed.
+  PRIVATE SECTION.
+    DATA speed TYPE i VALUE 0.
+ENDCLASS.                    "vehicle DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle IMPLEMENTATION.
+  METHOD accelerate.
+    speed = speed + 1.
+  ENDMETHOD.                    "accelerate
+  METHOD show_speed.
+    WRITE speed.
+  ENDMETHOD.                    "show_speed
+ENDCLASS.                    "vehicle IMPLEMENTATION
+
+DATA: ov TYPE REF TO vehicle,
+      ov_tab TYPE TABLE OF REF TO vehicle.
+
+START-OF-SELECTION.
+  DO 5 TIMES.
+    CREATE OBJECT ov.
+    APPEND ov TO ov_tab.
+  ENDDO.
+  LOOP AT ov_tab INTO ov.
+    DO sy-tabix TIMES.
+      CALL METHOD ov->accelerate.
+    ENDDO.
+    CALL METHOD ov->show_speed.
+  ENDLOOP.

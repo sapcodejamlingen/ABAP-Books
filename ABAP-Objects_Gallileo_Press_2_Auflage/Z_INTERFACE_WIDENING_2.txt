@@ -1,0 +1,79 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_INTERFACE_WIDENING_2
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_interface_widening_2.
+
+************************************************************************
+* Report Name  : Z_INTERFACE_WIDENING_2                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/25/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects 2. Aufl. S. 378                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.25.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+INTERFACE object_status.
+  METHODS write_status.
+ENDINTERFACE.                    "OBJECT_status
+
+*----------------------------------------------------------------------*
+*       INTERFACE object_movement
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+INTERFACE object_movement.
+  METHODS accelerate.
+ENDINTERFACE.                    "object_movement
+
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES: object_status,
+                object_movement.
+  PROTECTED SECTION.
+    DATA speed TYPE i.
+ENDCLASS.                    "vehicle DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle IMPLEMENTATION.
+  METHOD object_movement~accelerate.
+    speed = speed + 1.
+  ENDMETHOD.                    "object_status~accelerate
+  METHOD object_status~write_status.
+    WRITE: / 'Speed:', speed.
+  ENDMETHOD.                    "OBJECT_status~write_status
+ENDCLASS.                    "vehicle IMPLEMENTATION
+
+DATA: movement_ref TYPE REF TO object_movement,
+      status_ref TYPE REF TO object_status.
+
+
+START-OF-SELECTION.
+  CREATE OBJECT movement_ref TYPE vehicle.
+  CALL METHOD movement_ref->accelerate.
+  status_ref ?= movement_ref.
+  CALL METHOD status_ref->write_status.

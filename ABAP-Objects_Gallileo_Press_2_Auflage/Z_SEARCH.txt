@@ -1,0 +1,56 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SEARCH
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_search.
+
+************************************************************************
+* Report Name  : Z_SEARCH                                             *
+* Report Title : Suche in einer Zeichenkette mit versch. Suchmustern  *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/23/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects 2. Aufl. S. 182                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+DATA: text TYPE string.
+
+text = 'The quick brown Fox jumps over the lazy dog!'.
+
+WRITE: / 'Search in',
+         '''The quick brown Fox jumps over the lazy dog!'''.
+SKIP.
+
+SEARCH text FOR 'dog'.
+WRITE: / 'Search text FOR ''dog'''.
+WRITE: / 'sy-subrc:', sy-subrc, / 'sy-fdpos:', sy-fdpos.
+ULINE.
+
+SEARCH text FOR '.dog .'.
+WRITE: / 'Search text FOR ''.dog .'''.
+WRITE: / 'sy-subrc:', sy-subrc, / 'sy-fdpos:', sy-fdpos.
+ULINE.
+
+
+SEARCH text FOR 'laz*'.
+WRITE: / 'Search text FOR ''laz*'''.
+WRITE: / 'sy-subrc:', sy-subrc, / 'sy-fdpos:', sy-fdpos.
+ULINE.
+
+
+SEARCH text FOR '*azy'.
+WRITE: / 'Search text FOR ''*azy'''.
+WRITE: / 'sy-subrc:', sy-subrc, / 'sy-fdpos:', sy-fdpos.

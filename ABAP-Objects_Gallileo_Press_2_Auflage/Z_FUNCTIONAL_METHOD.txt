@@ -1,0 +1,64 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_FUNCTIONAL_METHOD
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_functional_method.
+
+************************************************************************
+* Report Name  : Z_FUNCTIONAL_METHOD                                                 *
+* Report Title : Funktionale Methode                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/25/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.309               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.25.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS circle DEFINITION.
+  PUBLIC SECTION.
+    METHODS get_area IMPORTING value(i_radius) TYPE i
+                     RETURNING value(r_size) TYPE f.
+  PRIVATE SECTION.
+    CONSTANTS pi TYPE f VALUE '3.14159265'.
+ENDCLASS.                    "circle DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS circle IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS circle IMPLEMENTATION.
+  METHOD get_area.
+    r_size = i_radius ** 2 * pi.
+  ENDMETHOD.                    "get_area
+ENDCLASS.                    "circle IMPLEMENTATION
+
+PARAMETERS radius TYPE i.
+
+DATA: o_circle TYPE REF TO circle,
+      area TYPE f.
+
+START-OF-SELECTION.
+  CREATE OBJECT o_circle.
+
+  CALL METHOD o_circle->get_area
+    EXPORTING
+      i_radius = radius
+    RECEIVING
+      r_size   = area.
+  WRITE: / area.
+
+  area = o_circle->get_area( radius ).
+  WRITE: / area.

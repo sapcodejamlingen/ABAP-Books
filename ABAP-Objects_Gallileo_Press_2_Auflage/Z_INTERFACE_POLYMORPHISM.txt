@@ -1,0 +1,109 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_INTERFACE_POLYMORPHISM
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_interface_polymorphism.
+
+************************************************************************
+* Report Name  : Z_INTERFACE_POLYMORPHISM                                                 *
+* Report Title : Polymorphie durch Interfaces                                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/25/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.381              *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.25.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+INTERFACE object_status.
+  METHODS write_status.
+ENDINTERFACE.                    "OBJECT_status
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES object_status.
+    METHODS accelerate.
+  PROTECTED SECTION.
+    DATA speed TYPE i.
+ENDCLASS.                    "vehicle DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS window DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS window DEFINITION.
+  PUBLIC SECTION.
+    METHODS open_close.
+    INTERFACES object_status.
+  PROTECTED SECTION.
+    DATA status_flag(1) TYPE c.
+ENDCLASS.                    "window DEFINITION
+*----------------------------------------------------------------------*
+*       CLASS vehicle IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle IMPLEMENTATION.
+  METHOD accelerate.
+    speed = speed + 1.
+  ENDMETHOD.                    "accelerate
+  METHOD object_status~write_status.
+    WRITE: / 'speed:', speed.
+  ENDMETHOD.                    "OBJECT_status~write_status
+ENDCLASS.                    "vehicle IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS window IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS window IMPLEMENTATION.
+  METHOD open_close.
+    IF status_flag = ' '.
+      status_flag = 'X'.
+    ELSE.
+      status_flag = ' '.
+    ENDIF.
+  ENDMETHOD.                    "open_close
+  METHOD object_status~write_status.
+    IF status_flag = ' '.
+      WRITE / 'window is closed'.
+    ELSE.
+      WRITE / 'Window is open'.
+    ENDIF.
+  ENDMETHOD.                    "object_status~write_status
+ENDCLASS.                    "window IMPLEMENTATION
+
+DATA: vehicle_ref TYPE REF TO vehicle,
+      window_ref TYPE REF TO window,
+      status_tab TYPE TABLE OF REF TO object_status.
+
+FIELD-SYMBOLS <status> TYPE REF TO object_status.
+
+START-OF-SELECTION.
+  CREATE OBJECT vehicle_ref.
+  CALL METHOD: vehicle_ref->accelerate.
+  APPEND vehicle_ref TO status_tab.
+  CREATE OBJECT window_ref.
+  CALL METHOD window_ref->open_close.
+  APPEND window_ref TO status_tab.
+  LOOP AT status_tab ASSIGNING <status>.
+    CALL METHOD <status>->write_status.
+  ENDLOOP.

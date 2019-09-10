@@ -1,0 +1,41 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_DATE_TIME
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_date_time.
+
+************************************************************************
+* Report Name  : Z_DATE_TIME                                                 *
+* Report Title : Datums und Zeitberechnungen       *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/24/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.172               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS t_start TYPE t DEFAULT '080000'.
+
+DATA: d_start TYPE d,
+      year_days TYPE i,
+      working_hours TYPE i.
+
+d_start = sy-datum.
+d_start+4(4) = '0101'.
+year_days = sy-datum - d_start + 1.
+working_hours = ( sy-uzeit - t_start ) / 3600.
+
+WRITE: / 'Tag', year_days, 'in Jahr', sy-datum(4),
+       / 'Bisherige Arbeitsstunden:', working_hours.

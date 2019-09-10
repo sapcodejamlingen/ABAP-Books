@@ -1,0 +1,52 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_CONVERSION_ERRORS_B
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_conversion_errors_b.
+
+************************************************************************
+* Report Name  : Z_CONVERSION_ERRORS_B                                *
+* Report Title : Laufzeitfehler bei Zuweisung konvertibler Typen       *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/24/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.163               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+DATA: f1(10) TYPE c VALUE 'Text',
+      f2(10) TYPE c VALUE '1234'.
+
+PERFORM:  times2 USING f1,
+          times2 USING f2.
+
+*&---------------------------------------------------------------------*
+*&      Form  times2
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->U_INPUT    text
+*----------------------------------------------------------------------*
+FORM times2 USING u_input TYPE c.
+  DATA result TYPE i.
+  CATCH SYSTEM-EXCEPTIONS conversion_errors = 4.
+    result = u_input * 2.
+  ENDCATCH.
+  IF sy-subrc = 0.
+    WRITE: / u_input, '* 2= ', result.
+  ELSE.
+    WRITE: / u_input, 'is no number'.
+  ENDIF.
+ENDFORM.                                                    "times2

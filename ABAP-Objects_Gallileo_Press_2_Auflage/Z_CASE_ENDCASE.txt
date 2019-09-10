@@ -1,0 +1,40 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_CASE_ENDCASE
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_case_endcase.
+
+************************************************************************
+* Report Name  : Z_CASE_ENDCASE                                       *
+* Report Title : Programmverzweigungen mit der Anweisung CASE.         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/23/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects 2. Aufl. S. 182                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CASE sy-datum+4(2).
+  WHEN '12' OR '01' OR '02'.
+    WRITE / 'Winter'.
+  WHEN '03' OR '04' OR '05'.
+    WRITE / 'Spring'.
+  WHEN '06' OR '07' OR '08'.
+    WRITE / 'Summer'.
+  WHEN '09' OR '10' OR '11'.
+    WRITE / 'Autumn'.
+  WHEN OTHERS.
+    WRITE 'Illegal Date'.
+ENDCASE.

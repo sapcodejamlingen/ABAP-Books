@@ -1,0 +1,48 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_DESCRIBE_FIELD
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_describe_field.
+
+************************************************************************
+* Report Name  : Z_DESCRIBE_FIELD                                   *
+* Report Title : Anweisung describe field                   *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/24/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.156               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+DATA: f1(20) TYPE c,
+      f2 TYPE p DECIMALS 2.
+
+PERFORM: test USING f1,
+         test USING f2.
+
+*&---------------------------------------------------------------------*
+*&      Form  test
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->U_INPUT    text
+*----------------------------------------------------------------------*
+FORM test USING u_input TYPE any.
+  DATA: t(1) TYPE c,
+        l TYPE i,
+        d TYPE i.
+*  DESCRIBE FIELD u_input TYPE t LENGTH l DECIMALS d.
+  WRITE: / 'Typ:', t, 'Länge', l, 'Dezimalstellen', d.
+ENDFORM.                    "test

@@ -1,0 +1,36 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SPLIT
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_split.
+
+************************************************************************
+* Report Name  : Z_SPLIT                                                 *
+* Report Title : Zerlegen einer Zeichenkette mit SPLIT.         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/23/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects 2. Aufl. S. 188                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+DATA: text TYPE string,
+      itab TYPE TABLE OF string.
+text = 'ABAP Objects ist der Schlüssel' &
+       ' zur OOP im SAP-System'.
+SPLIT text AT space INTO TABLE itab.
+LOOP AT itab INTO text.
+  WRITE: / text.
+ENDLOOP.

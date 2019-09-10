@@ -1,0 +1,437 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_GUI_CONTROLS_B
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_gui_controls_b.
+
+************************************************************************
+* Report Name  : Z_GUI_CONTROLS_B                                      *
+* Report Title : Klassisches Rahmenprogramm                            *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                             *
+* Create Date  : 01/26/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S. 544               *
+*              : Hilfsprogramm zum Hochladen des Bildes ist            *
+*              : REPORT  z_picture_save.               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.26.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+*&---------------------------------------------------------------------*
+*&      Module  cancel  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE cancel INPUT.
+  LEAVE PROGRAM.
+ENDMODULE.                 " cancel  INPUT
+
+*----------------------------------------------------------------------*
+*       CLASS screen_handler DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS screen_handler DEFINITION CREATE PRIVATE.
+  PUBLIC SECTION.
+    CLASS-DATA screen TYPE REF TO screen_handler.
+    CLASS-METHODS create_screen.
+    METHODS constructor.
+  PRIVATE SECTION.
+    DATA:
+          container_html    TYPE REF TO cl_gui_custom_container,
+          container_box     TYPE REF TO cl_gui_dialogbox_container,
+          picture           TYPE REF TO cl_gui_picture,
+          tree              TYPE REF TO cl_gui_simple_tree,
+          html_viewer       TYPE REF TO cl_gui_html_viewer,
+          list_viewer       TYPE REF TO cl_gui_alv_grid.
+    METHODS:  fill_picture,
+              fill_tree,
+              fill_html
+                IMPORTING i_carrid TYPE spfli-carrid,
+              fill_list
+                IMPORTING i_carrid TYPE spfli-carrid
+                          i_connid TYPE spfli-connid,
+              handle_node_double_click
+                FOR EVENT node_double_click
+                      OF cl_gui_simple_tree
+                IMPORTING node_key,
+              close_box
+               FOR EVENT close
+                   OF cl_gui_dialogbox_container.
+
+
+ENDCLASS.                    "screen_handler DEFINITION
+
+
+*----------------------------------------------------------------------*
+*       CLASS screen_handler IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS screen_handler IMPLEMENTATION.
+
+  METHOD create_screen.
+    IF  screen IS INITIAL.
+      CREATE OBJECT screen.
+    ENDIF.
+  ENDMETHOD.                    "create_screen
+  METHOD constructor.
+    DATA: l_event_tab         TYPE cntl_simple_events,
+          l_event             LIKE LINE OF l_event_tab,
+          l_docking           TYPE REF TO cl_gui_docking_container,
+          l_splitter          TYPE REF TO cl_gui_splitter_container,
+          l_container_top     TYPE REF TO cl_gui_container,
+          l_container_bottom  TYPE REF TO cl_gui_container.
+
+    CREATE OBJECT container_html
+    EXPORTING container_name = 'CUSTOM_CONTROL'.
+
+    CREATE OBJECT l_docking
+    EXPORTING side = cl_gui_docking_container=>dock_at_left
+          extension = 135.
+
+    CREATE OBJECT l_splitter
+    EXPORTING parent  = l_docking
+              rows    = 2
+              columns = 1.
+
+    CALL METHOD
+      l_splitter->set_border
+      EXPORTING
+        border = cl_gui_cfw=>false.
+    CALL METHOD
+      l_splitter->set_row_mode
+      EXPORTING
+        mode = l_splitter->mode_absolute.
+
+    CALL METHOD
+      l_splitter->set_row_height
+      EXPORTING
+        id     = 1
+        height = 180.
+
+    l_container_top =
+    l_splitter->get_container( row = 1 column = 1 ).
+
+    l_container_bottom =
+    l_splitter->get_container( row = 2 column = 1 ).
+
+    CREATE OBJECT picture
+    EXPORTING parent = l_container_top.
+
+    CREATE OBJECT tree
+    EXPORTING parent = l_container_bottom
+      node_selection_mode =
+      cl_gui_simple_tree=>node_sel_mode_single.
+
+    l_event-eventid =
+    cl_gui_simple_tree=>eventid_node_double_click.
+    l_event-appl_event = ' '.
+    APPEND l_event TO l_event_tab.
+
+    CALL METHOD
+      tree->set_registered_events
+      EXPORTING
+        events = l_event_tab.
+
+    SET HANDLER me->handle_node_double_click FOR tree.
+
+    me->fill_picture( ).
+    me->fill_tree( ).
+  ENDMETHOD.                    "constructor
+
+  METHOD fill_picture.
+        TYPES t_line(256) TYPE x.
+    DATA l_pict_tab TYPE TABLE OF t_line.
+    DATA l_url(255) TYPE c.
+
+    IMPORT pict_tab = l_pict_tab
+    FROM DATABASE zabtree(pi)
+          ID 'FLIGHTS'.
+
+    CALL FUNCTION 'DP_CREATE_URL'
+      EXPORTING
+        type    = 'IMAGE'
+        subtype = 'GIF'
+      TABLES
+        data    = l_pict_tab
+      CHANGING
+        url     = l_url.
+
+    CALL METHOD picture->load_picture_from_url
+      EXPORTING
+        url = l_url.
+
+    CALL METHOD picture->set_display_mode
+      EXPORTING
+        display_mode = picture->display_mode_stretch.
+
+  ENDMETHOD.                    "fill_picture
+
+
+  METHOD fill_tree.
+    DATA: l_node_table TYPE TABLE OF abdemonode,
+          l_node TYPE abdemonode,
+          l_spfli TYPE spfli,
+          l_spfli_tab TYPE SORTED TABLE OF spfli
+          WITH UNIQUE KEY carrid connid.
+
+    SELECT carrid connid
+      FROM spfli
+      INTO CORRESPONDING FIELDS OF TABLE l_spfli_tab.
+
+    l_node-hidden   = ' '.
+    l_node-disabled = ' '.
+    l_node-isfolder = 'X'.
+    l_node-expander = ' '.
+
+
+    LOOP AT l_spfli_tab INTO l_spfli.
+      AT NEW carrid.
+        l_node-node_key = l_spfli-carrid.
+        CLEAR l_node-relatkey.
+        CLEAR l_node-relatship.
+        l_node-text = l_spfli-carrid.
+
+        l_node-n_image = ' '.
+        l_node-exp_image = ' '.
+        APPEND l_node TO l_node_table.
+      ENDAT.
+
+      AT NEW connid.
+        CONCATENATE l_spfli-carrid l_spfli-connid
+        INTO l_node-node_key.
+        l_node-relatkey = l_spfli-carrid.
+        l_node-relatship = cl_gui_simple_tree=>relat_last_child.
+        l_node-text = l_spfli-connid.
+        l_node-n_image = '@AV@'.
+        l_node-exp_image = '@AV@'.
+      ENDAT.
+      APPEND l_node TO l_node_table.
+    ENDLOOP.
+    CALL METHOD tree->add_nodes
+      EXPORTING
+        table_structure_name = 'ABDEMONODE'
+        node_table           = l_node_table.
+  ENDMETHOD.                    "fill_tree
+
+
+  METHOD handle_node_double_click.
+
+    DATA: l_carrid TYPE spfli-carrid,
+          l_connid TYPE spfli-connid.
+
+    l_carrid = node_key(2).
+    l_connid = node_key+2(4).
+    IF l_connid IS INITIAL.
+      CALL METHOD fill_html
+        EXPORTING
+          i_carrid = l_carrid.
+    ELSE.
+      CALL METHOD fill_list
+        EXPORTING
+          i_carrid = l_carrid
+          i_connid = l_connid.
+    ENDIF.
+    CALL METHOD cl_gui_cfw=>flush.
+  ENDMETHOD.                    "handle_node_double_click
+
+  METHOD fill_html.
+    DATA l_url TYPE scarr-url.
+
+    IF html_viewer IS INITIAL.
+      CREATE OBJECT html_viewer
+      EXPORTING parent = container_html.
+    ENDIF.
+
+    SELECT SINGLE url
+      FROM scarr
+      INTO l_url
+      WHERE carrid = i_carrid.
+
+    CALL METHOD html_viewer->show_url
+      EXPORTING
+        url = l_url.
+  ENDMETHOD.                    "fill_html
+
+
+  METHOD fill_list.
+    DATA: l_flight_tab TYPE TABLE OF demofli,
+        BEGIN OF l_flight_title,
+          carrname TYPE scarr-carrname,
+          cityfrom TYPE spfli-cityfrom,
+          cityto  TYPE spfli-cityto,
+          END OF l_flight_title,
+          l_list_layout TYPE lvc_s_layo.
+
+
+
+    IF container_box IS INITIAL.
+      CREATE OBJECT container_box
+      EXPORTING
+         width    = 250
+         height   = 200
+         top      = 100
+         left     = 400
+         caption  = 'FLIGHT LIST'.
+      SET HANDLER close_box FOR container_box.
+      CREATE OBJECT list_viewer
+          EXPORTING i_parent = container_box.
+    ENDIF.
+
+    SELECT SINGLE c~carrname p~cityfrom p~cityto
+      INTO CORRESPONDING FIELDS OF l_flight_title
+      FROM ( scarr AS c
+      INNER JOIN  spfli AS p ON c~carrid = p~carrid )
+      WHERE p~carrid = i_carrid AND
+            p~connid = i_connid.
+
+    SELECT fldate seatsmax seatsocc
+      INTO CORRESPONDING FIELDS OF TABLE l_flight_tab
+      FROM sflight
+      WHERE carrid = i_carrid AND connid = i_connid
+      ORDER BY fldate.
+
+    CONCATENATE l_flight_title-carrname
+                i_connid
+                l_flight_title-cityfrom
+                l_flight_title-cityto
+    INTO l_list_layout-grid_title
+    SEPARATED BY space.
+
+    l_list_layout-smalltitle = 'X'.
+    l_list_layout-cwidth_opt = 'X'.
+    l_list_layout-no_toolbar = 'X'.
+
+    CALL METHOD list_viewer->set_table_for_first_display
+      EXPORTING
+                i_structure_name = 'DEMOFLI'
+                is_layout        = l_list_layout
+      CHANGING
+        it_outtab        = l_flight_tab.
+
+  ENDMETHOD.                    "fill_list
+
+
+
+  METHOD close_box.
+
+    CALL METHOD: list_viewer->free,
+                  container_box->free.
+
+    CLEAR: list_viewer,
+           container_box.
+    CALL METHOD cl_gui_cfw=>flush.
+  ENDMETHOD.                    "close_box
+
+
+
+ENDCLASS.                    "screen_handler IMPLEMENTATION
+
+
+* Event Block LOAD_OF_PROGRAM
+
+LOAD-OF-PROGRAM.
+  CALL  SCREEN 100.
+
+
+
+
+*&---------------------------------------------------------------------*
+*&      Module  STATUS_0100  OUTPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+  SET PF-STATUS 'SCREEN_100'.
+  SET TITLEBAR 'TIT_100'.
+  CALL METHOD screen_handler=>create_screen.
+ENDMODULE.                 " STATUS_0100  OUTPUT
+
+
+
+*ABAP ObJEcTs S. 2. Aufl 544
+PROCESS BEFORE OUTPUT.
+ MODULE STATUS_0100.
+*
+PROCESS AFTER INPUT.
+module cancel at EXIT-COMMAND.
+* MODULE USER_COMMAND_0100.
+
+
+
+
+*&---------------------------------------------------------------------*
+*& Report  Z_PICTURE_SAVE
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_picture_save.
+
+************************************************************************
+* Report Name  : Z_PICTURE_SAVE                                 *
+* Report Title : Hilfsprogramm zum Speichern von Bildern              *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/26/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2.Aufl. S. 550                *
+*              : Hilfsprogramm Bild Upload               *
+*              : Geändertes Programm                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.26.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+
+
+
+
+
+*PARAMETERS file TYPE rlgrap-filename DEFAULT 'C:\TEMP\PLANE.GIF'.
+*PARAMETERS id(20) TYPE x.
+
+*TYPES pict_line(256) TYPE c.
+*DATA pict_tab TYPE TABLE OF pict_line.
+
+*CALL FUNCTION 'WS_UPLOAD'
+* EXPORTING
+*    filename = file
+*    filetype = 'BIN'
+*  TABLES
+*   data_tab = pict_tab.
+
+*EXPORT pict_tab = pict_tab TO DATABASE ZABTREE(pi) ID  'FLIGHTS'.
+
+TYPES PICT_LINE(256) TYPE X.
+
+DATA: pict_tab TYPE TABLE OF pict_line.
+
+CALL FUNCTION 'GUI_UPLOAD'
+EXPORTING
+filename = 'C:\TEMP\PLANE.GIF' "File path with file name
+filetype = 'BIN'
+
+TABLES
+data_tab = pict_tab.
+EXPORT pict_tab = pict_tab TO DATABASE zabtree(pi) ID 'FLIGHTS'.
+IF sy-subrc = 0.
+WRITE: 'Success'.
+ENDIF.

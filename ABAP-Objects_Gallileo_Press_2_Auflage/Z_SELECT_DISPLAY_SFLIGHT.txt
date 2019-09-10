@@ -1,0 +1,108 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SELECT_DISPLAY_SFLIGHT
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_select_display_sflight.
+
+************************************************************************
+* Report Name  : Z_SELECT_DISPLAY_SFLIGHT                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 99/99/9999 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:99.99.99 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS select_display_sflight DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS class_constructor.
+    METHODS: constructor
+    IMPORTING i_carrid TYPE sflight-carrid
+              i_connid TYPE sflight-connid
+              EXCEPTIONS nothing_found,
+                         display_sflight.
+  PRIVATE SECTION.
+    CLASS-DATA list TYPE REF TO cl_gui_alv_grid.
+    DATA sflight_tab TYPE z_sflight_tab.
+ENDCLASS.                    "SELECT_display_sflight DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS select_display_sflight IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS select_display_sflight IMPLEMENTATION.
+  METHOD class_constructor.
+    CREATE OBJECT list
+    EXPORTING i_parent = cl_gui_container=>screen0.
+  ENDMETHOD.                    "class_constructor
+  METHOD constructor.
+    SELECT *
+      FROM sflight
+      INTO TABLE sflight_tab
+      WHERE carrid = i_carrid AND
+      connid = i_connid.
+    IF sy-subrc = 4.
+      RAISE nothing_found.
+    ENDIF.
+  ENDMETHOD.                    "constructor
+  METHOD display_sflight.
+    CALL METHOD list->set_table_for_first_display
+      EXPORTING
+        i_structure_name = 'SFLIGHT'
+      CHANGING
+        it_outtab        = sflight_tab.
+    CALL SCREEN 100.
+  ENDMETHOD.                    "display_sflight
+ENDCLASS.                    "select_display_sflight IMPLEMENTATION
+
+SELECTION-SCREEN BEGIN OF SCREEN 500.
+PARAMETERS: p_carrid TYPE sflight-carrid,
+            p_connid TYPE sflight-connid.
+SELECTION-SCREEN END OF SCREEN 500.
+
+DATA: BEGIN OF ref_tab_line,
+        carrid  TYPE sflight-carrid,
+        connid  TYPE sflight-connid,
+        oref    TYPE REF TO select_display_sflight,
+      END OF ref_tab_line,
+  ref_tab LIKE SORTED TABLE OF ref_tab_line
+  WITH UNIQUE KEY carrid connid.
+
+      START-OF-SELECTION.
+  DO.
+    CALL SELECTION-SCREEN 500 STARTING AT 10 10.
+    IF sy-subrc <> 0.
+      LEAVE PROGRAM.
+    ENDIF.
+    ref_tab_line-carrid = p_carrid.
+    ref_tab_line-connid = p_connid.
+    READ TABLE ref_tab INTO ref_tab_line
+                FROM ref_tab_line.
+    IF sy-subrc <> 0.
+      CREATE OBJECT ref_tab_line-oref
+      EXPORTING i_carrid = p_carrid
+                i_connid = p_connid
+                EXCEPTIONS nothing_found = 4.
+      IF sy-subrc = 4.
+        MESSAGE i888(sabapdocu) WITH 'No data'.
+        CONTINUE.
+      ELSE.
+        INSERT ref_tab_line INTO TABLE ref_tab.
+      ENDIF.
+    ENDIF.
+    CALL METHOD ref_tab_line-oref->display_sflight.
+  ENDDO.

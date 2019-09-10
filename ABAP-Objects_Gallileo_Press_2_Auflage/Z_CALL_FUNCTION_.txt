@@ -1,0 +1,96 @@
+FUNCTION z_select_sflight.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(I_CARRID) TYPE  SFLIGHT-CARRID
+*"     REFERENCE(I_CONNID) TYPE  SFLIGHT-CONNID
+*"  EXPORTING
+*"     REFERENCE(E_SFLIGHT_TAB) TYPE  Z_SFLIGHT_TAB
+*"----------------------------------------------------------------------
+*ABAP ObJEcTs 2. Aufl. S. 265
+
+  SELECT *
+    FROM sflight
+    INTO TABLE e_sflight_tab
+    WHERE carrid = i_carrid AND
+    connid = i_connid.
+
+  IF sy-subrc = 4.
+    RAISE nothing_found.
+  ENDIF.
+
+ENDFUNCTION.
+
+
+FUNCTION z_write_sflight.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(I_SFLIGHT_TAB) TYPE  Z_SFLIGHT_TAB
+*"----------------------------------------------------------------------
+*ABAP ObJEcTs 2. Aufl. S. 267
+
+  FIELD-SYMBOLS <fs_sflight> LIKE LINE OF i_sflight_tab.
+
+  LOOP AT i_sflight_tab ASSIGNING <fs_sflight>.
+    WRITE: / <fs_sflight>-carrid,
+             <fs_sflight>-connid,
+             <fs_sflight>-fldate.
+  ENDLOOP.
+
+
+ENDFUNCTION.
+
+
+
+*&---------------------------------------------------------------------*
+*& Report  Z_CALL_FUNCTION_B
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_call_function_b.
+
+************************************************************************
+* Report Name  : Z_CALL_FUNCTION_B                                                 *
+* Report Title : Aufrufen von Funktionsbausteinen      *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/24/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.269               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS: p_carrid TYPE spfli-carrid,
+            p_connid TYPE sflight-connid.
+DATA sflight_tab TYPE z_sflight_tab.
+
+START-OF-SELECTION.
+  CALL FUNCTION 'Z_SELECT_SFLIGHT'
+    EXPORTING
+      i_carrid      = p_carrid
+      i_connid      = p_connid
+    IMPORTING
+      e_sflight_tab = sflight_tab
+    EXCEPTIONS
+      nothing_found = 1
+      OTHERS        = 2.
+
+  IF sy-subrc = 0.
+    CALL FUNCTION 'Z_WRITE_SFLIGHT'
+      EXPORTING
+        i_sflight_tab = sflight_tab.
+
+  ELSE.
+    WRITE 'No data'.
+  ENDIF.

@@ -1,0 +1,38 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_STRING_COMPARISON
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_string_comparison.
+
+************************************************************************
+* Report Name  : Z_STRING_COMPARISON                                                 *
+* Report Title : Zeichenkettenvergleich                 *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/24/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.193               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+DATA: s1 TYPE string,
+      s2 TYPE string.
+
+s1 = 'ABAP Objects'.
+s2 = 'Objects'.
+
+IF s1 CS s2..
+  WRITE: / s2, 'ist ab Position', sy-fdpos,
+  'in', s1, 'enthalten'.
+ENDIF.

@@ -1,0 +1,39 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SELECT_SINGLE_ALL
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_select_single_all.
+
+************************************************************************
+* Report Name  : Z_SELECT_SINGLE_ALL                                   *
+* Report Title : Lesen aller Spalten einer Zeile in einer Structur     *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/27/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects 2. Aufl. S. 566                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.27.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+PARAMETERS: p_carrid TYPE spfli-carrid,
+            p_connid TYPE spfli-connid.
+
+DATA wa_spfli TYPE spfli.
+
+SELECT SINGLE *
+  FROM spfli
+  INTO wa_spfli
+  WHERE carrid = p_carrid AND
+        connid = p_connid.

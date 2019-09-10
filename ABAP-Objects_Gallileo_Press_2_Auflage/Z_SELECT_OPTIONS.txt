@@ -1,0 +1,41 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SELECT_OPTIONS
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  Z_SELECT_OPTIONS.
+
+************************************************************************
+* Report Name  : Z_SELECT_OPTIONS                                                 *
+* Report Title : Definition einer komplexen Selektion                                       *
+* Report Title : Abfangbarer Laufzeitfehler                *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/26/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.467            *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.26.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+data wa_spfli type spfli.
+
+SELECT-OPTIONS s_carrid for wa_spfli-carrid.
+
+* runtime Events
+START-OF-SELECTION.
+SELECT *
+  from spfli
+  into wa_spfli
+  where carrid in s_carrid.
+
+  ENDSELECT.
