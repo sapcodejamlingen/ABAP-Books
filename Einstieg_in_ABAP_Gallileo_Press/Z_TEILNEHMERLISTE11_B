@@ -1,0 +1,185 @@
+REPORT  z_teilnehmerliste11_B..
+*Einstieg in ABAP S. 305
+
+*Tabellen deklarieren
+TABLES zteilnehmer2.
+
+*Zeichnketten deklarieren
+DATA: jahr004 TYPE i,
+      jahr100 TYPE i,
+      jahr400 TYPE i,falschtnr LIKE zteilnehmer2-tnummer,
+      tnr LIKE zteilnehmer2-tnummer.
+
+* Selektionsbildschirm gestalten
+
+PARAMETERS: sek      TYPE i DEFAULT 10 OBLIGATORY,
+            initialw RADIOBUTTON GROUP radl,
+            non_sap  RADIOBUTTON GROUP radl,
+            schaltja RADIOBUTTON GROUP radl.
+
+*Block auf Selektionsbildschirm mit Rahmen und Rahmentext
+SELECTION-SCREEN BEGIN OF BLOCK teilnehmer WITH
+                  FRAME TITLE text-001. "Teilnehmerdaten
+
+
+*Zeile im Block mit freiuem Text
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 24(69) text-005.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN SKIP.
+
+*Zeile im Block mit freiem Text und zwei Parametern.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT (20) text-002 FOR FIELD geschlec.
+SELECTION-SCREEN POSITION 24.
+PARAMETERS geschlec LIKE zteilnehmer2-tgeschlecht OBLIGATORY
+                    VALUE CHECK.
+SELECTION-SCREEN COMMENT 32(16) text-004.
+PARAMETERS kursti LIKE zteilnehmer2-zzkurstitel DEFAULT
+                    'SAP-Grundlagen' LOWER CASE.
+SELECTION-SCREEN END OF LINE.
+
+*Zeile im Block mit freiem Text und Selektionstabelle.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT (16) text-003.
+SELECTION-SCREEN POSITION 21.
+
+SELECT-OPTIONS gebdat FOR zteilnehmer2-tgeburtsdatum NO-EXTENSION.
+SELECTION-SCREEN END OF LINE.
+
+*Zeile im Block mit freiem Text und Parameter
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT (47) text-006.
+PARAMETERS vollstli AS CHECKBOX.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN END OF BLOCK teilnehmer.
+
+* Parameter nach dem Block
+PARAMETERS neutnr LIKE zteilnehmer2-tnummer.
+
+INITIALIZATION.
+
+*Vorschlagswert für neue Teilnehmernummer ermitteln und
+*in Parameter übertragen
+
+  SELECT * FROM zteilnehmer2.
+    tnr = zteilnehmer2-tnummer.
+  ENDSELECT.
+  tnr = tnr + 1.
+  neutnr = tnr.
+
+AT SELECTION-SCREEN ON sek.
+* Eingabeprüfung für Startwert sekunden
+  IF sek < 5 OR sek > 20.
+    MESSAGE e001(zabap).
+  ENDIF.
+
+AT SELECTION-SCREEN ON neutnr.
+*Eingabeprüfung für neue Teilnehmernummer
+  IF neutnr < tnr.
+    falschtnr = neutnr.
+    neutnr = tnr.
+    MESSAGE e002(zabap) WITH falschtnr.
+  ENDIF.
+
+
+START-OF-SELECTION.
+
+
+* rückwärts laufende sekundenzähler
+  WHILE sek > 0.
+    WRITE: sek.
+    sek = sek - 1.
+  ENDWHILE.
+  WRITE: / sek.
+  SKIP.
+
+
+*Checkbox prüfen
+  IF NOT vollstli IS INITIAL.
+* vollständigen Tabellinhalt ausgeben
+    SELECT * FROM zteilnehmer2.
+      WRITE: / zteilnehmer2-tnummer,
+               zteilnehmer2-tname,
+               zteilnehmer2-tgeburtsdatum,
+               zteilnehmer2-tgeschlecht,
+               zteilnehmer2-tkurspreis,
+               zteilnehmer2-twaehrung,
+               zteilnehmer2-zzkfztyp,
+               zteilnehmer2-zzkurstitel.
+    ENDSELECT.
+    SKIP.
+  ENDIF.
+
+
+*Radiobutton initialw prüfen
+  IF NOT initialw IS INITIAL.
+*Schleife über alle Sätze der Tabelle, Feld auf initialwert prüfen.
+    SELECT * FROM zteilnehmer2.
+      IF zteilnehmer2-tgeburtsdatum IS INITIAL.
+        WRITE: / 'TNr:', zteilnehmer2-tnummer,
+                 zteilnehmer2-tname,
+                 'fehlt, Geburtsdatum, bitte nachtragen'.
+      ENDIF.
+    ENDSELECT.
+    SKIP.
+  ENDIF.
+
+
+
+*Schleife über alle Sätze der Tabelle, Selektionstabelle prüfen
+  SELECT * FROM zteilnehmer2.
+    IF zteilnehmer2-tgeburtsdatum IN gebdat.
+      WRITE: / 'TNr:', zteilnehmer2-tnummer,
+               zteilnehmer2-tname,
+               zteilnehmer2-tgeburtsdatum.
+    ENDIF.
+  ENDSELECT.
+  SKIP.
+
+*Schleife über alle Sätze der Tabelle, Logisches Und prüfen
+  SELECT * FROM zteilnehmer2.
+    IF zteilnehmer2-tgeschlecht = geschlec AND
+      zteilnehmer2-zzkurstitel = kursti.
+      WRITE: / zteilnehmer2-tnummer,
+             zteilnehmer2-tname,
+             zteilnehmer2-tgeschlecht,
+             zteilnehmer2-zzkurstitel.
+    ENDIF.
+  ENDSELECT.
+  SKIP.
+
+
+*Radiobutton NonSap prüfen
+  IF NOT non_sap IS INITIAL.
+*Schleife über alle Sätze der Tabelle logisches not prüfen
+
+    SELECT * FROM zteilnehmer2.
+      IF NOT zteilnehmer2-zzkurstitel(3) = 'SAP'.
+        WRITE: / 'TNr.', zteilnehmer2-tnummer,
+               zteilnehmer2-zzkurstitel.
+      ENDIF.
+    ENDSELECT.
+    SKIP.
+  ENDIF.
+
+
+
+*Radiobutton Schaltja prüfen
+  IF NOT schaltja IS INITIAL.
+*Schleife über alle Sätze der Tabelle, Schaltjahr prüfen
+    SELECT * FROM zteilnehmer2.
+      jahr004 = zteilnehmer2-tgeburtsdatum(4) MOD 4.
+      jahr100 = zteilnehmer2-tgeburtsdatum(4) MOD 100.
+      jahr400 = zteilnehmer2-tgeburtsdatum(4) MOD 400.
+      IF NOT zteilnehmer2-tgeburtsdatum IS INITIAL.
+        IF jahr400 = 0 OR jahr004 = 0 AND
+           NOT jahr100 = 0.
+          WRITE: zteilnehmer2-tnummer,
+                 zteilnehmer2-zzkurstitel,
+                 zteilnehmer2-tgeburtsdatum(4).
+        ENDIF.
+      ENDIF.
+    ENDSELECT.
+    SKIP.
+  ENDIF.
