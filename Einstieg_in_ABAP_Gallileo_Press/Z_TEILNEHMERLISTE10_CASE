@@ -1,0 +1,69 @@
+REPORT  z_teilnehmerliste10_case.
+*Einstieg in ABAP S. 248
+
+*Tabellen deklarieren
+TABLES zteilnehmer2.
+
+*Zeichnketten deklarieren
+DATA: tz_pc_grundlagen    TYPE i,
+      tz_netzwerktechnik  TYPE i,
+      tz_sap_grundlagen   TYPE i,
+      tz_sonst            TYPE i,
+      tz_total            TYPE i.
+
+* vollständigen Tabellinhalt ausgeben
+SELECT * FROM zteilnehmer2.
+  WRITE: / zteilnehmer2-tnummer,
+           zteilnehmer2-tname,
+           zteilnehmer2-tgeburtsdatum,
+           zteilnehmer2-tgeschlecht,
+           zteilnehmer2-tkurspreis,
+           zteilnehmer2-twaehrung,
+           zteilnehmer2-zzkfztyp,
+           zteilnehmer2-zzkurstitel.
+ENDSELECT.
+
+*SKIP.
+
+*Tabelleninhalt selektieren mit bedingung
+SELECT * FROM zteilnehmer2.
+  CASE zteilnehmer2-zzkurstitel.
+    WHEN 'Netzwerktechnik'.
+      tz_netzwerktechnik = tz_netzwerktechnik + 1.
+    WHEN 'PC-Grundlagen'.
+      tz_pc_grundlagen = tz_pc_grundlagen + 1.
+    WHEN OTHERS.
+      tz_sonst = tz_sonst + 1.
+  ENDCASE.
+ENDSELECT.
+SKIP.
+
+WRITE: / 'Verteilung der Personen auf die Kurse:',
+          tz_pc_grundlagen , 'PC-Grundlagen',
+          tz_netzwerktechnik, 'Netzwerktechnik',
+          tz_sap_grundlagen, 'SAP-Grundlagen',
+          tz_sonst,  'sonstige Kurse'.
+
+
+
+*wieder benötigte Zähler initialisieren
+CLEAR: tz_netzwerktechnik.
+
+* Sy-subrc der SELECT Anweisung mit case auswerten.
+SELECT * FROM zteilnehmer2 WHERE zzkurstitel = 'Netzwerktechnik'.
+  tz_netzwerktechnik = tz_netzwerktechnik + 1.
+ENDSELECT.
+SKIP.
+
+
+CASE sy-subrc.
+  WHEN 0.
+* ok Fall
+    WRITE: / tz_netzwerktechnik,
+          'Teilnehmer für den Kurs Netzwerktechnik gefunden'.
+  WHEN 4.
+* Fehlerfall
+    WRITE: / 'keine Teilnehmer für den Kurs Netzwerktechnik gefunden'.
+  WHEN OTHERS.
+*Kann nicht sein, anderer sy-subrc von der Anweisung nicht geliefert
+ENDCASE.
