@@ -1,0 +1,185 @@
+REPORT  z_teilnehmerliste08.
+*Einstig in ABAP S.180
+
+
+* Tabellen deklarieren
+TABLES zteilnehmer2.
+
+*Zeichenkette deklarieren
+DATA: aktuelle_uhrzeit  LIKE sy-uzeit,
+      alter_dec4        TYPE p DECIMALS 4,
+      alter_integer     TYPE i,
+      faelligkeitsdatum LIKE sy-datum,
+      geburtsdatum      LIKE sy-datum,
+      jahresanfang      LIKE sy-datum,
+      jahresende        LIKE sy-datum,
+      mitternacht       LIKE sy-uzeit,
+      mwst_betrag       LIKE zteilnehmer2-tkurspreis,
+      mwst_satz         TYPE p DECIMALS 2,
+      monatsanfang      LIKE sy-datum,
+      monatsende        LIKE sy-datum,
+      pause             TYPE p DECIMALS 2,
+      rechnungsbetrag   LIKE zteilnehmer2-tkurspreis,
+      rechnungsdatum    LIKE sy-datum,
+      restminuten       TYPE i,
+      restsekunden      TYPE i,
+      reststunden       TYPE i,
+      restzeit          TYPE p DECIMALS 4,
+      schichtende       LIKE sy-uzeit,
+      tage_vergangen    TYPE i,
+      tage_verbleibend  TYPE i,
+      tagesdatum        LIKE sy-datum,
+      unterrichtsbeginn LIKE sy-uzeit,
+      unterrichtsende   LIKE sy-uzeit,
+      unterrichtszeit   TYPE p DECIMALS 2,
+      zahlungsziel      TYPE i.
+
+*Feldwerte zuweisen
+rechnungsdatum    = sy-datum.
+rechnungsdatum    = '20040205'.
+unterrichtsbeginn = sy-uzeit.
+unterrichtsbeginn = '081500'.
+SKIP.
+
+* Fälligkeitsdatum einer Rechnung ermitteln
+rechnungsdatum    = sy-datum.
+zahlungsziel      = 30.
+faelligkeitsdatum = rechnungsdatum + zahlungsziel.
+WRITE: / 'Rechnungsdatum',        30 rechnungsdatum,
+       / 'Zahlungsziel in Tagen', 30 zahlungsziel,
+       / 'Fälligkeitsdatum',      30 faelligkeitsdatum.
+SKIP.
+
+*Den ersten Tag des laufenden Monats bestimmen
+monatsanfang = sy-datum.
+monatsanfang+6(2) = '01'.
+WRITE: / 'Monatsanfang des laufenden Monats ist', monatsanfang.
+
+* Erster Tag des folgenden Monats bestimmen
+monatsanfang      = sy-datum.
+monatsanfang+6(2) = '01'.
+monatsanfang      = monatsanfang + 35.
+monatsanfang+6(2) = '01'.
+WRITE: / 'Monatsanfang des folgenden Monats ist', monatsanfang.
+
+* Den letzten Tag des vormonats bestimmen
+monatsanfang      = sy-datum.
+monatsanfang+6(2) = '01'.
+monatsende        = monatsanfang - 1.
+WRITE: / 'Monatsende des vormonats Monats ist', monatsende.
+
+*Letzter Tag des laufenden Monats bestimmen
+monatsanfang      = sy-datum.
+monatsanfang+6(2) = '01'.
+monatsanfang      = monatsanfang + 35.
+monatsanfang+6(2) = '01'.
+monatsende        = monatsanfang - 1.
+WRITE: / 'Monatsende des laufenden Monats ist', monatsende.
+SKIP.
+
+*Vergangene und verbleibende Tage des Jahres bestimmen.
+tagesdatum        = sy-datum.
+jahresanfang      = sy-datum.
+jahresende        = sy-datum.
+jahresanfang+4(4) = '0101'.
+jahresende+4(4)   = '1231'.
+tage_vergangen    = tagesdatum - jahresanfang.
+tage_verbleibend  = jahresende - tagesdatum.
+
+WRITE: / 'Jahresanfang', jahresanfang,
+         'Jahresende', jahresende,
+         'heutiges Datum', tagesdatum,
+       / 'vergangene Tage', tage_vergangen,
+         'verbleibende Tage', tage_verbleibend.
+SKIP.
+
+* Alter einer Person bestimmen
+tagesdatum        = sy-datum.
+geburtsdatum      = '19760224'.
+alter_integer     = tagesdatum - geburtsdatum.
+WRITE: / 'Alter ganzzahlig in Tagen',
+              46 alter_integer.
+alter_integer     = alter_integer / 365.
+WRITE: / 'Alter ganzzahlig in kfm. gerundet',
+              46 alter_integer.
+alter_dec4        = ( tagesdatum - geburtsdatum ) / 365.
+WRITE: / 'Alter mit 4 Nachkommastellen in Jahren.',
+              40 alter_dec4.
+alter_dec4        = ( tagesdatum - geburtsdatum ) DIV 365.
+WRITE: / 'Alter ganzzahlige Division.',
+              40 alter_dec4.
+alter_dec4        = ( tagesdatum - geburtsdatum ) MOD 365.
+WRITE: / 'Alter ganzzahlige Division Resttage.',
+              40 alter_dec4.
+SKIP.
+
+*Unterrichtsdauer inkl. Pausen bestimmen
+unterrichtsbeginn = '081500'.
+unterrichtsende = '180000'.
+unterrichtszeit = unterrichtsende - unterrichtsbeginn.
+WRITE: / 'Unterichtszeit in Sekunden',
+40 unterrichtszeit.
+unterrichtszeit = ( unterrichtsende - unterrichtsbeginn ) / 60.
+WRITE: / 'Unterrichtszeit in Minuten', 40 unterrichtszeit.
+unterrichtszeit = ( unterrichtsende - unterrichtsbeginn ) / 3600.
+WRITE: / 'Unterrichtszeit in Stunden',
+40 unterrichtszeit.
+
+* Unterrichtsdauer ohne Pausen bestimmen
+pause = '0.5'.
+unterrichtszeit = ( unterrichtsende - unterrichtsbeginn ) / 3600 .
+unterrichtszeit = unterrichtszeit - pause.
+WRITE : / 'Pause in Stunden', 40 pause.
+WRITE: / 'Unterrichtszeit ohne Pause in Stunden', 40 unterrichtszeit.
+SKIP.
+
+
+*Zeit von jetzt bis Mitternacht berechnen
+aktuelle_uhrzeit = sy-uzeit.
+WRITE: / 'Aktuelle Uhrzeit', 40 aktuelle_uhrzeit.
+mitternacht = '240000'.
+restzeit = mitternacht - aktuelle_uhrzeit.
+WRITE: / 'Restzeit bis Mitternacht in Sekunden.',
+      40 restzeit.
+reststunden = ( mitternacht - aktuelle_uhrzeit ) DIV 3600.
+WRITE: / 'Reststunden bis Mitternacht', 40 reststunden.
+restminuten = ( ( mitternacht - aktuelle_uhrzeit ) MOD 3600 ) DIV 60.
+restsekunden = ( mitternacht - aktuelle_uhrzeit ) MOD 60.
+WRITE: / 'Restzeit bis Mitternacht:',
+      reststunden, 'Stunden',
+      restminuten, 'Minuten',
+      restsekunden, 'Sekunden'.
+SKIP.
+
+*Zeit über Mitternacht berechnen
+aktuelle_uhrzeit = sy-uzeit.
+schichtende = '052010'.
+WRITE: / 'Aktuelle Uhrzeit',
+         40 aktuelle_uhrzeit.
+WRITE: / 'Schichtende', 40 schichtende.
+restzeit = ( schichtende - aktuelle_uhrzeit ) MOD 86400.
+WRITE: / 'Restzeit bis Schichtende in Sekunden', 40 restzeit.
+reststunden = restzeit DIV 3600.
+WRITE: / 'reststunden bis Schichtende',
+          40 reststunden.
+restminuten = ( restzeit MOD 3600 ) DIV 60.
+restsekunden = restzeit MOD 60.
+WRITE: / 'Restzeit bis Schichtende:',
+reststunden, 'Stunden',
+restminuten, 'Minuten',
+restsekunden, 'Sekunden'.
+SKIP.
+
+*Rechnen mit Währungsfeldern
+mwst_satz = '0.16'.
+SELECT * FROM zteilnehmer2.
+  WRITE: / zteilnehmer2-tname,
+           zteilnehmer2-tkurspreis,
+           zteilnehmer2-twaehrung.
+           mwst_betrag = mwst_satz * zteilnehmer2-tkurspreis.
+           rechnungsbetrag = mwst_betrag + zteilnehmer2-tkurspreis.
+
+  WRITE: mwst_betrag, zteilnehmer2-twaehrung,
+         rechnungsbetrag,
+         zteilnehmer2-twaehrung.
+ENDSELECT.
