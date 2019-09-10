@@ -1,0 +1,797 @@
+*******************************************************************
+*   System-defined Include-files.                                 *
+*******************************************************************
+  INCLUDE LZPTB00_OBJ_BTATOP.                " Global Data
+  INCLUDE LZPTB00_OBJ_BTAUXX.                " Function Modules
+
+*******************************************************************
+*   User-defined Include-files (if necessary).                    *
+*******************************************************************
+* INCLUDE LZPTB00_OBJ_BTAF...                " Subprograms
+* INCLUDE LZPTB00_OBJ_BTAO...                " PBO-Modules
+* INCLUDE LZPTB00_OBJ_BTAI...                " PAI-Modules
+
+*&SPWizard: Include inserted by SP Wizard. DO NOT CHANGE THIS LINE!
+INCLUDE LZPTB00_OBJ_BTAO01 .
+INCLUDE LZPTB00_OBJ_BTAI01 .
+INCLUDE LZPTB00_OBJ_BTAF01 .
+
+
+
+FUNCTION zptb00_obj_bta_edit.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  CHANGING
+*"     REFERENCE(C_STR_BTA) TYPE  ZPTB00_STR_BTA OPTIONAL
+*"----------------------------------------------------------------------
+*ABAP Basics S. 431
+
+  DATA: l_str_item TYPE zptb00_btaitem.
+
+  IF c_str_bta IS INITIAL.
+*Just add one line to the position by default.
+    APPEND l_str_item TO c_str_bta-tab_item.
+  ENDIF.
+*Make manual posting global for dynpro.
+  MOVE-CORRESPONDING c_str_bta TO g_str_bta.
+* Call edit screen
+  CALL SCREEN 0100.
+
+  MOVE-CORRESPONDING g_str_bta TO c_str_bta.
+
+ENDFUNCTION.
+
+
+FUNCTION zptb00_obj_bta_enrich.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  CHANGING
+*"     REFERENCE(C_STR_BTA) TYPE  ZPTB00_STR_BTA
+*"  EXCEPTIONS
+*"      FAILED
+*"----------------------------------------------------------------------
+*ABAP Basics S. 433
+
+  FIELD-SYMBOLS:
+                 <l_str_item> TYPE zptb00_btaitem.
+
+  c_str_bta-client = sy-mandt.
+
+  CALL FUNCTION 'GUID_CREATE'
+   IMPORTING
+*   EV_GUID_16       =
+*   EV_GUID_22       =
+     ev_guid_32       = c_str_bta-id.
+  c_str_bta-booked = '1'.
+
+*enrich items.
+
+  LOOP AT c_str_bta-tab_item ASSIGNING <l_str_item>.
+    <l_str_item>-client = sy-mandt.
+
+    CALL FUNCTION 'GUID_CREATE'
+     IMPORTING
+*   EV_GUID_16       =
+*   EV_GUID_22       =
+       ev_guid_32       = <l_str_item>-id.
+    <l_str_item>-header_id = c_str_bta-id.
+    <l_str_item>-mark = ' '.
+  ENDLOOP.
+
+
+ENDFUNCTION.
+
+
+
+FUNCTION zptb00_obj_bta_load.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(I_BOOKED) TYPE  ZPTB00_DTE_BTA_BOOKED DEFAULT '1'
+*"  EXPORTING
+*"     REFERENCE(E_TAB_BTA) TYPE  ZPTB00_TTY_BTA
+*"----------------------------------------------------------------------
+*ABAP Basics S. 431
+
+  DATA:
+*db
+        l_tab_bta_header TYPE STANDARD TABLE OF zptb00_btaheader,
+        l_tab_bta_item TYPE STANDARD TABLE OF zptb00_btaitem,
+*local
+        l_str_bta TYPE zptb00_str_bta.
+
+  FIELD-SYMBOLS:
+*db
+                 <l_str_bta_header> TYPE zptb00_btaheader,
+                 <l_str_bta_item> TYPE zptb00_btaitem.
+* read the header data
+  SELECT * FROM zptb00_btaheader INTO TABLE
+    l_tab_bta_header
+    WHERE booked = i_booked.
+
+  IF sy-dbcnt = 0.
+    RAISE failed.
+  ENDIF.
+
+*read the item data. APAB statement "For all entries" only works
+* up to ca. 1700 entries so we better loop.
+
+  LOOP AT l_tab_bta_header ASSIGNING <l_str_bta_header>.
+    MOVE-CORRESPONDING <l_str_bta_header> TO l_str_bta.
+    SELECT * FROM zptb00_btaitem INTO TABLE l_tab_bta_item
+      WHERE header_id = <l_str_bta_header>-id.
+    l_str_bta-tab_item = l_tab_bta_item.
+    APPEND l_str_bta TO e_tab_bta.
+  ENDLOOP.
+  IF sy-dbcnt = 0.
+    RAISE failed.
+  ENDIF.
+
+
+ENDFUNCTION.
+
+
+
+FUNCTION zptb00_obj_bta_mark_as_booked.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(I_TAB_BTA) TYPE  ZPTB00_TTY_BTA
+*"  EXCEPTIONS
+*"      FAILED
+*"----------------------------------------------------------------------
+*ABAP Basics S. 435
+
+  FIELD-SYMBOLS:
+                 <l_str_bta> TYPE zptb00_str_bta.
+
+  LOOP AT i_tab_bta ASSIGNING <l_str_bta>.
+    UPDATE zptb00_btaheader SET booked = '2'
+    WHERE id = <l_str_bta>-id.
+  ENDLOOP.
+
+
+
+
+ENDFUNCTION.
+
+
+
+
+FUNCTION zptb00_obj_bta_save.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(I_STR_BTA) TYPE  ZPTB00_STR_BTA OPTIONAL
+*"     REFERENCE(I_TAB_BTA) TYPE  ZPTB00_TTY_BTA OPTIONAL
+*"  EXCEPTIONS
+*"      FAILED
+*"----------------------------------------------------------------------
+*ABAP Basics S. 436
+
+  DATA:
+        l_tab_bta TYPE zptb00_tty_bta,
+        l_str_btaheader TYPE zptb00_btaheader.
+  FIELD-SYMBOLS:
+            <l_str_bta> TYPE zptb00_str_bta.
+  l_tab_bta = i_tab_bta.
+  IF NOT i_str_bta IS INITIAL.
+    APPEND i_str_bta TO l_tab_bta.
+  ENDIF.
+  LOOP AT i_tab_bta ASSIGNING <l_str_bta>.
+
+*        l_tab_btaitem TYPE STANDARD TABLE OF
+*        zptb00_btaitem.
+
+    MOVE-CORRESPONDING <l_str_bta> TO l_str_btaheader.
+    MODIFY zptb00_btaheader FROM l_str_btaheader.
+    IF sy-subrc <> 0.
+      RAISE failed.
+    ENDIF.
+
+    DELETE FROM zptb00_btaitem WHERE header_id =
+    l_str_btaheader-id.
+    MODIFY zptb00_btaitem FROM TABLE <l_str_bta>-tab_item.
+    IF sy-subrc <> 0.
+      RAISE failed.
+    ENDIF.
+
+  ENDLOOP.
+
+ENDFUNCTION.
+
+
+
+FUNCTION-POOL zptb00_obj_bta.               "MESSAGE-ID ..
+
+
+
+DATA: g_str_bta TYPE zptb00_str_bta.
+***&SPWIZARD: DATA DECLARATION FOR TABLECONTROL 'POSITION_TABLE'
+*&SPWIZARD: DEFINITION OF DDIC-TABLE
+TABLES:   ZPTB00_BTAITEM.
+
+*&SPWIZARD: TYPE FOR THE DATA OF TABLECONTROL 'POSITION_TABLE'
+TYPES: BEGIN OF T_POSITION_TABLE,
+         PR_ID LIKE ZPTB00_BTAITEM-PR_ID,
+         PSTYPE LIKE ZPTB00_BTAITEM-PSTYPE,
+         WH_ID LIKE ZPTB00_BTAITEM-WH_ID,
+         AMOUNT LIKE ZPTB00_BTAITEM-AMOUNT,
+         CURRENCY LIKE ZPTB00_BTAITEM-CURRENCY,
+         QUANTITY LIKE ZPTB00_BTAITEM-QUANTITY,
+         UNIT LIKE ZPTB00_BTAITEM-UNIT,
+       END OF T_POSITION_TABLE.
+
+*&SPWIZARD: INTERNAL TABLE FOR TABLECONTROL 'POSITION_TABLE'
+DATA:     G_POSITION_TABLE_ITAB   TYPE T_POSITION_TABLE OCCURS 0,
+          G_POSITION_TABLE_WA     TYPE T_POSITION_TABLE. "work area
+DATA:     G_POSITION_TABLE_COPIED.           "copy flag
+
+*&SPWIZARD: DECLARATION OF TABLECONTROL 'POSITION_TABLE' ITSELF
+CONTROLS: POSITION_TABLE TYPE TABLEVIEW USING SCREEN 0100.
+
+*&SPWIZARD: LINES OF TABLECONTROL 'POSITION_TABLE'
+DATA:     G_POSITION_TABLE_LINES  LIKE SY-LOOPC.
+
+DATA:     OK_CODE LIKE SY-UCOMM.
+
+
+
+*****************************************************************
+*   THIS FILE IS GENERATED BY THE FUNCTION LIBRARY.             *
+*   NEVER CHANGE IT MANUALLY, PLEASE!                           *
+*****************************************************************
+INCLUDE LZPTB00_OBJ_BTAU01.
+                    "ZPTB00_OBJ_BTA_EDIT
+INCLUDE LZPTB00_OBJ_BTAU02.
+                    "ZPTB00_OBJ_BTA_SAVE
+INCLUDE LZPTB00_OBJ_BTAU03.
+                    "ZPTB00_OBJ_BTA_ENRICH
+INCLUDE LZPTB00_OBJ_BTAU04.
+                    "ZPTB00_OBJ_BTA_LOAD
+INCLUDE LZPTB00_OBJ_BTAU05.
+                    "ZPTB00_OBJ_BTA_MARK_AS_BOOKED
+
+
+
+                    *&---------------------------------------------------------------------*
+*&  Include           LZPTB00_OBJ_BTAO01
+*&---------------------------------------------------------------------*
+*ABAP Basics S. 303
+
+*&SPWIZARD: OUTPUT MODULE FOR TC 'POSITION_TABLE'. DO NOT CHANGE THIS LI
+*&SPWIZARD: COPY DDIC-TABLE TO ITAB
+MODULE POSITION_TABLE_INIT OUTPUT.
+  IF G_POSITION_TABLE_COPIED IS INITIAL.
+*&SPWIZARD: COPY DDIC-TABLE 'ZPTB00_BTAITEM'
+*&SPWIZARD: INTO INTERNAL TABLE 'g_POSITION_TABLE_itab'
+    SELECT * FROM ZPTB00_BTAITEM
+       INTO CORRESPONDING FIELDS
+       OF TABLE G_POSITION_TABLE_ITAB.
+    G_POSITION_TABLE_COPIED = 'X'.
+    REFRESH CONTROL 'POSITION_TABLE' FROM SCREEN '0100'.
+  ENDIF.
+ENDMODULE.
+
+*&SPWIZARD: OUTPUT MODULE FOR TC 'POSITION_TABLE'. DO NOT CHANGE THIS LI
+*&SPWIZARD: MOVE ITAB TO DYNPRO
+MODULE POSITION_TABLE_MOVE OUTPUT.
+  MOVE-CORRESPONDING G_POSITION_TABLE_WA TO ZPTB00_BTAITEM.
+ENDMODULE.
+
+*&SPWIZARD: OUTPUT MODULE FOR TC 'POSITION_TABLE'. DO NOT CHANGE THIS LI
+*&SPWIZARD: GET LINES OF TABLECONTROL
+MODULE POSITION_TABLE_GET_LINES OUTPUT.
+  G_POSITION_TABLE_LINES = SY-LOOPC.
+ENDMODULE.
+
+*&---------------------------------------------------------------------*
+*&      Module  STATUS_0100  OUTPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+  DATA: g_header_copied TYPE c.
+
+  SET PF-STATUS 'ZPTB00_OBJ_BTA_STD'.
+  SET TITLEBAR 'ZPTB00_OBJ_BTA_STD'.
+
+
+  IF g_header_copied IS INITIAL.
+* Assign header data to appropriate controls
+    zptb00_str_bta-bp_id  = g_str_bta-bp_id.
+    zptb00_str_bta-bttype = g_str_bta-bttype.
+    zptb00_str_bta-btdate = g_str_bta-btdate.
+    g_header_copied = 'X'.
+  ENDIF.
+
+
+ENDMODULE.                 " STATUS_0100  OUTPUT
+
+
+
+
+*&---------------------------------------------------------------------*
+*&  Include           LZPTB00_OBJ_BTAI01
+*&---------------------------------------------------------------------*
+*ABAP Basics S. 303
+
+*&SPWIZARD: INPUT MODULE FOR TC 'POSITION_TABLE'. DO NOT CHANGE THIS LIN
+*&SPWIZARD: MODIFY TABLE
+MODULE POSITION_TABLE_MODIFY INPUT.
+  MOVE-CORRESPONDING ZPTB00_BTAITEM TO G_POSITION_TABLE_WA.
+  MODIFY G_POSITION_TABLE_ITAB
+    FROM G_POSITION_TABLE_WA
+    INDEX POSITION_TABLE-CURRENT_LINE.
+ENDMODULE.
+
+*&SPWIZARD: INPUT MODULE FOR TC 'POSITION_TABLE'. DO NOT CHANGE THIS LIN
+*&SPWIZARD: PROCESS USER COMMAND
+MODULE POSITION_TABLE_USER_COMMAND INPUT.
+  OK_CODE = SY-UCOMM.
+  PERFORM USER_OK_TC USING    'POSITION_TABLE'
+                              'G_POSITION_TABLE_ITAB'
+                              'FLAG'
+                     CHANGING OK_CODE.
+  SY-UCOMM = OK_CODE.
+ENDMODULE.
+
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+  DATA:
+        g_answer   TYPE c,
+        g_index    TYPE sy-tabix,
+        g_str_item TYPE zptb00_btaitem.
+*Save_ok like ok_code
+  FIELD-SYMBOLS:
+*Position checking
+  <position_str> TYPE t_position_table.
+  IF ok_code = 'BACK' OR ok_code = 'QUIT'.
+
+    CALL FUNCTION 'POPUP_TO_CONFIRM_STEP'
+      EXPORTING
+*   DEFAULTOPTION        = 'Y'
+        textline1            = text-003
+*   TEXTLINE2            = ' '
+        titel                = text-001
+*   START_COLUMN         = 25
+*   START_ROW            = 6
+*   CANCEL_DISPLAY       = 'X'
+     IMPORTING
+       answer               = g_answer.
+
+    IF g_answer = 'N'.
+      CLEAR g_str_bta.
+      LEAVE TO SCREEN 0.
+    ELSEIF g_answer = 'J'.
+      ok_code = 'SAVE'.
+    ENDIF.
+  ENDIF.
+  IF ok_code = 'SAVE'.
+* check header data
+    IF zptb00_str_bta-bttype IS INITIAL.
+      MESSAGE i006(zptb00_bta) WITH g_index.
+      RETURN.
+    ENDIF.
+    IF zptb00_str_bta-btdate IS INITIAL.
+      MESSAGE i007(zptb00_bta) WITH g_index.
+      RETURN.
+    ENDIF.
+*Check position data
+    LOOP AT g_position_table_itab ASSIGNING
+      <position_str>.
+      g_index = sy-tabix.
+      IF  <position_str>-pr_id IS INITIAL.
+        MESSAGE i000(zptb00_bta) WITH g_index.
+        RETURN.
+      ENDIF.
+      IF <position_str>-pstype IS INITIAL.
+        MESSAGE i001(zptb00_bta) WITH g_index.
+        RETURN.
+      ENDIF.
+      IF <position_str>-amount IS INITIAL.
+        MESSAGE i002(zptb00_bta) WITH g_index.
+        RETURN.
+      ENDIF.
+      IF <position_str>-currency IS INITIAL.
+        MESSAGE i003(zptb00_bta) WITH g_index.
+        RETURN.
+      ENDIF.
+      IF <position_str>-quantity IS INITIAL.
+        MESSAGE i004(zptb00_bta) WITH g_index.
+        RETURN.
+      ENDIF.
+      IF <position_str>-unit IS INITIAL.
+        MESSAGE i005(zptb00_bta) WITH g_index.
+        RETURN.
+      ENDIF.
+* put header data into communication structure
+* g_str_bta
+      IF g_str_bta-id IS INITIAL.
+        CALL FUNCTION 'GUID_CREATE'
+          IMPORTING
+            ev_guid_32 = g_str_bta-id.
+      ENDIF.
+      g_str_bta-bp_id  = zptb00_btaheader-bp_id.
+      g_str_bta-bttype = zptb00_btaheader-bttype.
+      g_str_bta-btdate = zptb00_btaheader-btdate.
+*Put position data into communication structure
+* g_str_bta
+
+      READ TABLE g_str_bta-tab_item INDEX g_index INTO
+      g_str_item.
+      IF sy-subrc <> 0.
+        CALL FUNCTION 'GUID_CREATE'
+          IMPORTING
+            ev_guid_32 = g_str_bta-id.
+        g_str_item-header_id = g_str_item-id.
+        MOVE-CORRESPONDING <position_str>
+        TO g_str_item.
+        APPEND g_str_item TO g_str_bta-tab_item.
+      ELSE.
+        IF g_str_item IS INITIAL.
+          CALL FUNCTION 'GUID_CREATE'
+            IMPORTING
+              ev_guid_32 = g_str_bta-id.
+          g_str_item-header_id = g_str_bta-id.
+        ENDIF.
+        MOVE-CORRESPONDING <position_str> TO
+        g_str_item.
+        MODIFY g_str_bta-tab_item FROM g_str_item INDEX
+        g_index.
+      ENDIF.
+    ENDLOOP.
+    LEAVE TO SCREEN 0.
+  ENDIF.
+  CLEAR ok_code.
+ENDMODULE.                 " USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*&      Module  user_exit_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_exit_0100 INPUT.
+* has the user typed in any data?...
+  IF sy-datar = 'X'.
+* ...then we have to conf the cancel process
+    CALL FUNCTION 'POPUP_TO_CONFIRM_LOSS_OF_DATA'
+      EXPORTING
+        textline1           = text-002
+*   TEXTLINE2           = ' '
+        titel               = text-001
+*   START_COLUMN        = 25
+*   START_ROW           = 6
+*   DEFAULTOPTION       = 'N'
+     IMPORTING
+       answer              = g_answer
+              .
+  ELSE.
+*Otherwise we need no confirmation
+    g_answer = 'J'.
+  ENDIF.
+  IF g_answer = 'J'.
+    CLEAR g_str_bta.
+    LEAVE TO SCREEN 0.
+  ENDIF.
+
+
+ENDMODULE.                 " user_exit_0100  INPUT
+
+
+
+*&---------------------------------------------------------------------*
+*&  Include           LZPTB00_OBJ_BTAF01
+*&---------------------------------------------------------------------*
+
+*----------------------------------------------------------------------*
+*   INCLUDE TABLECONTROL_FORMS                                         *
+*----------------------------------------------------------------------*
+
+*&---------------------------------------------------------------------*
+*&      Form  USER_OK_TC                                               *
+*&---------------------------------------------------------------------*
+ FORM USER_OK_TC USING    P_TC_NAME TYPE DYNFNAM
+                          P_TABLE_NAME
+                          P_MARK_NAME
+                 CHANGING P_OK      LIKE SY-UCOMM.
+
+*&SPWIZARD: BEGIN OF LOCAL DATA----------------------------------------*
+   DATA: L_OK              TYPE SY-UCOMM,
+         L_OFFSET          TYPE I.
+*&SPWIZARD: END OF LOCAL DATA------------------------------------------*
+
+*&SPWIZARD: Table control specific operations                          *
+*&SPWIZARD: evaluate TC name and operations                            *
+   SEARCH P_OK FOR P_TC_NAME.
+   IF SY-SUBRC <> 0.
+     EXIT.
+   ENDIF.
+   L_OFFSET = STRLEN( P_TC_NAME ) + 1.
+   L_OK = P_OK+L_OFFSET.
+*&SPWIZARD: execute general and TC specific operations                 *
+   CASE L_OK.
+     WHEN 'INSR'.                      "insert row
+       PERFORM FCODE_INSERT_ROW USING    P_TC_NAME
+                                         P_TABLE_NAME.
+       CLEAR P_OK.
+
+     WHEN 'DELE'.                      "delete row
+       PERFORM FCODE_DELETE_ROW USING    P_TC_NAME
+                                         P_TABLE_NAME
+                                         P_MARK_NAME.
+       CLEAR P_OK.
+
+     WHEN 'P--' OR                     "top of list
+          'P-'  OR                     "previous page
+          'P+'  OR                     "next page
+          'P++'.                       "bottom of list
+       PERFORM COMPUTE_SCROLLING_IN_TC USING P_TC_NAME
+                                             L_OK.
+       CLEAR P_OK.
+*     WHEN 'L--'.                       "total left
+*       PERFORM FCODE_TOTAL_LEFT USING P_TC_NAME.
+*
+*     WHEN 'L-'.                        "column left
+*       PERFORM FCODE_COLUMN_LEFT USING P_TC_NAME.
+*
+*     WHEN 'R+'.                        "column right
+*       PERFORM FCODE_COLUMN_RIGHT USING P_TC_NAME.
+*
+*     WHEN 'R++'.                       "total right
+*       PERFORM FCODE_TOTAL_RIGHT USING P_TC_NAME.
+*
+     WHEN 'MARK'.                      "mark all filled lines
+       PERFORM FCODE_TC_MARK_LINES USING P_TC_NAME
+                                         P_TABLE_NAME
+                                         P_MARK_NAME   .
+       CLEAR P_OK.
+
+     WHEN 'DMRK'.                      "demark all filled lines
+       PERFORM FCODE_TC_DEMARK_LINES USING P_TC_NAME
+                                           P_TABLE_NAME
+                                           P_MARK_NAME .
+       CLEAR P_OK.
+
+*     WHEN 'SASCEND'   OR
+*          'SDESCEND'.                  "sort column
+*       PERFORM FCODE_SORT_TC USING P_TC_NAME
+*                                   l_ok.
+
+   ENDCASE.
+
+ ENDFORM.                              " USER_OK_TC
+
+*&---------------------------------------------------------------------*
+*&      Form  FCODE_INSERT_ROW                                         *
+*&---------------------------------------------------------------------*
+ FORM fcode_insert_row
+               USING    P_TC_NAME           TYPE DYNFNAM
+                        P_TABLE_NAME             .
+
+*&SPWIZARD: BEGIN OF LOCAL DATA----------------------------------------*
+   DATA L_LINES_NAME       LIKE FELD-NAME.
+   DATA L_SELLINE          LIKE SY-STEPL.
+   DATA L_LASTLINE         TYPE I.
+   DATA L_LINE             TYPE I.
+   DATA L_TABLE_NAME       LIKE FELD-NAME.
+   FIELD-SYMBOLS <TC>                 TYPE CXTAB_CONTROL.
+   FIELD-SYMBOLS <TABLE>              TYPE STANDARD TABLE.
+   FIELD-SYMBOLS <LINES>              TYPE I.
+*&SPWIZARD: END OF LOCAL DATA------------------------------------------*
+
+   ASSIGN (P_TC_NAME) TO <TC>.
+
+*&SPWIZARD: get the table, which belongs to the tc                     *
+   CONCATENATE P_TABLE_NAME '[]' INTO L_TABLE_NAME. "table body
+   ASSIGN (L_TABLE_NAME) TO <TABLE>.                "not headerline
+
+*&SPWIZARD: get looplines of TableControl                              *
+   CONCATENATE 'G_' P_TC_NAME '_LINES' INTO L_LINES_NAME.
+   ASSIGN (L_LINES_NAME) TO <LINES>.
+
+*&SPWIZARD: get current line                                           *
+   GET CURSOR LINE L_SELLINE.
+   IF SY-SUBRC <> 0.                   " append line to table
+     L_SELLINE = <TC>-LINES + 1.
+*&SPWIZARD: set top line                                               *
+     IF L_SELLINE > <LINES>.
+       <TC>-TOP_LINE = L_SELLINE - <LINES> + 1 .
+     ELSE.
+       <TC>-TOP_LINE = 1.
+     ENDIF.
+   ELSE.                               " insert line into table
+     L_SELLINE = <TC>-TOP_LINE + L_SELLINE - 1.
+     L_LASTLINE = <TC>-TOP_LINE + <LINES> - 1.
+   ENDIF.
+*&SPWIZARD: set new cursor line                                        *
+   L_LINE = L_SELLINE - <TC>-TOP_LINE + 1.
+
+*&SPWIZARD: insert initial line                                        *
+   INSERT INITIAL LINE INTO <TABLE> INDEX L_SELLINE.
+   <TC>-LINES = <TC>-LINES + 1.
+*&SPWIZARD: set cursor                                                 *
+   SET CURSOR LINE L_LINE.
+
+ ENDFORM.                              " FCODE_INSERT_ROW
+
+*&---------------------------------------------------------------------*
+*&      Form  FCODE_DELETE_ROW                                         *
+*&---------------------------------------------------------------------*
+ FORM fcode_delete_row
+               USING    P_TC_NAME           TYPE DYNFNAM
+                        P_TABLE_NAME
+                        P_MARK_NAME   .
+
+*&SPWIZARD: BEGIN OF LOCAL DATA----------------------------------------*
+   DATA L_TABLE_NAME       LIKE FELD-NAME.
+
+   FIELD-SYMBOLS <TC>         TYPE cxtab_control.
+   FIELD-SYMBOLS <TABLE>      TYPE STANDARD TABLE.
+   FIELD-SYMBOLS <WA>.
+   FIELD-SYMBOLS <MARK_FIELD>.
+*&SPWIZARD: END OF LOCAL DATA------------------------------------------*
+
+   ASSIGN (P_TC_NAME) TO <TC>.
+
+*&SPWIZARD: get the table, which belongs to the tc                     *
+   CONCATENATE P_TABLE_NAME '[]' INTO L_TABLE_NAME. "table body
+   ASSIGN (L_TABLE_NAME) TO <TABLE>.                "not headerline
+
+*&SPWIZARD: delete marked lines                                        *
+   DESCRIBE TABLE <TABLE> LINES <TC>-LINES.
+
+   LOOP AT <TABLE> ASSIGNING <WA>.
+
+*&SPWIZARD: access to the component 'FLAG' of the table header         *
+     ASSIGN COMPONENT P_MARK_NAME OF STRUCTURE <WA> TO <MARK_FIELD>.
+
+     IF <MARK_FIELD> = 'X'.
+       DELETE <TABLE> INDEX SYST-TABIX.
+       IF SY-SUBRC = 0.
+         <TC>-LINES = <TC>-LINES - 1.
+       ENDIF.
+     ENDIF.
+   ENDLOOP.
+
+ ENDFORM.                              " FCODE_DELETE_ROW
+
+*&---------------------------------------------------------------------*
+*&      Form  COMPUTE_SCROLLING_IN_TC
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->P_TC_NAME  name of tablecontrol
+*      -->P_OK       ok code
+*----------------------------------------------------------------------*
+ FORM COMPUTE_SCROLLING_IN_TC USING    P_TC_NAME
+                                       P_OK.
+*&SPWIZARD: BEGIN OF LOCAL DATA----------------------------------------*
+   DATA L_TC_NEW_TOP_LINE     TYPE I.
+   DATA L_TC_NAME             LIKE FELD-NAME.
+   DATA L_TC_LINES_NAME       LIKE FELD-NAME.
+   DATA L_TC_FIELD_NAME       LIKE FELD-NAME.
+
+   FIELD-SYMBOLS <TC>         TYPE cxtab_control.
+   FIELD-SYMBOLS <LINES>      TYPE I.
+*&SPWIZARD: END OF LOCAL DATA------------------------------------------*
+
+   ASSIGN (P_TC_NAME) TO <TC>.
+*&SPWIZARD: get looplines of TableControl                              *
+   CONCATENATE 'G_' P_TC_NAME '_LINES' INTO L_TC_LINES_NAME.
+   ASSIGN (L_TC_LINES_NAME) TO <LINES>.
+
+
+*&SPWIZARD: is no line filled?                                         *
+   IF <TC>-LINES = 0.
+*&SPWIZARD: yes, ...                                                   *
+     L_TC_NEW_TOP_LINE = 1.
+   ELSE.
+*&SPWIZARD: no, ...                                                    *
+     CALL FUNCTION 'SCROLLING_IN_TABLE'
+          EXPORTING
+               ENTRY_ACT             = <TC>-TOP_LINE
+               ENTRY_FROM            = 1
+               ENTRY_TO              = <TC>-LINES
+               LAST_PAGE_FULL        = 'X'
+               LOOPS                 = <LINES>
+               OK_CODE               = P_OK
+               OVERLAPPING           = 'X'
+          IMPORTING
+               ENTRY_NEW             = L_TC_NEW_TOP_LINE
+          EXCEPTIONS
+*              NO_ENTRY_OR_PAGE_ACT  = 01
+*              NO_ENTRY_TO           = 02
+*              NO_OK_CODE_OR_PAGE_GO = 03
+               OTHERS                = 0.
+   ENDIF.
+
+*&SPWIZARD: get actual tc and column                                   *
+   GET CURSOR FIELD L_TC_FIELD_NAME
+              AREA  L_TC_NAME.
+
+   IF SYST-SUBRC = 0.
+     IF L_TC_NAME = P_TC_NAME.
+*&SPWIZARD: et actual column                                           *
+       SET CURSOR FIELD L_TC_FIELD_NAME LINE 1.
+     ENDIF.
+   ENDIF.
+
+*&SPWIZARD: set the new top line                                       *
+   <TC>-TOP_LINE = L_TC_NEW_TOP_LINE.
+
+
+ ENDFORM.                              " COMPUTE_SCROLLING_IN_TC
+
+*&---------------------------------------------------------------------*
+*&      Form  FCODE_TC_MARK_LINES
+*&---------------------------------------------------------------------*
+*       marks all TableControl lines
+*----------------------------------------------------------------------*
+*      -->P_TC_NAME  name of tablecontrol
+*----------------------------------------------------------------------*
+FORM FCODE_TC_MARK_LINES USING P_TC_NAME
+                               P_TABLE_NAME
+                               P_MARK_NAME.
+*&SPWIZARD: EGIN OF LOCAL DATA-----------------------------------------*
+  DATA L_TABLE_NAME       LIKE FELD-NAME.
+
+  FIELD-SYMBOLS <TC>         TYPE cxtab_control.
+  FIELD-SYMBOLS <TABLE>      TYPE STANDARD TABLE.
+  FIELD-SYMBOLS <WA>.
+  FIELD-SYMBOLS <MARK_FIELD>.
+*&SPWIZARD: END OF LOCAL DATA------------------------------------------*
+
+  ASSIGN (P_TC_NAME) TO <TC>.
+
+*&SPWIZARD: get the table, which belongs to the tc                     *
+   CONCATENATE P_TABLE_NAME '[]' INTO L_TABLE_NAME. "table body
+   ASSIGN (L_TABLE_NAME) TO <TABLE>.                "not headerline
+
+*&SPWIZARD: mark all filled lines                                      *
+  LOOP AT <TABLE> ASSIGNING <WA>.
+
+*&SPWIZARD: access to the component 'FLAG' of the table header         *
+     ASSIGN COMPONENT P_MARK_NAME OF STRUCTURE <WA> TO <MARK_FIELD>.
+
+     <MARK_FIELD> = 'X'.
+  ENDLOOP.
+ENDFORM.                                          "fcode_tc_mark_lines
+
+*&---------------------------------------------------------------------*
+*&      Form  FCODE_TC_DEMARK_LINES
+*&---------------------------------------------------------------------*
+*       demarks all TableControl lines
+*----------------------------------------------------------------------*
+*      -->P_TC_NAME  name of tablecontrol
+*----------------------------------------------------------------------*
+FORM FCODE_TC_DEMARK_LINES USING P_TC_NAME
+                                 P_TABLE_NAME
+                                 P_MARK_NAME .
+*&SPWIZARD: BEGIN OF LOCAL DATA----------------------------------------*
+  DATA L_TABLE_NAME       LIKE FELD-NAME.
+
+  FIELD-SYMBOLS <TC>         TYPE cxtab_control.
+  FIELD-SYMBOLS <TABLE>      TYPE STANDARD TABLE.
+  FIELD-SYMBOLS <WA>.
+  FIELD-SYMBOLS <MARK_FIELD>.
+*&SPWIZARD: END OF LOCAL DATA------------------------------------------*
+
+  ASSIGN (P_TC_NAME) TO <TC>.
+
+*&SPWIZARD: get the table, which belongs to the tc                     *
+   CONCATENATE P_TABLE_NAME '[]' INTO L_TABLE_NAME. "table body
+   ASSIGN (L_TABLE_NAME) TO <TABLE>.                "not headerline
+
+*&SPWIZARD: demark all filled lines                                    *
+  LOOP AT <TABLE> ASSIGNING <WA>.
+
+*&SPWIZARD: access to the component 'FLAG' of the table header         *
+     ASSIGN COMPONENT P_MARK_NAME OF STRUCTURE <WA> TO <MARK_FIELD>.
+
+     <MARK_FIELD> = SPACE.
+  ENDLOOP.
+ENDFORM.                                          "fcode_tc_mark_lines

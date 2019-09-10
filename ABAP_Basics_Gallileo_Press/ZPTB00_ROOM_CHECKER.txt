@@ -1,0 +1,36 @@
+*&---------------------------------------------------------------------*
+*& Report  ZPTB00_ROOM_CHECKER
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  zptb00_room_checker.
+
+************************************************************************
+* Report Name  : ZPTB00_ROOM_CHECKER                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 99/99/9999 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Basics S. 203                 *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:02.09.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS:
+p_room    TYPE zptb00_room_number OBLIGATORY VALUE CHECK,
+p_chkin   TYPE d OBLIGATORY,
+p_chkout  TYPE d OBLIGATORY.
+
+WRITE: / 'Room Reservation',
+       / 'Check in day:', p_chkin,
+       / 'Check out day: ', p_chkout.

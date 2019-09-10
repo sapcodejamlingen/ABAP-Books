@@ -1,0 +1,97 @@
+*&---------------------------------------------------------------------*
+*& Report  ZPTB00_SALES_ORDER
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  zptb00_sales_order.
+
+************************************************************************
+* Report Name  : ZPTB00_SALES_ORDER                                                 *
+* Report Title : Create outgoing Invoice Sales Order                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 02/08/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Basics S. 127                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:02.09.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS:
+      p_ano(10) TYPE n OBLIGATORY,
+      p_aname(40) TYPE c OBLIGATORY,
+      p_aprice TYPE p DECIMALS 2 OBLIGATORY,
+      p_curr TYPE currencysap OBLIGATORY DEFAULT 'EUR',
+      p_aquant TYPE i OBLIGATORY DEFAULT 1,
+*Tax
+      p_tax TYPE p DECIMALS 2 DEFAULT '19' OBLIGATORY,
+*Terms of Payment
+      p_cash TYPE c RADIOBUTTON GROUP 0001 DEFAULT 'X',
+      p_credit TYPE c RADIOBUTTON GROUP 0001,
+      p_month TYPE i OBLIGATORY DEFAULT '24'.
+
+CONSTANTS:
+*Interest per year in percent
+con_annual_interest TYPE p DECIMALS 2 VALUE '6.75'.   " Jahreszinssatz
+
+DATA:
+*Temporary Data
+      l_net_amount TYPE p DECIMALS 2,         " Netto Betrag
+      l_tax_factor TYPE f,                    " Steuerfaktor
+      l_credit_amount TYPE p DECIMALS 2,      " Kreditbetrag
+      l_monthly_interest_factor TYPE f,       " Monatlicher Zinssatz
+*Result data
+      l_monthly_vat_amount TYPE p DECIMALS 2, " Monatlicher Mehrwertsteuer Betrag
+      l_monthly_amount TYPE p DECIMALS 2,     " Monatliche Menge
+      l_vat_amount TYPE p DECIMALS 2,         " Mehrwertsteuerbetrag
+      l_total_amount LIKE l_net_amount.       " Gesamtmenge
+
+* Temporary calculations
+l_net_amount = p_aprice * p_aquant.
+l_tax_factor = p_tax / 100.
+
+*Write article information to screen
+WRITE: /, / 'Artikel Information',
+          / 'Artikle Number: ', 30 p_ano,
+          / 'Artikle Name: ', 30 p_aname,
+          / 'Artikle net price: ', 30 p_aprice, p_curr,
+          / 'Quantity: ', 30 p_aquant.
+
+WRITE: /, / 'Result: '.
+IF p_cash = 'X'.
+
+* Calculate cash results
+  l_vat_amount = l_net_amount * l_tax_factor.
+  l_total_amount = l_net_amount + l_vat_amount.
+
+*Write results to screen
+  WRITE: / 'Total vat amount: ', 30 l_vat_amount,
+          p_curr,
+         / 'Total amount: ', 30 l_total_amount, p_curr.
+ELSE.
+
+*Calculate interest result
+  l_monthly_interest_factor = con_annual_interest / 100 / 12.
+  l_credit_amount = l_net_amount + l_net_amount *
+                  l_monthly_interest_factor * p_month.
+
+  l_vat_amount = l_credit_amount * l_tax_factor.
+  l_total_amount = l_credit_amount + l_vat_amount.
+  l_monthly_vat_amount = l_vat_amount / p_month.
+  l_monthly_amount = l_total_amount / p_month.
+* Write results to screen
+  WRITE: / 'Month: ', 30 p_month,
+         / 'Monthly vat amount: ', 30 l_monthly_vat_amount, p_curr,
+         / 'Monthlyamount: ', 30 l_monthly_amount, p_curr,
+         / '(VAT amount: ', 30 l_vat_amount, p_curr, ')',
+         / '(Total amount: ', 30 l_total_amount, p_curr, ')'.
+ENDIF.

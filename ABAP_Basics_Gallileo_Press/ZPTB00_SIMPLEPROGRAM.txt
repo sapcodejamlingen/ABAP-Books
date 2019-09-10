@@ -1,0 +1,85 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SIMPLEPROGRAM
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_simpleprogram.
+
+************************************************************************
+* Report Name  : Z_SIMPLEPROGRAM                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 99/99/9999 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:99.99.99 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS lcl_category DEFINITION.
+  PUBLIC SECTION.
+    DATA:
+          title TYPE string.
+    CONSTANTS:
+    vat TYPE f VALUE '0.16'.
+ENDCLASS.                    "lcl_category DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS lcl_product DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS lcl_product DEFINITION.
+  PUBLIC SECTION.
+    METHODS:
+    constructor IMPORTING _category TYPE REF TO
+      lcl_category,
+    get_price RETURNING value(_price) TYPE f,
+    set_price IMPORTING _price TYPE f.
+    DATA:
+          title TYPE string,
+          description TYPE string,
+          category TYPE REF TO lcl_category,
+          unit TYPE string.
+  PROTECTED SECTION.
+    DATA:
+          price TYPE f.
+ENDCLASS.                    "lcl_product DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS lcl_product IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS lcl_product IMPLEMENTATION.
+  METHOD constructor.
+    super->constructor( ).
+    IF _category IS BOUND.
+      category = _category.
+    ELSE.
+      CREATE OBJECT category TYPE lcl_category.
+    ENDIF.
+    price = 10.
+    title = 'Cherry G80 3000'.
+    description = 'With featured computer keybord with click.'.
+    unit = 'Piece'.
+  ENDMETHOD.                    "constructor
+
+  METHOD get_price.
+    _price = price.
+  ENDMETHOD.                    "get_price
+
+  METHOD set_price.
+    price = _price.
+  ENDMETHOD.                    "set_price
+ENDCLASS.                    "lcl_product IMPLEMENTATION

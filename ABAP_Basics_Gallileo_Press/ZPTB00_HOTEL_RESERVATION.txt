@@ -1,0 +1,83 @@
+*&---------------------------------------------------------------------*
+*& Report  ZPTB00_HOTEL_RESERVATION
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  zptb00_hotel_reservation.
+
+************************************************************************
+* Report Name  : ZPTB00_HOTEL_RESERVATION                                                 *
+* Report Title : Hotel Reservierung                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 02/08/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Basics S. 219                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:02.09.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS:
+p_room    TYPE zptb00_room_number OBLIGATORY VALUE CHECK,
+p_chkin   TYPE zptb00_checkin,
+p_chkout  TYPE zptb00_checkout,
+p_name    TYPE zptb00_customer_name,
+* Application menue
+p_add TYPE c RADIOBUTTON GROUP grp1 DEFAULT 'X',
+p_delete TYPE c RADIOBUTTON GROUP grp1,
+p_show TYPE c RADIOBUTTON GROUP grp1.
+DATA:
+* For working with table zptb_hreservat
+l_str_reservation TYPE zptb00_hreservat,
+l_tab_reservation TYPE STANDARD TABLE OF
+          zptb00_hreservat.
+IF p_add = 'X'.
+* Check whether period is free
+  SELECT * FROM zptb00_hreservat INTO TABLE l_tab_reservation
+    WHERE ( room_number = p_room )
+  and ( ( checkin between p_chkin and p_chkout )
+        or ( checkout between p_chkin and p_chkout ) ).
+  IF sy-dbcnt > 0.
+    WRITE: / 'Period already reserved'.
+  ELSE.
+* Make Reservation
+    CALL FUNCTION 'GUID_CREATE'
+     IMPORTING
+*   EV_GUID_16       =
+*   EV_GUID_22       =
+       ev_guid_32       = l_str_reservation-id
+              .
+    l_str_reservation-room_number = p_room.
+    l_str_reservation-checkin = p_chkin.
+    l_str_reservation-checkout = p_chkout.
+    l_str_reservation-customer_name = p_name.
+    INSERT zptb00_hreservat FROM l_str_reservation.
+    WRITE: / 'Reservation made.'.
+  ENDIF.
+ELSEIF p_delete = 'X'.
+* Delete reservation
+  DELETE FROM zptb00_hreservat WHERE room_number = p_room
+  AND checkin = p_chkin AND checkout = p_chkout.
+  WRITE: / 'Reservation deleted'.
+ELSEIF p_show = 'X'.
+*Show Resevations
+  SELECT * FROM ZPTB00_HRESERVAT INTO TABLE l_tab_reservation
+    ORDER BY room_number checkin customer_name.
+  WRITE: / 'Room Reservations'.
+  LOOP AT l_tab_reservation INTO l_str_reservation.
+
+    WRITE: / 'Room:', l_str_reservation-room_number,
+           / 'Check in: ', l_str_reservation-checkin,
+           / 'Check out: ', l_str_reservation-checkout,
+           / 'Customer name: ', l_str_reservation-customer_name.
+  ENDLOOP.
+ENDIF.

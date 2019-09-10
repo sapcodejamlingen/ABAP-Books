@@ -1,0 +1,71 @@
+*&---------------------------------------------------------------------*
+*& Report  ZPTB00_SAVINGS_CALCULATOR
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  zptb00_savings_calculator.
+
+************************************************************************
+* Report Name  : ZPTB00_SAVINGS_CALCULATOR                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 99/99/9999 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:99.99.99 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS:
+* Savings target, monthley savings and yearly interest rate
+p_atargt  TYPE p DECIMALS 2,      "Einsparungsziel
+p_mrate   TYPE p DECIMALS 2,      "Monatlicher Sparbetrag
+p_iperc   TYPE p DECIMALS 2.      "Bankzinssatz
+
+DATA:
+* Monthly interest rate, current savings and month
+l_monthly_interest_rate TYPE f,             "Monatlicher Zinssatz
+l_savings               TYPE p DECIMALS 2,  "Ersparnisse
+l_month                 TYPE i.             "Monat
+
+* Calculate Month and savings
+l_monthly_interest_rate = p_iperc / 12 / 100.
+
+WRITE: / 'Savings target: ',  p_atargt,
+       / 'Monthly Amount: ',  p_mrate,
+       / 'Interest Rate %: ', p_iperc.
+
+WRITE sy-uline AS LINE.
+* while Version
+WHILE l_savings < p_atargt.
+  l_savings = l_savings + ( l_savings *
+                  l_monthly_interest_rate ) + p_mrate.
+  l_month = l_month + 1.
+ENDWHILE.
+WRITE: / 'While Statement',
+       / 'Month needet: ', l_month,
+       / 'Saved amount: ', l_savings.
+* Do Version
+CLEAR l_savings.
+CLEAR l_month.
+DO.
+  l_savings = l_savings + ( l_savings *
+              l_monthly_interest_rate ) + p_mrate.
+  l_month = l_month + 1.
+  IF l_savings >= p_atargt.
+    EXIT.
+  ENDIF.
+ENDDO.
+WRITE: / 'DO Statement',
+       / 'Month needet:', l_month,
+       / 'Saved amount:', l_savings.

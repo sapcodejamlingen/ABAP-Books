@@ -1,0 +1,83 @@
+*&---------------------------------------------------------------------*
+*& Report  ZPTB00_PERFORMANCE_TESTER
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  zptb00_performance_tester.
+
+************************************************************************
+* Report Name  : ZPTB00_PERFORMANCE_TESTER                                                 *
+* Report Title : Trip Costs                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 02/08/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Basics S. 158                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:02.09.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+PARAMETERS:
+* KM of last Travel
+p_km TYPE i.
+DATA:
+* Amount and runtime for form and function
+l_amount_form TYPE f,         "Betrag Formular
+l_runtime_form TYPE i,        "Laufzeitformular
+l_amount_function TYPE f,     "Betragsfunction
+l_runtime_function TYPE i.    "Laufzeitfunction
+
+*First initialize l_runtime_form, than measure performance
+GET RUN TIME FIELD l_runtime_form.
+PERFORM calculate_travel_expense USING p_km CHANGING l_amount_form.
+PERFORM calculate_travel_expense USING p_km CHANGING l_amount_form.
+PERFORM calculate_travel_expense USING p_km CHANGING l_amount_form.
+PERFORM calculate_travel_expense USING p_km CHANGING l_amount_form.
+GET RUN TIME FIELD l_runtime_form.
+*First initialize l_runtime_function, then measure performance
+GET RUN TIME FIELD l_runtime_function.
+GET RUN TIME FIELD l_runtime_function.
+
+CALL FUNCTION 'ZPTB00_CALCULATE_TRAVEL_EXPENS'
+  EXPORTING
+    i_km     = p_km
+  IMPORTING
+    e_amount = l_amount_function
+  EXCEPTIONS
+    failed   = 1
+    OTHERS   = 2.
+IF sy-subrc <> 0.
+  RETURN.
+ENDIF.
+
+
+*Write performance results to screen
+WRITE: / 'Runtime of form: ', l_runtime_form,
+       / 'Runtime of Function: ', l_runtime_function.
+
+WRITE: / 'Runtime of form: ', l_amount_form,
+       / 'Runtime of Function: ', l_amount_function.
+*&---------------------------------------------------------------------*
+*&      Form  calculate_travel_expense
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->I_KM       text
+*      -->E_AMOUNT   text
+*----------------------------------------------------------------------*
+FORM calculate_travel_expense   "Reisekosten berechnen
+  USING
+        i_km TYPE i
+  CHANGING
+    e_amount TYPE f.
+
+  e_amount = i_km * '0.3'.
+ENDFORM.                    "calculate_travel_expense

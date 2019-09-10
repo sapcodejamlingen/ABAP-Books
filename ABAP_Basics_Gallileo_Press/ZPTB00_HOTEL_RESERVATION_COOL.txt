@@ -1,0 +1,365 @@
+*&---------------------------------------------------------------------*
+*& Report  ZPTB00_HOTEL_RESERVATION_COOL
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  zptb00_hotel_reservation_cool.
+
+************************************************************************
+* Report Name  : ZPTB00_HOTEL_RESERVATION_COOL                                                 *
+* Report Title : Hotel Reservation Cool                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 02/08/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Basics S. 236                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:02.09.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+*Contains ALV Grid structures, needet for variables
+TYPE-POOLS slis.
+*Main Menue as selection screen
+SELECTION-SCREEN BEGIN OF SCREEN 110.
+SELECTION-SCREEN BEGIN OF BLOCK b110 WITH FRAME TITLE text-001.
+PARAMETERS:
+p_add TYPE c RADIOBUTTON GROUP grp1 DEFAULT 'X',
+p_delete TYPE c RADIOBUTTON GROUP grp1,
+p_show TYPE c RADIOBUTTON GROUP grp1.
+SELECTION-SCREEN END OF BLOCK b110.
+SELECTION-SCREEN END OF SCREEN 110.
+
+SELECTION-SCREEN BEGIN OF SCREEN 120.
+SELECTION-SCREEN  BEGIN OF BLOCK b120 WITH FRAME TITLE text-002.
+PARAMETERS:
+p_room TYPE zptb00_room_number VALUE CHECK,
+p_chkin TYPE zptb00_checkin,
+p_chkout TYPE zptb00_checkout,
+p_name TYPE zptb00_customer_name.
+SELECTION-SCREEN END OF BLOCK b120.
+SELECTION-SCREEN END OF SCREEN 120.
+
+
+DO.
+  CALL SELECTION-SCREEN 110.
+  IF sy-subrc <> 0.
+    EXIT.
+  ELSEIF p_add = 'X'.
+    PERFORM zptb00_hrc_add.
+  ELSEIF p_delete = 'X'.
+    PERFORM zptb00_hrc_delete.
+  ELSEIF p_show = 'X'.
+    PERFORM zptb00_hrc_show.
+  ENDIF.
+ENDDO.
+
+
+*&---------------------------------------------------------------------*
+*&      Form  zptb00_hrc_add
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM zptb00_hrc_add.
+  DATA:
+*For working with table zptb00_hreservat.
+  l_str_reservation TYPE zptb00_hreservat,
+  l_tab_reservation TYPE STANDARD TABLE OF zptb00_hreservat.
+
+* call input dialog
+  CALL SELECTION-SCREEN 120 STARTING AT 5 5.
+  IF sy-subrc = 0.
+* Check period is free
+    SELECT * FROM zptb00_hreservat INTO TABLE l_tab_reservation
+      WHERE ( room_number = p_room )
+        AND ( ( checkin BETWEEN p_chkin AND p_chkout )
+        OR ( checkout BETWEEN p_chkin AND p_chkout ) ).
+    IF sy-dbcnt > 0.
+      MESSAGE s000(zptb00_messages).
+    ELSE.
+* Make reservation
+      CALL FUNCTION 'GUID_CREATE'
+       IMPORTING
+*   EV_GUID_16       =
+*   EV_GUID_22       =
+         ev_guid_32       = l_str_reservation-id.
+
+      l_str_reservation-room_number = p_room.
+      l_str_reservation-checkin = p_chkin.
+      l_str_reservation-checkout = p_chkout.
+      l_str_reservation-customer_name = p_name.
+      INSERT zptb00_hreservat FROM l_str_reservation.
+      MESSAGE s001(zptb00_messages).
+    ENDIF.
+  ENDIF.
+ENDFORM.                    "zptb00_hrc_add
+
+*&---------------------------------------------------------------------*
+*&      Form  zptb00_hrc_delete
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM zptb00_hrc_delete.
+  TYPES:
+*Builds a structure named t_str_reservationx,
+* containing of the fields Mark, client, id,
+*ROOM_NUMBER, CHEKIN, CHEKOUT, CUSTOMER_NAME:
+* Needet for alv-Grid-Display.
+  BEGIN OF t_mark,
+    mark TYPE c,
+    END OF t_mark,
+    BEGIN OF t_str_reservationx.
+          INCLUDE STRUCTURE zptb00_hreservat.
+  INCLUDE TYPE t_mark.
+  TYPES:
+  END OF t_str_reservationx.
+  DATA:
+* For ALV Grid-Display
+l_dis TYPE disvariant,
+l_str_layout TYPE slis_layout_alv,
+l_str_exit_by_user TYPE slis_exit_by_user,
+l_tab_reservationx TYPE STANDARD TABLE OF
+t_str_reservationx,
+l_str_reservationx TYPE t_str_reservationx,
+* For Working with table zptb00_hreservat
+l_tab_reservation TYPE STANDARD TABLE OF
+zptb00_hreservat,
+l_count TYPE i.
+  FIELD-SYMBOLS:
+* For Working with table zptb00_hreservat
+<l_str_reservation> TYPE zptb00_hreservat,
+<l_str_reservationx> TYPE t_str_reservationx.
+* Load content of reservation table into memory table
+*with additional field mark.
+  SELECT * FROM zptb00_hreservat INTO TABLE
+    l_tab_reservation.
+  LOOP AT l_tab_reservation ASSIGNING
+    <l_str_reservation>.
+    MOVE-CORRESPONDING <l_str_reservation>
+            TO l_str_reservationx.
+    APPEND l_str_reservationx TO l_tab_reservationx.
+  ENDLOOP.
+* Make colum width as small as possible
+  l_str_layout-colwidth_optimize = 'X'.
+* This text should be displayed as the window Title
+  l_str_layout-window_titlebar = text-003.
+*This is the name of the field in the table, wich
+* ALV-Grid can use to store, whether the user has
+*marked it or not
+  l_str_layout-box_fieldname = 'MARK'.
+*give th name of our report, so that the user can save
+* Individual configurations of the ALV-Grid-Dispaly
+  l_dis-report = sy-repid.
+
+*Call alv grid function
+  CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+   EXPORTING
+*   I_INTERFACE_CHECK                 = ' '
+*   I_BYPASSING_BUFFER                = ' '
+*   I_BUFFER_ACTIVE                   = ' '
+     i_callback_program                = l_dis-report
+     i_callback_pf_status_set          = 'CB_ALV_PF_SET_STATUS'
+     i_callback_user_command           = 'CB_ALV_USER_COMMAND'
+*   I_CALLBACK_TOP_OF_PAGE            = ' '
+*   I_CALLBACK_HTML_TOP_OF_PAGE       = ' '
+*   I_CALLBACK_HTML_END_OF_LIST       = ' '
+     i_structure_name                  = 'ZPTB00_HRESERVAT'
+*   I_BACKGROUND_ID                   = ' '
+*   I_GRID_TITLE                      =
+*   I_GRID_SETTINGS                   =
+     is_layout                         = l_str_layout
+*   IT_FIELDCAT                       =
+*   IT_EXCLUDING                      =
+*   IT_SPECIAL_GROUPS                 =
+*   IT_SORT                           =
+*   IT_FILTER                         =
+*   IS_SEL_HIDE                       =
+     i_default                         = 'X'
+     i_save                            = 'A'
+     is_variant                        = l_dis
+*   IT_EVENTS                         =
+*   IT_EVENT_EXIT                     =
+*   IS_PRINT                          =
+*   IS_REPREP_ID                      =
+*   I_SCREEN_START_COLUMN             = 0
+*   I_SCREEN_START_LINE               = 0
+*   I_SCREEN_END_COLUMN               = 0
+*   I_SCREEN_END_LINE                 = 0
+*   I_HTML_HEIGHT_TOP                 = 0
+*   I_HTML_HEIGHT_END                 = 0
+*   IT_ALV_GRAPHICS                   =
+*   IT_HYPERLINK                      =
+*   IT_ADD_FIELDCAT                   =
+*   IT_EXCEPT_QINFO                   =
+*   IR_SALV_FULLSCREEN_ADAPTER        =
+   IMPORTING
+*   E_EXIT_CAUSED_BY_CALLER           =
+     es_exit_caused_by_user            = l_str_exit_by_user
+    TABLES
+      t_outtab                          = l_tab_reservationx
+   EXCEPTIONS
+     program_error                     = 1
+     OTHERS                            = 2
+            .
+  IF sy-subrc <> 0.
+* Error? -> Show to the user what happend
+    MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+            WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+  ENDIF.
+
+*Leave the whole program, if the user pressed exit
+* Leave back to the main screen, if the user pressed
+* back or cancel
+
+  CASE 'X'.
+    WHEN l_str_exit_by_user-exit.
+      LEAVE PROGRAM.
+    WHEN l_str_exit_by_user-back OR
+         l_str_exit_by_user-cancel.
+      RETURN.
+  ENDCASE.
+
+*Otherwise the user must have pressed our delete
+*Button, so delete all lines in the reservation table.
+* Wich are marked with an 'X'.
+  l_count = 0.
+  LOOP AT l_tab_reservationx ASSIGNING
+    <l_str_reservationx>.
+    IF <l_str_reservationx>-mark = 'X'.
+      DELETE FROM zptb00_hreservat WHERE id =
+      <l_str_reservationx>-id.
+    ENDIF.
+  ENDLOOP.
+  MESSAGE s002(zptb00_messages) WITH l_count.
+ENDFORM.                    "zptb00_hrc_delete
+
+*&---------------------------------------------------------------------*
+*&      Form  zptb00_hrc_show
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM zptb00_hrc_show.
+  DATA:
+* for alv Grid Display
+l_dis TYPE disvariant,
+l_rda_table TYPE REF TO data,
+      l_str_layout TYPE slis_layout_alv,
+* For working with table zptb00_hreservat
+l_tab_reservation TYPE STANDARD TABLE OF
+zptb00_hreservat.
+
+* Load all data of reservation table into memory table
+  SELECT * FROM zptb00_hreservat INTO TABLE
+    l_tab_reservation.
+* Make colum width as small as possible
+  l_str_layout-colwidth_optimize = 'X'.
+*This text should be displayed as the window title
+  l_str_layout-window_titlebar = text-004.
+* Give the name of our report, so that the user can
+*Save individual configurations of the alv grid
+*Display. You could also provide another text here if,
+*you want seperate configuration of the show and
+*deleten display.
+  l_dis-report = sy-repid.
+
+  CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+   EXPORTING
+*   I_INTERFACE_CHECK                 = ' '
+*   I_BYPASSING_BUFFER                = ' '
+*   I_BUFFER_ACTIVE                   = ' '
+*   I_CALLBACK_PROGRAM                = ' '
+*   I_CALLBACK_PF_STATUS_SET          = ' '
+*   I_CALLBACK_USER_COMMAND           = ' '
+*   I_CALLBACK_TOP_OF_PAGE            = ' '
+*   I_CALLBACK_HTML_TOP_OF_PAGE       = ' '
+*   I_CALLBACK_HTML_END_OF_LIST       = ' '
+   i_structure_name                  = 'ZPTB00_HRESERVAT'
+*   I_BACKGROUND_ID                   = ' '
+*   I_GRID_TITLE                      =
+*   I_GRID_SETTINGS                   =
+     is_layout                         = l_str_layout
+*   IT_FIELDCAT                       =
+*   IT_EXCLUDING                      =
+*   IT_SPECIAL_GROUPS                 =
+*   IT_SORT                           =
+*   IT_FILTER                         =
+*   IS_SEL_HIDE                       =
+*   I_DEFAULT                         = 'X'
+     i_save                            = 'X'
+     is_variant                        = l_dis
+*   IT_EVENTS                         =
+*   IT_EVENT_EXIT                     =
+*   IS_PRINT                          =
+*   IS_REPREP_ID                      =
+*   I_SCREEN_START_COLUMN             = 0
+*   I_SCREEN_START_LINE               = 0
+*   I_SCREEN_END_COLUMN               = 0
+*   I_SCREEN_END_LINE                 = 0
+*   I_HTML_HEIGHT_TOP                 = 0
+*   I_HTML_HEIGHT_END                 = 0
+*   IT_ALV_GRAPHICS                   =
+*   IT_HYPERLINK                      =
+*   IT_ADD_FIELDCAT                   =
+*   IT_EXCEPT_QINFO                   =
+*   IR_SALV_FULLSCREEN_ADAPTER        =
+* IMPORTING
+*   E_EXIT_CAUSED_BY_CALLER           =
+*   ES_EXIT_CAUSED_BY_USER            =
+    TABLES
+      t_outtab                          = l_tab_reservation
+   EXCEPTIONS
+     program_error                     = 1
+     OTHERS                            = 2
+            .
+  IF sy-subrc <> 0.
+* Error? -> Show to the user what happend
+    MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+            WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+  ENDIF.
+
+
+
+ENDFORM.                    "zptb00_hrc_show
+
+*&---------------------------------------------------------------------*
+*&      Form  cd_alv_user_command
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->R_UCOMM      text
+*      -->RS_SELFIELD  text
+*----------------------------------------------------------------------*
+FORM cb_alv_user_command
+  USING
+        r_ucomm LIKE sy-ucomm
+  rs_selfield TYPE slis_selfield.                           "#EC called
+
+*Delete button pressed? -> then force to leave the
+* grid display now by switching on the exit button
+  IF r_ucomm = 'EXECUTE'.
+    rs_selfield-exit = 'X'.
+  ENDIF.
+ENDFORM.                    "cd_alv_user_command
+
+*&---------------------------------------------------------------------*
+*&      Form  cb_alv_pf_set_status
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->RT_EXTAB   text
+*----------------------------------------------------------------------*
+FORM cb_alv_pf_set_status
+  USING
+  rt_extab TYPE slis_t_extab.     "#ec called
+* take our pf-status insteed of your own
+  SET PF-STATUS 'STANDARD_FULLSCREEN' EXCLUDING
+  rt_extab.
+ENDFORM.                    "cb_alv_pf_set_status

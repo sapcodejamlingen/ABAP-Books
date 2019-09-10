@@ -1,0 +1,145 @@
+*&---------------------------------------------------------------------*
+*& Report  ZPTB00_PRODUCT_EVENT
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  zptb00_product_event_GL.
+
+
+************************************************************************
+* Report Name  : ZPTB00_PRODUCT_EVENT                                               *
+* Report Title :   PRODUCT__EVENT                                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 02/01/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : <ABAP Basics S. 376                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:2.01.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+*Main Program start ***
+DATA: l_category_root TYPE REF TO zptb00_cl_category,
+      l_category TYPE REF TO zptb00_cl_category,
+      l_salesproduct TYPE REF TO zptb00_cl_salesproduct,
+      l_purchaseproduct TYPE REF TO zptb00_cl_purchaseproduct.
+
+CREATE OBJECT l_category_root
+EXPORTING
+  i_title = 'Products'.
+
+CREATE OBJECT l_category
+  EXPORTING
+    i_rcl_parent = l_category_root
+    i_title = 'Hardware'.
+
+CREATE OBJECT l_purchaseproduct
+
+EXPORTING
+  i_rcl_parent = l_category
+  i_title = 'Toshiba Satelite 430s'
+  i_net_price = '1500'.
+
+CREATE OBJECT l_salesproduct
+EXPORTING
+  i_rcl_parent = l_category
+  i_title = 'Toshiba Satelite 430s'
+  i_net_price = '1500'.
+l_category_root->write_to_screen( ).
+SET HANDLER l_salesproduct->set_title FOR
+                            l_purchaseproduct.
+CALL METHOD l_purchaseproduct->set_title
+  EXPORTING
+    i_title = 'Toschiba Portege 120s'.
+l_category_root->write_to_screen( ).
+
+*End of Main Program *****
+
+
+
+
+
+class ZPTB00_CL_PRODUCT definition
+  public
+  create public .
+
+*"* public components of class ZPTB00_CL_PRODUCT
+*"* do not include other source files here!!!
+public section.
+
+  data TITLE type STRING .
+  data DESCRIPTION type STRING .
+  data PARENT type ref to ZPTB00_CL_CATEGORY .
+  data NET_PRICE type F .
+
+  events ON_TITLE_CHANGE
+    exporting
+      value(I_TITLE) type STRING .
+
+  methods CONSTRUCTOR
+    importing
+      !I_RCL_PARENT type ref to ZPTB00_CL_CATEGORY optional
+      !I_TITLE type STRING
+      !I_NET_PRICE type STRING
+    preferred parameter I_RCL_PARENT .
+  methods WRITE_TO_SCREEN
+    importing
+      !I_COLUMN type I default 0 .
+  methods GET_GROSS_PRICE
+    returning
+      value(R_PRICE) type I .
+  methods SET_TITLE
+    for event ON_TITLE_CHANGE of ZPTB00_CL_PRODUCT
+    importing
+      !I_TITLE .
+
+method CONSTRUCTOR.
+*ABAP Basics S. 349
+*Initialize attributes
+*super->constructor( ).
+    IF i_rcl_parent IS BOUND.
+*This is my daddy.
+      parent = i_rcl_parent.
+*Hi, daddy, i am your child
+      APPEND me TO parent->childs.
+    ENDIF.
+    title = i_title.
+    net_price = i_net_price.
+endmethod.
+
+
+
+METHOD write_to_screen.
+*ABAP Basics S. 349
+  DATA:
+  l_gross_price TYPE p DECIMALS 2.
+  l_gross_price = me->get_gross_price( ).
+  WRITE: AT /i_column 'Title :', title, '. Gross Price :',
+            (10) l_gross_price.
+ENDMETHOD.,
+
+method GET_GROSS_PRICE.
+*ABAP Basics S. 349
+
+   r_price = net_price + net_price * parent->vat.
+endmethod.
+
+
+
+METHOD set_title.
+*ABAP Basics S. 388
+  RAISE EVENT on_title_change
+  EXPORTING
+    i_title = i_title.
+  title = i_title.
+
+ENDMETHOD.

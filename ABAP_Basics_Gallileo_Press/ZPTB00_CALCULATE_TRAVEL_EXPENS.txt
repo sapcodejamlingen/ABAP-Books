@@ -1,0 +1,17 @@
+FUNCTION ZPTB00_CALCULATE_TRAVEL_EXPENS.
+*"--------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     VALUE(I_KM) TYPE  I
+*"  EXPORTING
+*"     VALUE(E_AMOUNT) TYPE  F
+*"  EXCEPTIONS
+*"      FAILED
+*"--------------------------------------------------------------------
+*ABAP Basics S. 162
+  e_amount = i_km * '0.3'.
+  IF sy-subrc <> 0.
+    RAISE failed.
+  ENDIF.
+
+ENDFUNCTION.

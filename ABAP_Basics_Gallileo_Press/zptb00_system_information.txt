@@ -1,0 +1,61 @@
+*&---------------------------------------------------------------------*
+*& Report  ZPTB00_SYSTEM_INFORMATION
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  zptb00_system_information.
+
+************************************************************************
+* Report Name  : ZPTB00_SYSTEM_INFORMATION                            *
+* Report Title : System Information                                    *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 02/08/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Basics S. 113                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:02.08.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+DATA:
+* Date & time information variables
+l_timestamp  TYPE timestampl,
+l_string(30) TYPE c.
+
+*Refresh all internal date and time fields like
+* sy-uhzeit
+GET TIME.
+
+*get exact timestamp
+GET TIME STAMP FIELD l_timestamp.
+WRITE l_timestamp TIME ZONE sy-zonlo TO l_string.
+
+* write info to screen
+WRITE: /, / 'Date & Time Information',
+       / 'System Date: ',             30 sy-datum,
+       / 'System Time: ',             30 sy-uzeit,
+       / 'Exact System Time Stamp:',  30 l_string,
+       / 'Daylight Saving time: ',    30 sy-dayst AS
+                            CHECKBOX INPUT OFF,
+       / 'Local Date: ',              30 sy-datlo,
+       / 'Local Time: ',              30 sy-timlo,
+       / 'Local Time Zone: ',         30 sy-zonlo.
+WRITE: /, / 'Logical Information',
+       / 'Logical SAP System: ',      30 sy-sysid,
+       / 'Client: ',                  30 sy-mandt,
+       / 'user_name: ',               30 sy-uname.
+WRITE: /,/ 'System & Program Information',
+       / 'SAP WebAS Name: ',          30 sy-host,
+       / 'Database Name: ',           30 sy-dbsys,
+       / 'Operating System Name: ',   30 sy-opsys,
+       / 'Program Transaction: ',     30 sy-tcode,
+       / ' Program Name: ',           30 sy-repid.
