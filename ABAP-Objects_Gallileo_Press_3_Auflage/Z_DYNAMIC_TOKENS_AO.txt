@@ -1,0 +1,96 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_DYNAMIC_TOKENS_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_dynamic_tokens_ao.
+
+************************************************************************
+* Report Name  : Z_DYNAMIC_TOKENS_AO                                                 *
+* Report Title : Einfacher Data Browser mit sortierung                                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/28/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen ABAP ObJEcTs S. 905              *
+*              : Run Time Type Information                 *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.28.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+PARAMETERS: p_dbtab TYPE c LENGTH 30,
+            p_sort TYPE c LENGTH 30.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+  PRIVATE SECTION.
+    CLASS-METHODS display
+    IMPORTING value(result) TYPE STANDARD TABLE.
+ENDCLASS.                    "demo DEFINITION
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: tref TYPE REF TO data,
+          otab TYPE abap_sortorder_tab,
+          oline LIKE LINE OF otab,
+          error TYPE REF TO cx_root.
+    FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
+    TRY.
+        CREATE DATA tref TYPE TABLE OF (p_dbtab).
+        ASSIGN tref->* TO <table>.
+      CATCH cx_sy_create_data_error INTO error.
+        MESSAGE error TYPE 'I' DISPLAY LIKE 'E'.
+        RETURN.
+    ENDTRY.
+    TRY.
+        SELECT * FROM (p_dbtab)
+          INTO TABLE <table>.
+      CATCH cx_sy_sql_error INTO error.
+        MESSAGE error TYPE 'I' DISPLAY LIKE 'E'.
+        RETURN.
+    ENDTRY.
+    TRY.
+        IF p_sort IS NOT INITIAL.
+          oline-name = p_sort.
+          APPEND oline TO otab.
+          SORT <table> BY (otab).
+        ENDIF.
+      CATCH cx_sy_dyn_table_error INTO error.
+        MESSAGE error TYPE 'I' DISPLAY LIKE 'E'.
+        RETURN.
+    ENDTRY.
+    display( <table> ).
+  ENDMETHOD.                    "main
+  METHOD display.
+    DATA alv TYPE REF TO cl_salv_table.
+    TRY.
+        cl_salv_table=>factory(
+        IMPORTING r_salv_table = alv
+          CHANGING t_table = result ).
+        alv->display( ).
+      CATCH cx_salv_msg.
+        MESSAGE 'ALV display not possible!' TYPE 'I'
+        DISPLAY LIKE 'E'.
+    ENDTRY.
+  ENDMETHOD.                    "display
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

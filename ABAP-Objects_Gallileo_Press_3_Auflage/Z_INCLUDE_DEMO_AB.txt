@@ -1,0 +1,71 @@
+*&---------------------------------------------------------------------*
+*& Modulpool         Z_INCLUDE_DEMO_AB
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+************************************************************************
+* Report Name  : Z_INCLUDE_DEMO_AB                             *
+* Report Title : Listnings ABAP Objects Buch                           *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 08/07/2018 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen aus dem Buch SAP Objects                      *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01/03/19 | Author: M.Buescher| Destrcription/Transport  *
+************************************************************************
+
+INCLUDE z_include_demo_ab_top                   .    " global Data
+INCLUDE z_include_demo_ab_impl                   .  " PBO-Modules
+INCLUDE z_include_demo_ab_start                   .  " PAI-Modules
+* INCLUDE Z_INCLUDE_DEMO_AB_F01                   .  " FORM-Routines
+
+*&---------------------------------------------------------------------*
+*& Include Z_INCLUDE_DEMO_AB_TOP                             Modulpool        Z_INCLUDE_DEMO_AB
+*&
+*&---------------------------------------------------------------------*
+
+PROGRAM  z_include_demo_ab.
+
+
+INCLUDE z_include_demo_ab_decl1                   .  " -Modules
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+
+ENDCLASS.                    "demo DEFINITION
+
+*&---------------------------------------------------------------------*
+*&  Include           Z_INCLUDE_DEMO_AB_IMPL
+*&---------------------------------------------------------------------*
+
+class demo implementation.
+  method main.
+    data text type string.
+    text = helper1=>meth1( ).
+    message text type 'I'.
+    endmethod.
+    endclass.
+
+    include Z_INCLUDE_DEMO_AB_impl1.
+
+*&---------------------------------------------------------------------*
+*&  Include           Z_INCLUDE_DEMO_AB_START
+*&---------------------------------------------------------------------*
+
+START-OF-SELECTION.
+demo=>main( ).

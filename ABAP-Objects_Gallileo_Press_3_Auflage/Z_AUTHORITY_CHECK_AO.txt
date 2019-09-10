@@ -1,0 +1,66 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_AUTHORITY_CHECK_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_authority_check_ao.
+
+************************************************************************
+* Report Name  : Z_AUTHORITY_CHECK_AO                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 99/99/9999 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:99.99.99 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS p_name TYPE c LENGTH 30 LOWER CASE.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main IMPORTING i_name TYPE clike.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    AUTHORITY-CHECK OBJECT 'ZAUTHOB'
+            ID 'TESTFIELD' FIELD i_name.
+    IF sy-subrc = 0.
+      MESSAGE 'Authorized' TYPE 'S'.
+    ELSEIF sy-subrc = 4.
+      MESSAGE 'Not Authorized!' TYPE 'S'
+      DISPLAY LIKE 'A'.
+      RETURN.
+    ELSE.
+      MESSAGE 'Problem with Authority check!' TYPE 'S'
+      DISPLAY LIKE 'E'.
+      RETURN.
+    ENDIF.
+
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( p_name ).

@@ -1,0 +1,108 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_ABAP_UNIT_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_abap_unit_ao.
+
+************************************************************************
+* Report Name  : Z_ABAP_UNIT_AO                                                 *
+* Report Title : Beispiel für Modultest                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 02/01/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects Buch S.1008                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:02.01.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS test_sflight_selection DEFINITION DEFERRED.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION FRIENDS test_sflight_selection .
+  PUBLIC SECTION.
+    METHODS get_carrier_flights
+    IMPORTING carrier TYPE string.
+  PRIVATE SECTION.
+    DATA sflight_tab TYPE TABLE OF sflight.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD get_carrier_flights.
+    SELECT * FROM sflight
+      INTO TABLE sflight_tab
+      WHERE carrid = 'LH'.
+  ENDMETHOD.                    "get_carrier_flights
+ENDCLASS.                    "demo IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS test_sflight_selection IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS test_sflight_selection
+  DEFINITION          "#AU Risk_level_ Harmless
+  FOR TESTING.        "#AU Duration Short
+  PRIVATE SECTION.
+    METHODS: test_get_carrier_flights FOR TESTING,
+    setup.
+    DATA: demo_ref TYPE REF TO demo,
+          test_carrid TYPE string,
+          test_carrids TYPE TABLE OF string,
+          endclass.
+ENDCLASS.                    "test_sflight_selection IMPLEMENTATION
+*----------------------------------------------------------------------*
+*       CLASS test_sflight_selection IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS test_sflight_selection IMPLEMENTATION.
+  METHOD setup.
+    CREATE OBJECT demo_ref.
+    APPEND 'LH' TO test_carrids.
+    APPEND 'UA' TO test_carrids.
+    APPEND 'AA' TO test_carrids.
+
+  ENDMETHOD.                    "setup
+  METHOD test_get_carrier_flights.
+    DATA: act_carrid TYPE string,
+          msg TYPE string,
+          sflight_wa TYPE sflight.
+    LOOP AT test_carrids INTO test_carrid.
+      CONCATENATE 'Selection of' test_carrid
+      'gives different airlines'
+      INTO msg SEPARATED BY space.
+      demo_ref->get_carrier_flights( test_carrid ).
+      LOOP AT demo_ref->sflight_tab INTO sflight_wa.
+        act_carrid = sflight_wa-carrid.
+        cl_aunit_assert=>assert_equals(
+        act = act_carrid
+        exp = test_carrid
+        msg = msg
+        quit = cl_aunit_assert=>no ).
+        IF act_carrid <> test_carrid.
+          EXIT.
+        ENDIF.
+      ENDLOOP.
+    ENDLOOP.
+  ENDMETHOD.                    "test_get_carrier_flights
+ENDCLASS.                    "test_sflight_selection IMPLEMENTATION

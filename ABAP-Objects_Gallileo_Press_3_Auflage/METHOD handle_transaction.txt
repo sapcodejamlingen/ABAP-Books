@@ -1,0 +1,54 @@
+METHOD handle_transaction.
+*ABAP Objects S.842
+  DATA: tx_manager TYPE REF TO if_os_transaction_manager,
+        tx         TYPE REF TO if_os_transaction.
+  tx_manager = cl_os_system=>get_transaction_manager( ).
+  tx = tx_manager->create_transaction( ).
+  TRY.
+      tx->start( ).
+      me->main( ).
+      tx->end( ).
+    CATCH cx_os_error.
+      tx->undo( ).
+  ENDTRY.
+ENDMETHOD.
+
+
+
+method MAIN.
+DATA: customer_id   TYPE zcustomer_id_ab,
+          car_category  TYPE zcategory_ab,
+          date_from     TYPE zdate_from_ab,
+          date_to       TYPE zdate_to_ab,
+          agent         TYPE REF TO zca_customer_entity_ao,
+          customer      TYPE REF TO zcl_customer_entity_ao,
+          reservation   TYPE REF TO zcl_resevation_entity_ao.
+
+    CALL FUNCTION 'Z_INPUT_CUSTOMER'
+      IMPORTING
+        customer_id = customer_id.
+        agent = zca_customer_entity_ao=>agent.
+    TRY.
+        customer = agent->get_persistent( i_id = customer_id ).
+      CATCH cx_os_object_not_found.
+        MESSAGE 'Customer does not exist' TYPE 'I'
+        DISPLAY LIKE 'E'.
+        RETURN.
+    ENDTRY.
+    CALL FUNCTION 'Z_INPUT_RESERVATION'
+      IMPORTING
+        car_category = car_category
+        date_from    = date_from
+        date_to      = date_to.
+    TRY.
+        reservation = zcl_resevation_entity_ao=>make_reservation(
+        customer = customer_id
+        category = car_category
+        from = date_from
+        to = date_to ).
+        COMMIT WORK.
+      CATCH zcx_no_car_available.
+        MESSAGE 'No car available' TYPE 'I' DISPLAY LIKE 'E'.
+        RETURN.
+    ENDTRY.
+endmethod.

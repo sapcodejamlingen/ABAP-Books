@@ -1,0 +1,114 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_IMPORT_EXPORT_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_import_export_ao.
+
+************************************************************************
+* Report Name  : z_import_export_ao                                         *
+* Report Title : Daten-Cluster                               *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/22/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects S.858                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.22.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+TYPE-POOLS abdoc.
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+  PRIVATE SECTION.
+    CLASS-DATA index_tab TYPE abdoc_man_index_tab.
+    CLASS-METHODS: get_index,
+                   display_index.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    get_index( ).
+    display_index( ).
+  ENDMETHOD.                    "main
+  METHOD get_index.
+    DATA: abaphtml_wa TYPE abaphtml,
+          abaphtml_id TYPE abaphtml-srtfd,
+          langu TYPE sy-langu,
+          subrc TYPE sy-subrc.
+    IF sy-langu <> 'D'.
+      langu = 'E'.
+    ELSE.
+      langu = 'D'.
+    ENDIF.
+    CONCATENATE 'MAN_INDEX.' langu INTO abaphtml_id.
+    TRY.
+        IMPORT man_index_tab = index_tab
+        FROM DATABASE abaphtml(mx)
+        ID abaphtml_id
+        TO abaphtml_wa.
+        subrc = sy-subrc.
+      CATCH cx_sy_import_mismatch_error.
+        subrc = 8.
+    ENDTRY.
+    IF subrc <> 0.
+      CALL FUNCTION 'ABAP_DOCU_MAN_INDEX_TABLE'
+        EXPORTING
+          langu            = langu
+*     INDEX_DATE       = '00010101'
+*     INDEX_TIME       = '000000'
+        CHANGING
+          index_tab        = index_tab.
+      DELETE FROM DATABASE abaphtml(mx) ID abaphtml_id.
+      abaphtml_wa-aedat = sy-datum.
+      abaphtml_wa-aetim = sy-uzeit.
+      EXPORT man_index_tab = index_tab
+      TO DATABASE abaphtml(mx)
+      ID abaphtml_id
+      FROM abaphtml_wa.
+    ENDIF.
+  ENDMETHOD.                    "get_index
+  METHOD display_index.
+    DATA: text TYPE REF TO zcl_text,
+          text_line TYPE zcl_text=>t_line.
+    FIELD-SYMBOLS: <index_wa> TYPE abdoc_man_index,
+                   <subindex_wa> TYPE LINE OF
+                   abdoc_man_index-docu_objects.
+    text = zcl_text=>get_handle( ).
+    LOOP AT index_tab ASSIGNING <index_wa>.
+      WRITE <index_wa>-key1 TO text_line.
+      text->add_line( text_line ).
+      LOOP at <index_wa>-docu_objects ASSIGNING <subindex_wa>.
+        CLEAR text_line.
+        WRITE <subindex_wa>-key2 TO text_line+20.
+        text->add_line( text_line ).
+      ENDLOOP.
+    ENDLOOP.
+    text->display( ).
+  ENDMETHOD.                    "display
+
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).
+  .

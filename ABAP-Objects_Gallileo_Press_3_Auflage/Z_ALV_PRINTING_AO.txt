@@ -1,0 +1,130 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_ALV_PRINTING_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_alv_printing_ao.
+
+************************************************************************
+* Report Name  : z_alv_printing_ao                *
+* Report Title : ALV Listendruck                               *
+* SAP Release 6.0                                                      *
+* Author�s Name: BUESCHERM                                         *
+* Create Date  : 01/16/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP ObJEcTs S. 726                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.16.19 | Author: M.B�scher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    TYPES: BEGIN OF scarr_wa,
+      carrid TYPE scarr-carrid,
+      carrname TYPE scarr-carrname,
+      url TYPE scarr-url,
+      END OF scarr_wa.
+    DATA: scarr_tab TYPE TABLE OF scarr_wa,
+          pripars TYPE pri_params,
+          valid_flag TYPE c LENGTH 1,
+          alv TYPE REF TO cl_salv_table,
+          print TYPE REF TO cl_salv_print.
+    CALL FUNCTION 'GET_PRINT_PARAMETERS'
+     EXPORTING
+*         ARCHIVE_ID                     = C_CHAR_UNKNOWN
+*         ARCHIVE_INFO                   = C_CHAR_UNKNOWN
+*         ARCHIVE_MODE                   = C_CHAR_UNKNOWN
+*         ARCHIVE_TEXT                   = C_CHAR_UNKNOWN
+*         AR_OBJECT                      = C_CHAR_UNKNOWN
+*         ARCHIVE_REPORT                 = C_CHAR_UNKNOWN
+*         AUTHORITY                      = C_CHAR_UNKNOWN
+*         COPIES                         = C_NUM3_UNKNOWN
+*         COVER_PAGE                     = C_CHAR_UNKNOWN
+*         DATA_SET                       = C_CHAR_UNKNOWN
+*         DEPARTMENT                     = C_CHAR_UNKNOWN
+       destination                    = 'LP01'
+*         EXPIRATION                     = C_NUM1_UNKNOWN
+       immediately                    = ' '
+*         IN_ARCHIVE_PARAMETERS          = ' '
+*         IN_PARAMETERS                  = ' '
+*         LAYOUT                         = C_CHAR_UNKNOWN
+*         LINE_COUNT                     = C_INT_UNKNOWN
+*         LINE_SIZE                      = C_INT_UNKNOWN
+*         LIST_NAME                      = C_CHAR_UNKNOWN
+*         LIST_TEXT                      = C_CHAR_UNKNOWN
+*         MODE                           = ' '
+*         NEW_LIST_ID                    = C_CHAR_UNKNOWN
+*         PROTECT_LIST                   = C_CHAR_UNKNOWN
+       no_dialog                      = 'X'
+*         RECEIVER                       = C_CHAR_UNKNOWN
+*         RELEASE                        = C_CHAR_UNKNOWN
+*         REPORT                         = C_CHAR_UNKNOWN
+*         SAP_COVER_PAGE                 = C_CHAR_UNKNOWN
+*         HOST_COVER_PAGE                = C_CHAR_UNKNOWN
+*         PRIORITY                       = C_NUM1_UNKNOWN
+*         SAP_OBJECT                     = C_CHAR_UNKNOWN
+*         TYPE                           = C_CHAR_UNKNOWN
+*         USER                           = SY-UNAME
+*         USE_OLD_LAYOUT                 = ' '
+*         UC_DISPLAY_MODE                = C_CHAR_UNKNOWN
+*         DRAFT                          = C_CHAR_UNKNOWN
+*         ABAP_LIST                      = ' '
+*         USE_ARCHIVENAME_DEF            = ' '
+*         DEFAULT_SPOOL_SIZE             = C_CHAR_UNKNOWN
+*         WITH_STRUCTURE                 = C_CHAR_UNKNOWN
+*         SUPPRESS_SHADING               = C_CHAR_UNKNOWN
+*         PO_FAX_STORE                   = ' '
+*         NO_FRAMES                      = C_CHAR_UNKNOWN
+     IMPORTING
+*         OUT_ARCHIVE_PARAMETERS         =
+       out_parameters                 = pripars
+       valid                          = valid_flag
+*         VALID_FOR_SPOOL_CREATION       =
+     EXCEPTIONS
+*         ARCHIVE_INFO_NOT_FOUND         = 1
+       invalid_print_params           = 2
+*         INVALID_ARCHIVE_PARAMS         = 3
+       OTHERS                         = 4
+              .
+
+    IF sy-subrc <> 0 OR valid_flag <> 'X'.
+      RETURN.
+    ENDIF.
+    SELECT *
+      FROM scarr
+      INTO CORRESPONDING FIELDS OF TABLE scarr_tab.
+    TRY.
+        cl_salv_table=>factory(
+        IMPORTING r_salv_table = alv
+          CHANGING t_table = scarr_tab ).
+        print = alv->get_print( ).
+        print->set_print_only( 'X' ).
+        alv->display( ).
+      CATCH cx_salv_msg.
+        MESSAGE 'ALV output not possible' TYPE 'I'
+        DISPLAY LIKE 'E'.
+    ENDTRY.
+  ENDMETHOD.                    "demo
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

@@ -1,0 +1,60 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_ASSIGN_CASTING_TYPE_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_assign_casting_type_ao.
+
+************************************************************************
+* Report Name  : Z_ASSIGN_CASTING_TYPE_AO                              *
+* Report Title : Casting mit expliziter Typangabe                      *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/28/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen ABAP ObJEcTs S. 881               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.28.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS: main,
+              assign_casting
+              importing text type csequence
+                        dtype type csequence.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: text TYPE c LENGTH 8 VALUE '20061001'.
+    assign_casting( text = text dtype = 'D' ).
+    assign_casting( text = text dtype = 'N' ).
+  ENDMETHOD.                    "main
+  METHOD assign_casting.
+    DATA: int4 TYPE i,
+          msg TYPE c LENGTH 40.
+    FIELD-SYMBOLS <fs> TYPE ANY.
+    ASSIGN text TO <fs> CASTING TYPE (dtype).
+    int4 = <fs>.
+    WRITE int4 TO msg NO-GROUPING.
+    MESSAGE msg TYPE 'I'.
+  ENDMETHOD.                    "ASSIgn_castimg
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

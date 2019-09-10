@@ -1,0 +1,72 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_MATCH_REGEX_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_match_regex_ao.
+
+************************************************************************
+* Report Name  : Z_MATCH_REGEX_AO                                   *
+* Report Title : Abgleich mit einem regulären Ausdruck               *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/04/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übung ABAP Objects Buch S. 339                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:99.99.99 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+SELECTION-SCREEN BEGIN OF SCREEN 100 AS WINDOW.
+PARAMETERS email TYPE c LENGTH 30 LOWER CASE.
+SELECTION-SCREEN END OF SCREEN 100.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: regex   TYPE REF TO cl_abap_regex,
+          matcher TYPE REF TO cl_abap_matcher.
+    CREATE OBJECT regex
+      EXPORTING pattern     = `\w+(\.\w+)*@(\w+\.)+(\w{2,4})`
+                ignore_case = 'X' .
+    DO.
+      CALL SELECTION-SCREEN 100 STARTING AT 10 10.
+      IF sy-subrc <> 0.
+        EXIT.
+      ENDIF.
+      matcher = regex->create_matcher( text = email ).
+      IF matcher->match( ) IS INITIAL.
+        MESSAGE 'Wrong Format' TYPE 'S' DISPLAY LIKE 'E'.
+      ELSE.
+        MESSAGE 'Format OK' TYPE 'S'.
+        EXIT.
+      ENDIF.
+    ENDDO.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).

@@ -1,0 +1,67 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_BRANCHING_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_branching_ao.
+
+************************************************************************
+* Report Name  : Z_BRANCHING_AO*
+* Report Title : Listnings ABAP Objects Buch                           *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/03/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen aus dem Buch SAP Objects                      *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01/03/19 | Author: M.Buescher| Destrcription/Transport  *
+************************************************************************
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA result_txt TYPE string.
+    IF sy-saprl < '45A'.
+      CONCATENATE 'ABAP Release ' sy-saprl
+                  ' is not object-oriented.'
+                  INTO result_txt RESPECTING BLANKS.
+    ELSE.
+      IF sy-saprl < '46A'.
+        CONCATENATE 'ABAP Release ' sy-saprl
+                    ' is partly object-oriented.'
+                    INTO result_txt RESPECTING BLANKS.
+      ELSE.
+        CONCATENATE 'ABAP Release ' sy-saprl
+                    ' is fully object-oriented.'
+                    INTO result_txt RESPECTING BLANKS.
+      ENDIF.
+    ENDIF.
+    MESSAGE result_txt TYPE 'I'.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

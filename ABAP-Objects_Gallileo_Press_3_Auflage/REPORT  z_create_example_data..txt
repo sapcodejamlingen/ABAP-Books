@@ -1,0 +1,92 @@
+REPORT  z_create_example_data.
+*ABAP Objects S.98
+
+************************************************************************
+* Report Name  : z_create_example_data.                             *
+* Report Title : Listnings ABAP Objects Buch                           *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 08/07/2018 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen aus dem Buch SAP Objects                      *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01/03/19 | Author: M.Buescher| Destrcription/Transport  *
+************************************************************************
+
+DATA: customer_wa TYPE zcustomers_ab,
+      customer_tab TYPE HASHED TABLE OF zcustomers_ab
+              WITH UNIQUE KEY id.
+
+DATA: car_wa TYPE zcars_ab,
+      car_tab TYPE HASHED TABLE OF zcars_ab
+      WITH UNIQUE KEY license_plate.
+
+START-OF-SELECTION.
+
+  customer_wa-id = '00000001'.
+  customer_wa-name = 'Maximilien Vomact'.
+  INSERT customer_wa INTO TABLE customer_tab.
+
+  customer_wa-id = '00000002'.
+  customer_wa-name = 'Benjacomin Bozart'.
+  INSERT customer_wa INTO TABLE customer_tab.
+
+  customer_wa-id = '00000003'.
+  customer_wa-name = 'Johanna Gnade'.
+  INSERT customer_wa INTO TABLE customer_tab.
+
+  customer_wa-id = '00000004'.
+  customer_wa-name = 'Dolores Oh'.
+  INSERT customer_wa INTO TABLE customer_tab.
+
+  TRY.
+      DELETE FROM zcustomers_ab.
+      INSERT zcustomers_ab
+            FROM TABLE customer_tab.
+      IF sy-subrc = 0.
+        MESSAGE 'Customer Table updated'
+        TYPE 'I'.
+      ENDIF.
+    CATCH cx_sy_open_sql_db.
+      MESSAGE 'Customer table could not be updated.'
+              TYPE 'I' DISPLAY LIKE 'I'.
+  ENDTRY.
+
+  car_wa-license_plate = '1234XX CA'.
+  car_wa-category = 'A'.
+  INSERT car_wa INTO TABLE car_tab.
+
+  car_wa-license_plate = '5678YY NY'.
+  car_wa-category = 'A'.
+  INSERT car_wa INTO TABLE car_tab.
+
+  car_wa-license_plate = '4321ZZ NV'.
+  car_wa-category = 'A'.
+  INSERT car_wa INTO TABLE car_tab.
+
+  car_wa-license_plate = '5522HH NC'.
+  car_wa-category = 'B'.
+  INSERT car_wa INTO TABLE car_tab.
+
+  car_wa-license_plate = '1717WW AZ'.
+  car_wa-category = 'C'.
+  INSERT car_wa INTO TABLE car_tab.
+
+  TRY.
+      DELETE FROM zcars_ab.
+      INSERT zcars_ab
+            FROM TABLE car_tab.
+      IF sy-subrc = 0.
+        MESSAGE 'Car Table updated'
+        TYPE 'I'.
+      ENDIF.
+    CATCH cx_sy_open_sql_db.
+      MESSAGE 'Car table could not be updated.'
+              TYPE 'I' DISPLAY LIKE 'I'.
+  ENDTRY.

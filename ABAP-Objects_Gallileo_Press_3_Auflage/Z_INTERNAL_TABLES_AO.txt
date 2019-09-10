@@ -1,0 +1,134 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_INTERNAL_TABLES_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_internal_tables_ao.
+
+************************************************************************
+* Report Name  : Z_INTERNAL_TABLES_AO                                 *
+* Report Title : Definition Interner Tabellen                          *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/04/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects Buch S. 354              *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:99.99.99 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+  PRIVATE SECTION.
+    TYPES:
+    BEGIN OF t_address,
+      street TYPE c LENGTH 20,
+      city TYPE c LENGTH 20,
+      END OF t_address,
+      t_address_tab TYPE STANDARD TABLE
+      OF t_address
+      WITH NON-UNIQUE KEY city.
+
+    CLASS-DATA:
+    BEGIN OF company,
+      name TYPE c LENGTH 20,
+      addresses TYPE t_address_tab,
+      END OF company,
+      company_tab LIKE HASHED TABLE
+      OF company
+      WITH UNIQUE KEY name,
+      company_sorted_tab LIKE SORTED TABLE
+      OF company
+      WITH UNIQUE KEY name.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: address TYPE t_address,
+          idx     TYPE sy-tabix,
+          output  TYPE c LENGTH 80,
+          text    TYPE REF TO zcl_text.
+    FIELD-SYMBOLS <fs> LIKE company.
+* Text output
+    text = zcl_text=>get_handle( ).
+* internal table filling
+    company-name        = 'Racing Bikes Inc.'.
+    address-street      = 'Fifth Avenue'.
+    address-city        = 'New York'.
+    APPEND address TO company-addresses.
+    address-street      = 'Second Street'.
+    address-city        = 'Boston'.
+    APPEND address TO company-addresses.
+    INSERT company INTO TABLE company_tab.
+    CLEAR company.
+    company-name        = 'Chocolatiers Suisse'.
+    address-street      = 'Avenue des Forets'.
+    address-city        = 'Geneve'.
+    APPEND address TO company-addresses.
+    address-street      = 'Kleine Bachgasse'.
+    address-city        = 'Basel'.
+    APPEND address TO company-addresses.
+    address-street      = 'Piazza di Lago'.
+    address-city        = 'Lugano'.
+    APPEND address TO company-addresses.
+    INSERT company INTO TABLE company_tab.
+*Internal Tabel reading
+    READ TABLE company_tab
+      WITH TABLE KEY name = 'Racing Bikes Inc.'
+     ASSIGNING <fs>.
+    WRITE <fs>-name TO output.
+    text->add_line( output ).
+    LOOP AT <fs>-addresses INTO address.
+      CLEAR output.
+      WRITE:  sy-tabix        TO output+4(4),
+              address-street  TO output+8(20),
+              address-city    TO output+28(20).
+      text->add_line( output ).
+    ENDLOOP.
+    text->add_line( space ).
+*mod int Tables
+    address-street = 'Rue des Montagnes'.
+    address-city = 'Geneve'.
+    READ TABLE company_tab WITH TABLE KEY
+    name = 'Chocolatiers Suisse' INTO company.
+    READ TABLE company-addresses TRANSPORTING NO FIELDS
+    WITH TABLE KEY city = address-city.
+    idx = sy-tabix.
+    MODIFY company-addresses FROM address INDEX idx.
+    MODIFY TABLE company_tab FROM company.
+* Moving and sorting Table
+    company_sorted_tab = company_tab.
+    LOOP AT company_sorted_tab INTO company.
+      WRITE company-name TO output.
+      text->add_line( output ).
+      SORT company-addresses.
+      LOOP AT company-addresses INTO address.
+        CLEAR output.
+        WRITE:  sy-tabix TO output+4(4),
+                address-street TO output+8(20),
+                address-city TO output+28(20).
+        text->add_line( output ).
+      ENDLOOP.
+    ENDLOOP.
+* text output
+    text->display( ).
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

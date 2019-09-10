@@ -1,0 +1,75 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_ASXML_TABLE_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_asxml_table_ao.
+
+************************************************************************
+* Report Name  : Z_ASXML_TABLE_AO                                                 *
+* Report Title : asXML_table                                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/31/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects Buch S.1007                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.31.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: itab TYPE TABLE OF i,
+          xmlstr  TYPE xstring.
+    DO 3 TIMES. APPEND sy-index TO itab. ENDDO.
+    CALL TRANSFORMATION z_simple_table_ao
+                             SOURCE table = itab
+                                  RESULT XML xmlstr.
+    CALL FUNCTION 'DISPLAY_XML_STRING'
+      EXPORTING
+        xml_string = xmlstr.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).
+
+
+
+<?sap.transform simple?>
+<tt:transform xmlns:tt="http://www.sap.com/transformation-templates">
+
+  <tt:root name="table"/>
+
+  <tt:template>
+    <TABLE>
+      <tt:loop ref=".table">
+        <ITEM>
+          <tt:value/>
+        </ITEM>
+      </tt:loop>
+    </TABLE>
+  </tt:template>
+
+</tt:transform>
+
+

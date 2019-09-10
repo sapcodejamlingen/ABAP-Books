@@ -1,0 +1,73 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_CLASSIC_PRINTING_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_classic_printing_ao.
+
+************************************************************************
+* Report Name  : Z_CLASSIC_PRINTING_AO                    *
+* Report Title : Klassischer Listendruck                               *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/16/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP ObJEcTs S. 717                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.16.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+
+  METHOD main.
+    DATA: scarr_wa TYPE scarr,
+          pripars TYPE pri_params,
+          valid_flag TYPE c LENGTH 1.
+    CALL FUNCTION 'GET_PRINT_PARAMETERS'
+      EXPORTING
+        destination          = 'LP01'
+        immediately          = ' '
+        no_dialog            = 'X'
+      IMPORTING
+        out_parameters       = pripars
+        valid                = valid_flag
+      EXCEPTIONS
+        invalid_print_params = 2
+        OTHERS               = 4.
+    IF sy-subrc <> 0 OR valid_flag <> 'X'.
+      RETURN.
+    ENDIF.
+    NEW-PAGE PRINT ON
+    NO DIALOG PARAMETERS pripars.
+    SELECT * FROM scarr
+      INTO scarr_wa.
+      WRITE: /(3) scarr_wa-carrid,
+      (30) scarr_wa-carrname,
+      (40) scarr_wa-url.
+    ENDSELECT.
+    ULINE.
+    NEW-PAGE PRINT OFF.
+
+  ENDMETHOD.                    "mai
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

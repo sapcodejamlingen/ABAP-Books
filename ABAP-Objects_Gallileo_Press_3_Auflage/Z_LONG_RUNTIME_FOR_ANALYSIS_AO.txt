@@ -1,0 +1,63 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_LONG_RUNTIME_FOR_ANALYSIS_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_long_runtime_for_analysis_ao.
+
+************************************************************************
+* Report Name  : Z_LONG_RUNTIME_FOR_ANALYSIS_AO
+* Report Title : Beispielprogramm für die Laufzeitanalyse
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 02/01/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects Buch S.1070                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:02.01.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: sflight_tab TYPE TABLE OF sflight,
+          sflight_wa TYPE sflight.
+    DO 10 TIMES.
+      SELECT *
+        FROM sflight
+        INTO sflight_wa
+        WHERE carrid LIKE '%A%'.
+        APPEND sflight_wa TO sflight_tab.
+      ENDSELECT.
+       select *
+       from sflight
+       into table sflight_tab
+       where carrid like '%A%'.
+    ENDDO.
+    LOOP AT sflight_tab INTO sflight_wa.
+            sflight_wa-carrid = 'XX'.
+      MODIFY sflight_tab FROM sflight_wa.
+    ENDLOOP.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

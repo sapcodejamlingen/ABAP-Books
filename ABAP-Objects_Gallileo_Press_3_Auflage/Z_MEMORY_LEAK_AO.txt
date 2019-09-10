@@ -1,0 +1,110 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_MEMORY_LEAK_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_memory_leak_ao.
+
+************************************************************************
+* Report Name  : Z_MEMORY_LEAK_AO                                                 *
+* Report Title : Beispiel für ein Program mit Speicherleck                                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 02/01/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects Buch S.1064                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:02.01.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+SELECTION-SCREEN BEGIN OF SCREEN 100.
+PARAMETERS p_dbtab TYPE c LENGTH 30 DEFAULT 'SFLIGHT'.
+SELECTION-SCREEN END OF SCREEN 100.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+    CLASS-EVENTS trigger.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS dbtab_data DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS dbtab_data DEFINITION.
+  PUBLIC SECTION.
+    METHODS: constructor
+    IMPORTING dbtab TYPE csequence
+      RAISING cx_sy_create_data_error
+      cx_sy_open_sql_error,
+      handle_data
+      for event trigger of demo.
+  PRIVATE SECTION.
+    DATA data_ref TYPE REF TO data.
+ENDCLASS.                    "dbtab_data DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: oref TYPE REF TO dbtab_data,
+          error TYPE REF TO cx_root.
+    DO.
+      CALL SELECTION-SCREEN 100.
+      IF sy-subrc <> 0.
+        RETURN.
+      ENDIF.
+      TRY.
+          CREATE OBJECT oref
+          EXPORTING dbtab = p_dbtab.
+          RAISE EVENT trigger.
+        CATCH  cx_sy_create_data_error
+          cx_sy_open_sql_error INTO error.
+          MESSAGE error TYPE 'I' DISPLAY LIKE 'E'.
+          RETURN.
+      ENDTRY.
+    ENDDO.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS dbtab_data IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS dbtab_data IMPLEMENTATION.
+  METHOD constructor.
+    FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
+    CREATE DATA data_ref
+          TYPE STANDARD TABLE OF (dbtab).
+    ASSIGN data_ref->* TO <table>.
+    SELECT *
+    FROM (dbtab)
+    INTO TABLE <table>.
+    SET HANDLER handle_data.
+  ENDMETHOD.                    "constructor
+  METHOD handle_data.
+    MESSAGE 'Handling data...' TYPE 'S'.
+  ENDMETHOD.                    "handle_data
+ENDCLASS.                    "dbtab_data IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

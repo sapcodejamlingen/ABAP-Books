@@ -1,0 +1,149 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_DROPDOWN_LIST_BOX_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_dropdown_list_box_ao.
+
+************************************************************************
+* Report Name  : Z_DROPDOWN_LIST_BOX_AO                                *
+* Report Title : Erzeugen einer Werteliste für die Eingabehilfe        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/14/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen ABAP Book S. 605                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.14.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+TABLES sdyn_conn.
+DATA ok_code TYPE sy-ucomm.
+
+*----------------------------------------------------------------------*
+*       CLASS dynpro_utilitys DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS dynpro_utilities DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS value_help.
+ENDCLASS.                    "dynpro_utilitys DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS dynpro_utilitys IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS dynpro_utilities IMPLEMENTATION.
+  METHOD value_help.
+    TYPES: BEGIN OF carrid_line,
+      carrid TYPE spfli-carrid,
+      carrname TYPE scarr-carrname,
+      END OF carrid_line.
+    DATA carrid_list TYPE STANDARD TABLE OF carrid_line.
+    SELECT carrid carrname
+      FROM scarr
+      INTO CORRESPONDING FIELDS OF TABLE carrid_list.
+    CALL FUNCTION 'F4IF_INT_TABLE_VALUE_REQUEST'
+      EXPORTING
+*   DDIC_STRUCTURE         = ' '
+        retfield               = 'CARRID'
+*   PVALKEY                = ' '
+*   DYNPPROG               = ' '
+*   DYNPNR                 = ' '
+*   DYNPROFIELD            = ' '
+*   STEPL                  = 0
+*   WINDOW_TITLE           =
+*   VALUE                  = ' '
+       value_org              = 'S'
+*   MULTIPLE_CHOICE        = ' '
+*   DISPLAY                = ' '
+*   CALLBACK_PROGRAM       = ' '
+*   CALLBACK_FORM          = ' '
+*   MARK_TAB               =
+* IMPORTING
+*   USER_RESET             =
+      TABLES
+        value_tab              = carrid_list
+*   FIELD_TAB              =
+*   RETURN_TAB             =
+*   DYNPFLD_MAPPING        =
+     EXCEPTIONS
+       parameter_error        = 1
+       no_values_found        = 2
+       OTHERS                 = 3
+              .
+    IF sy-subrc <> 0.
+* MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+*         WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+    ENDIF.
+  ENDMETHOD.                    "value_help
+
+ENDCLASS.                    "dynpro_utilitys IMPLEMENTATION
+
+START-OF-SELECTION.
+  CALL SCREEN 100.
+
+*----------------------------------------------------------------------*
+*  MODULE status_0100 OUTPUT
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+  SET PF-STATUS 'SCREEN_100'.
+ENDMODULE.                    "status_0100 OUTPUT
+
+*----------------------------------------------------------------------*
+*  MODULE cancel INPUT
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+MODULE cancel INPUT.
+  LEAVE PROGRAM.
+ENDMODULE.                    "cancel INPUT
+
+*----------------------------------------------------------------------*
+*  MODULE user_command_0100 INPUT
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+  CASE ok_code.
+    WHEN 'SELECTED'.
+      MESSAGE i888(sabapdocu) WITH sdyn_conn-carrid.
+  ENDCASE.
+ENDMODULE.                    "user_command_0100 INPUT
+
+
+
+*----------------------------------------------------------------------*
+*  MODULE create_dropdown_box INPUT
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+MODULE create_dropdown_box INPUT.
+  dynpro_utilities=>value_help( ).
+ENDMODULE.                    "create_dropdown_box INPUT
+
+
+
+PROCESS BEFORE OUTPUT.
+  MODULE status_0100.
+*
+PROCESS AFTER INPUT.
+  MODULE user_command_0100.
+  MODULE cancel AT EXIT-COMMAND.
+  MODULE user_command_0100.
+
+PROCESS ON VALUE-REQUEST.
+  FIELD sdyn_conn-carrid MODULE create_dropdown_box.

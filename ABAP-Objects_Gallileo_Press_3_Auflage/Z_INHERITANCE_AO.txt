@@ -1,0 +1,118 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_INHERITANCE_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_inheritance_ao.
+
+************************************************************************
+* Report Name  : z_inheritance_ao                                *
+* Report Title : Einfaches Beispiel zur Vererbung                    *
+* SAP Release 6.0                                                      *
+* Author�s Name: BUESCHERM                                         *
+* Create Date  : 01/05/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects Buch S. 398              *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.05.19 | Author: M.B�scher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle DEFINITION.
+  PUBLIC SECTION.
+    METHODS: accelerate IMPORTING delta TYPE i,
+             show_speed.
+  PROTECTED SECTION.
+    DATA speed TYPE i.
+ENDCLASS.                    "vehicle DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS car DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS car DEFINITION INHERITING FROM vehicle.
+ENDCLASS.                    "car DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS truck DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS truck DEFINITION INHERITING FROM vehicle.
+  PUBLIC SECTION.
+    METHODS: load IMPORTING freight TYPE string,
+             unload.
+  PROTECTED SECTION.
+    DATA freight TYPE string.
+ENDCLASS.                    "truck DEFINITION
+*----------------------------------------------------------------------*
+*       CLASS vehicle IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle IMPLEMENTATION.
+  METHOD accelerate.
+    me->speed = me->speed + delta.
+  ENDMETHOD.                    "accelerate
+  METHOD show_speed.
+    DATA output TYPE string.
+    output = me->speed.
+    MESSAGE output TYPE 'I'.
+  ENDMETHOD.                    "show_speed
+ENDCLASS.                    "vehicle IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS truck IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS truck IMPLEMENTATION.
+  METHOD load.
+    me->freight = freight.
+  ENDMETHOD.                    "load
+  METHOD unload.
+    CLEAR me->freight.
+  ENDMETHOD.                "load
+ENDCLASS.                    "truck IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: car_ref TYPE REF TO car,
+          truck_ref TYPE REF TO truck.
+    CREATE OBJECT: car_ref,
+    truck_ref.
+    car_ref->accelerate( 130 ).
+    car_ref->show_speed( ).
+    truck_ref->load( `Beer`).
+    truck_ref->accelerate( 110 ).
+    truck_ref->show_speed( ).
+    truck_ref->unload( ).
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

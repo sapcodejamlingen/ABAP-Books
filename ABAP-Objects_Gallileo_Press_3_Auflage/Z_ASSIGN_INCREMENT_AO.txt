@@ -1,0 +1,63 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_ASSIGN_INCREMENT_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_assign_increment_ao.
+
+************************************************************************
+* Report Name  : Z_ASSIGN_INCREMENT_AO                                                 *
+* Report Title : Inkrementelle Zuweisung                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/28/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects S. 878               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.28.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: BEGIN OF text,
+              comp1 TYPE c LENGTH 2 VALUE 'xx',
+              comp2 TYPE c LENGTH 10 VALUE 'aabbccddee',
+          END OF text,
+      result TYPE string.
+    FIELD-SYMBOLS <fs> TYPE c.
+    DO.
+      ASSIGN text-comp1 INCREMENT sy-index
+      TO <fs> RANGE text.
+      IF sy-subrc <> 0.
+        EXIT.
+      ENDIF.
+      CONCATENATE result <fs> INTO result SEPARATED BY space.
+    ENDDO.
+    MESSAGE result TYPE 'I'.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+demo=>main( ).

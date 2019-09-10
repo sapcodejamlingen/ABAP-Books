@@ -1,0 +1,40 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_DRIVE_LOCAL_STATIC_VEHICLEAO
+*& Seite: 213
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  Z_DRIVE_LOCAL_STATIC_VEHICLEAO.
+
+************************************************************************
+* Report Name  : Z_DRIVE_LOCAL_STATIC_VEHICLEAO.*
+* Report Title : Listnings ABAP Objects Buch                           *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/03/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen aus dem Buch SAP Objects                      *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01/03/19 | Author: M.Buescher| Destrcription/Transport  *
+************************************************************************
+
+class static_vehicle definition.
+
+  endclass.
+
+  class static_vehicle implementation.
+
+    endclass.
+
+    START-OF-SELECTION.
+    zcl_static_vehicle=>accelerate( 100 ).
+    zcl_static_vehicle=>accelerate( 200 ).
+    zcl_static_vehicle=>show_speed( ).

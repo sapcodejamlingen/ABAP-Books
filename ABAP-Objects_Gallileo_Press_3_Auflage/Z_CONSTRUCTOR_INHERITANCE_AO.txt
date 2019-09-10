@@ -1,0 +1,110 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_CONSTRUCTOR_INHERITANCE_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_constructor_inheritance_ao.
+
+************************************************************************
+* Report Name  : Z_CONSTRUCTOR_INHERITANCE_AO                          *
+* Report Title : Instanzkonstructoren in der Vererbung                 *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/07/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP OBJECTS S. 409               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.07.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS vessel DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vessel DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor IMPORTING i_name TYPE string.
+  PROTECTED SECTION.
+    DATA name TYPE string.
+ENDCLASS.                    "vessel DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS ship DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS ship DEFINITION INHERITING FROM vessel.
+
+ENDCLASS.                    "ship DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS motorship DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS motorship DEFINITION INHERITING FROM ship.
+  PUBLIC SECTION.
+    METHODS constructor IMPORTING i_name TYPE string
+                            i_fuelamount TYPE i.
+  PRIVATE SECTION.
+    DATA fuelamount TYPE i.
+ENDCLASS.                    "motorship DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS vessel IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vessel IMPLEMENTATION.
+  METHOD constructor.
+    name = i_name.
+  ENDMETHOD.                    "constructor
+ENDCLASS.                    "vessel IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS motorship IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS motorship IMPLEMENTATION.
+  METHOD constructor.
+    super->constructor( i_name ).
+    fuelamount = i_fuelamount.
+  ENDMETHOD.                    "constructor
+ENDCLASS.                    "motorship IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: o_vessel    TYPE REF TO vessel,
+          o_ship      TYPE REF TO ship,
+          o_motorship TYPE REF TO motorship.
+  CREATE OBJECT:
+    o_vessel    EXPORTING i_name        = 'Vincent',
+    o_ship      EXPORTING i_name        = 'Mia',
+    o_motorship EXPORTING i_name        = 'Jules'
+                          i_fuelamount  = 12000.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

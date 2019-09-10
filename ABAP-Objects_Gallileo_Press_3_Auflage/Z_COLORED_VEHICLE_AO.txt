@@ -1,0 +1,104 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_COLORED_VEHICLE_AO
+*& S.233
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_colored_vehicle_ao.
+
+************************************************************************
+* Report Name  :  z_colored_vehicle_ao                                          *
+* Report Title : Listnings ABAP Objects Buch                           *
+* SAP Release 6.0                                                      *
+* Author�s Name: BUESCHERM                                         *
+* Create Date  : 01/03/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : �bungen aus dem Buch SAP Objects                      *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01/03/19 | Author: M.Buescher| Destrcription/Transport  *
+************************************************************************
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle DEFINITION.
+  PUBLIC SECTION.
+    METHODS: constructor IMPORTING color TYPE string,
+              accelaerate IMPORTING delta TYPE i,
+                      show_speed.
+  PRIVATE SECTION.
+    DATA: color TYPE string,
+           speed TYPE i.
+ENDCLASS.                    "vehicle DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle IMPLEMENTATION.
+  METHOD constructor.
+    me->color = color.
+  ENDMETHOD.                    "constructor
+
+  METHOD accelaerate.
+    speed = speed + delta.
+  ENDMETHOD.                    "accelaerate
+  METHOD show_speed.
+    DATA output TYPE string.
+    output = me->speed.
+    CONCATENATE me->color `: ` output INTO output.
+    MESSAGE output TYPE 'I'.
+  ENDMETHOD.                    "show_speed
+ENDCLASS.                    "vehicle IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+
+    DATA: red_vehicle TYPE REF TO vehicle,
+    blue_vehicle TYPE REF TO vehicle,
+    green_vehicle TYPE REF TO vehicle.
+
+    CREATE OBJECT:
+    red_vehicle EXPORTING color = `Red`,
+      blue_vehicle EXPORTING color = `Blue`,
+        green_vehicle EXPORTING color = `Green`.
+
+    red_vehicle->accelaerate( 100 ).
+    blue_vehicle->accelaerate( 200 ).
+    green_vehicle->accelaerate( 300 ).
+
+    red_vehicle->show_speed( ).
+    blue_vehicle->show_speed( ).
+    green_vehicle->show_speed( ).
+
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

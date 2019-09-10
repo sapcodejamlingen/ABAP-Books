@@ -1,0 +1,234 @@
+method START.
+*AObJEcTs s. 612
+  CALL FUNCTION 'Z_CHANGE_PLANETYPE_AO'.
+endmethod.
+
+FUNCTION z_change_planetype_ao.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"----------------------------------------------------------------------
+
+  CALL SCREEN 100.
+
+
+
+ENDFUNCTION.
+
+*ABAP ObJEcTs S. 614
+PROCESS BEFORE OUTPUT.
+  MODULE set_status.
+
+PROCESS AFTER INPUT.
+  MODULE cancel AT EXIT-COMMAND.
+  FIELD demo_conn-fldate MODULE user_command_100.
+
+*ABAP ObJEcTs S. 614
+PROCESS BEFORE OUTPUT.
+  MODULE set_status.
+
+PROCESS AFTER INPUT.
+  MODULE cancel AT EXIT-COMMAND.
+  CHAIN.
+    FIELD demo_conn-planetype.
+    MODULE: get_seatsmax_200 ON CHAIN-REQUEST,
+            user_command_200.
+  ENDCHAIN.
+
+*******************************************************************
+*   System-defined Include-files.                                 *
+*******************************************************************
+  INCLUDE LZ_CHANGE_FLIGHTSAOTOP.            " Global Data
+  INCLUDE LZ_CHANGE_FLIGHTSAOUXX.            " Function Modules
+
+*******************************************************************
+*   User-defined Include-files (if necessary).                    *
+*******************************************************************
+*AObJEcTs S.616
+* INCLUDE LZ_CHANGE_FLIGHTSAOF...            " Subprograms
+ INCLUDE LZ_CHANGE_FLIGHTSAOO01...            " PBO-Modules
+ INCLUDE LZ_CHANGE_FLIGHTSAOi01...            " PAI-Modules
+ INCLUDE LZ_CHANGE_FLIGHTSAOP01...            " Class Implementations
+
+FUNCTION-POOL Z_CHANGE_FLIGHTSAO.           "MESSAGE-ID ..
+
+
+
+TABLES demo_conn.
+
+DATA: ok_code TYPE sy-ucomm,
+      save_ok TYPE sy-ucomm.
+
+*----------------------------------------------------------------------*
+*       CLASS confirm DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS confirm DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS popup RETURNING value(rc)
+                        TYPE syst-subrc.
+ENDCLASS.                    "confirm DEFINITION
+
+
+*&---------------------------------------------------------------------*
+*&  Include           LZ_CHANGE_FLIGHTSAOO01
+*&---------------------------------------------------------------------*
+*AObJEcTs S.617
+MODULE set_status OUTPUT.
+  SET TITLEBAR 'TITLE_100_200'.
+  CASE sy-dynnr.
+    WHEN 100.
+      SET PF-STATUS 'SCREEN_100_200' EXCLUDING 'UPDATE'.
+    WHEN 200.
+      SET PF-STATUS 'SCREEN_100_200' EXCLUDING 'CHANGE'.
+  ENDCASE.
+ENDMODULE.                    "set_status OUTPUT
+
+
+
+*&---------------------------------------------------------------------*
+*&  Include           LZ_CHANGE_FLIGHTSAOI01
+*&---------------------------------------------------------------------*
+*AObJEcTs S.618
+MODULE cancel INPUT.
+  CASE sy-dynnr.
+    WHEN 100.
+      LEAVE TO SCREEN 0.
+    WHEN 200.
+      LEAVE TO SCREEN 100.
+  ENDCASE.
+ENDMODULE.                    "cancel INPUT
+*----------------------------------------------------------------------*
+*  MODULE user_command_100 INPUT
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+MODULE user_command_100 INPUT.
+  save_ok = ok_code.
+  CLEAR ok_code.
+  CASE save_ok.
+    WHEN 'CHANGE'.
+      TRY.
+          zcl_change_planetype_ao=>get_flight(
+          CHANGING conn_data = demo_conn ).
+          SET SCREEN 200.
+        CATCH zcx_no_flight.
+          MESSAGE text-nof TYPE 'E'.
+      ENDTRY.
+    WHEN 'BACK' OR 'EXIT'.
+      LEAVE TO SCREEN 0.
+    WHEN OTHERS.
+      LEAVE TO SCREEN 100.
+  ENDCASE.
+ENDMODULE. "user_command_100 INPUT
+*----------------------------------------------------------------------*
+*  MODULE get_seatsmax_200 INPUT
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+MODULE get_seatsmax_200 INPUT.
+  zcl_change_planetype_ao=>get_seatsmax(
+  CHANGING conn_data = demo_conn ).
+ENDMODULE. "get_seatsmax_200 INPUT
+
+*----------------------------------------------------------------------*
+*  MODULE user_command_200 INPUT
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+MODULE user_command_200 INPUT.
+  save_ok = ok_code.
+  CLEAR ok_code.
+  CASE save_ok.
+    WHEN 'UPDATE'.
+      IF zcl_change_planetype_ao=>check_seats(
+        conn_data = demo_conn ) <> 0.
+        MESSAGE text-nop TYPE 'E'.
+      ENDIF.
+      IF zcl_change_planetype_ao=>update_planetype(
+        conn_data = demo_conn ) = 0.
+        MESSAGE text-chd TYPE 'I'.
+      ELSE.
+        MESSAGE text-nch TYPE 'I' DISPLAY LIKE 'E'.
+      ENDIF.
+      SET SCREEN 200.
+    WHEN 'BACK' OR 'EXIT'.
+      IF zcl_change_planetype_ao=>compare_planetype(
+        demo_conn-planetype ) = 4.
+        IF confirm=>popup( ) = 2.
+          LEAVE TO SCREEN 200.
+        ENDIF.
+      ENDIF.
+      IF save_ok = 'BACK'.
+        SET SCREEN 100.
+      ELSEIF save_ok = 'EXIT'.
+        SET SCREEN 0.
+      ENDIF.
+    WHEN OTHERS.
+      LEAVE TO SCREEN 200.
+  ENDCASE.
+ENDMODULE.                    "user_command_200 INPUT
+
+
+*&---------------------------------------------------------------------*
+*&  Include           LZ_CHANGE_FLIGHTSAOP01
+*&---------------------------------------------------------------------*
+
+CLASS confirm IMPLEMENTATION.
+  METHOD popup.
+    DATA ans TYPE c LENGTH 1.
+    CALL FUNCTION 'POPUP_TO_CONFIRM'
+      EXPORTING
+        titlebar              = text-sec
+        text_question         = text-que
+        text_button_1         = text-yes
+        icon_button_1         = 'ICON_CHECKED'
+        text_button_2         = text-non
+        icon_button_2         = 'ICON_FLIGHT'
+        default_button        = '2'
+        display_cancel_button = ' '
+      IMPORTING
+        answer                = ans.
+    rc = ans.
+  ENDMETHOD.                    "popup
+ENDCLASS.                    "confirm IMPLEMENTATION
+
+
+*----------------------------------------------------------------------*
+*       CLASS ZCL_CHANGE_PLANETYPE_AO  DEFINITIO
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS zcl_change_planetype_ao DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+*"* public components of class ZCL_CHANGE_PLANETYPE_AO
+*"* do not include other source files here!!!
+PUBLIC SECTION.
+
+  CLASS-METHODS start .
+  CLASS-METHODS get_flight
+    CHANGING
+      !conn_data TYPE demo_conn
+    RAISING
+      zcx_no_flight .
+  CLASS-METHODS get_seatsmax
+    CHANGING
+      !conn_data TYPE demo_conn .
+  CLASS-METHODS check_seats
+    IMPORTING
+      !conn_data TYPE demo_conn
+    RETURNING
+      value(rc) TYPE syst-subrc .
+  CLASS-METHODS update_planetype
+    IMPORTING
+      !conn_data TYPE demo_conn
+    RETURNING
+      value(rc) TYPE syst-subrc .
+  CLASS-METHODS compare_planetype
+  IMPORTING planetype TYPE demo_conn-planetype
+    RETURNING value(rc) TYPE syst-subrc.
+
+

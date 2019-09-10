@@ -1,0 +1,68 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_DRIV_MANY_VEHICLES_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_drive_many_vehicles_ao.
+
+************************************************************************
+* Report Name  : Z_DRIV_MANY_VEHICLES_AO*
+* Report Title : Listnings ABAP Objects Buch                           *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/03/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen aus dem Buch SAP Objects                      *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01/03/19 | Author: M.Buescher| Destrcription/Transport  *
+************************************************************************
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo  IMPLEMENTAION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo implementation.
+  METHOD main.
+
+    DATA: vehicle TYPE REF TO zcl_vehicle,
+          vehicle_tab TYPE TABLE OF
+            REF TO zcl_vehicle,
+            n TYPE i VALUE 5,
+            speed TYPE i.
+
+    DO n TIMES.
+      CREATE OBJECT vehicle.
+      speed = sy-index * 10.
+      vehicle->accelerate( speed ).
+      APPEND vehicle TO vehicle_tab.
+    ENDDO.
+
+    LOOP AT vehicle_tab INTO vehicle.
+      vehicle->show_speed( ).
+    ENDLOOP.
+
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo  IMPLEMENTAION
+
+START-OF-SELECTION.
+  demo=>main( ).

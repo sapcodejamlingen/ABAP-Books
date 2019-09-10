@@ -1,0 +1,56 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_CALL_VERY_SINPLE_TRANS_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_call_very_sinple_trans_ao.
+
+************************************************************************
+* Report Name  : Z_CALL_VERY_SINPLE_TRANS_AO                         *
+* Report Title : Aufruf einer simplen Transformation                  *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/31/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects Buch S.1012                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.31.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: str TYPE string VALUE `Hello XML!`,
+          dat TYPE d,
+          xmlstr TYPE xstring.
+    dat = sy-datum.
+    CALL TRANSFORMATION z_very_simple_transformation_a
+                                  SOURCE root1 = dat
+                                  root2 = str
+                                  RESULT XML xmlstr.
+    CALL FUNCTION 'DISPLAY_XML_STRING'
+      EXPORTING
+        xml_string = xmlstr.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

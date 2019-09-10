@@ -1,0 +1,115 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_ICF_CLIENT_VIA_DEST_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_icf_client_via_dest_ao.
+
+************************************************************************
+* Report Name  : Z_ICF_CLIENT_VIA_DEST_AO                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/31/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects S.966                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.31.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS: main,
+                   display_list
+                 IMPORTING value(html) TYPE string.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: client TYPE REF TO if_http_client,
+          path TYPE string
+            VALUE '/Z_HTTP_REPORTAO?LH0400',
+          errortext TYPE string,
+          html_body TYPE string.
+    cl_http_client=>create_by_destination(
+      EXPORTING destination = 'HTTP_TEST'
+      IMPORTING
+                client = client
+      EXCEPTIONS
+                destination_not_found     = 1
+                internal_error            = 2
+                argument_not_found        = 3
+                 destination_no_authority = 4
+                plugin_not_active         = 5
+                OTHERS                    = 6 ).
+    IF sy-subrc <> 0.
+      MESSAGE 'Client object not created' TYPE 'I'
+              DISPLAY LIKE 'E'.
+      RETURN.
+    ENDIF.
+    cl_http_utility=>set_request_uri(
+              request = client->request
+              uri = '/Z_HTTP_REPORTAO?LH0400' ).
+    client->send(
+    EXCEPTIONS  http_communication_failure  = 1
+                http_invalid_state          = 2
+                http_processing_failed      = 3
+                OTHERS                      = 4 ).
+    IF sy-subrc <> 0.
+      client->get_last_error(
+      IMPORTING message = errortext ).
+      MESSAGE errortext TYPE 'I'
+      DISPLAY LIKE 'E'.
+      RETURN.
+    ENDIF.
+    client->receive(
+    EXCEPTIONS
+      http_communication_failure = 1
+      http_invalid_state = 2
+      http_processing_failed = 3
+      OTHERS = 4 ) .
+    IF sy-subrc <> 0.
+      client->get_last_error(
+        IMPORTING message = errortext ).
+      MESSAGE errortext TYPE 'I'
+      DISPLAY LIKE 'E'.
+      RETURN.
+    ENDIF.
+    html_body = client->response->get_cdata( ).
+    client->close( ).
+    display_list( html_body ).
+  ENDMETHOD.                    "main
+  METHOD display_list.
+    DATA: flight TYPE zcl_http_report=>tflight,
+          alv TYPE REF TO cl_salv_table.
+    CALL TRANSFORMATION z_flight_to_html_ao
+      SOURCE XML html
+      RESULT flight = flight.
+    TRY.
+        cl_salv_table=>factory(
+        IMPORTING r_salv_table = alv
+          CHANGING t_table = flight-table ).
+        alv->display( ).
+      CATCH cx_salv_msg.
+        MESSAGE 'ALV display not possible' TYPE 'I'
+          DISPLAY LIKE 'E'.
+    ENDTRY.
+  ENDMETHOD.                    "display_list
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

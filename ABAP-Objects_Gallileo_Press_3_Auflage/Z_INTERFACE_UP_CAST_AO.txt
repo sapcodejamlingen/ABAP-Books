@@ -1,0 +1,95 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_INTERFACE_UP_CAST_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_interface_up_cast_ao.
+
+************************************************************************
+* Report Name  : Z_INTERFACE_UP_CAST_AO                                *
+* Report Title : Interfacereferenzvariablen                     *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/07/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects S 442               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.07.18 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+INTERFACE i1.
+  METHODS meth.
+ENDINTERFACE.                    "i1,
+
+*----------------------------------------------------------------------*
+*       INTERFACE i2
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+INTERFACE i2.
+  INTERFACES i1.
+  METHODS meth.
+ENDINTERFACE.                    "i2
+
+*----------------------------------------------------------------------*
+*       CLASS c1 DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS c1 DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES i2.
+ENDCLASS.                    "c1 DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: iref1 TYPE REF TO i1,
+          iref2 TYPE REF TO i2.
+    CREATE OBJECT iref2 TYPE c1.
+    iref1 = iref2.
+    CALL METHOD iref1->meth.
+    CALL METHOD iref2->meth.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS c1 IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS c1 IMPLEMENTATION.
+  METHOD i1~meth.
+    MESSAGE 'Method of interafce i1' TYPE 'I'.
+  ENDMETHOD.                                                "i1~meth
+  METHOD i2~meth.
+    MESSAGE 'Method of interface i2' TYPE 'I'.
+  ENDMETHOD.                                                "i2~meth
+ENDCLASS.                    "c1 IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

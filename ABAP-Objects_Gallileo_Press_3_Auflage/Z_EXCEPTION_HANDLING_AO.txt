@@ -1,0 +1,68 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_EXCEPTION_HANDLING_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_exception_handling_ao.
+
+************************************************************************
+* Report Name  : Z_EXCEPTION_HANDLING_AO                               *
+* Report Title : Behandeln von Ausnahmen                               *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/11/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen ABAP ObJEcTs S. 531               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.11.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS lcl_demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS
+    main IMPORTING operand TYPE i.
+ENDCLASS.                    "lcl_demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS lcl_demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS lcl_demo IMPLEMENTATION.
+  METHOD main.
+    DATA: x TYPE i,
+          oerror TYPE REF TO cx_root,
+          txterror TYPE string.
+    TRY.
+        x = 1 / operand.
+        x = SQRT( operand ).
+        x = operand ** operand.
+
+      CATCH cx_sy_zerodivide INTO oerror.
+        txterror = oerror->get_longtext( ).
+        MESSAGE txterror TYPE 'I' DISPLAY LIKE 'E'.
+
+      CATCH cx_sy_arg_out_of_domain INTO oerror.
+        txterror = oerror->get_longtext( ).
+        MESSAGE txterror TYPE 'I' DISPLAY LIKE 'E'.
+
+      CATCH cx_root INTO oerror.
+        txterror = oerror->get_longtext( ).
+        MESSAGE txterror TYPE 'I' DISPLAY LIKE 'E'.
+    ENDTRY.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "lcl_demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  lcl_demo=>main( operand = 0 ).
+  lcl_demo=>main( operand = -1 ).
+  lcl_demo=>main( operand = 1000000 ).

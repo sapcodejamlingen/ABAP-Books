@@ -1,0 +1,54 @@
+REPORT  z_show_reservations.
+*ABAP Objects S.144
+
+************************************************************************
+* Report Name  : z_show_reservations.                                  *
+* Report Title : Listnings ABAP Objects Buch                           *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 08/08/2018 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen aus dem Buch SAP Objects                      *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01/03/19 | Author: M.Buescher| Destrcription/Transport  *
+************************************************************************
+
+CLASS report_reservations DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS show_all.
+ENDCLASS.                    "report_reservations DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS report_reservations IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS report_reservations IMPLEMENTATION.
+  METHOD show_all.
+    DATA: reservations TYPE TABLE OF zreservations_ab,
+          alv TYPE REF TO cl_salv_table.
+
+
+    SELECT * FROM zreservations_ab
+      INTO TABLE reservations
+      ORDER BY date_from.
+    TRY.
+        cl_salv_table=>factory(
+        IMPORTING r_salv_table = alv
+          CHANGING t_table = reservations ).
+        alv->display( ).
+      CATCH cx_salv_msg.
+        MESSAGE 'ALV display not possible' TYPE 'I'
+               DISPLAY LIKE 'E'.
+    ENDTRY.
+  ENDMETHOD.                    "show_all
+ENDCLASS. "report_reservations IMPLEMENTATION
+
+START-OF-SELECTION.
+  report_reservations=>show_all( ).

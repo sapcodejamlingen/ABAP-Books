@@ -1,0 +1,82 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_ASSIGN_COMPONENT_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_assign_component_ao.
+
+************************************************************************
+* Report Name  : Z_ASSIGN_COMPONENT_AO                                                 *
+* Report Title : Strukturen komponentenweise zuweisen                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/28/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects S. 876                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.28.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+  PRIVATE SECTION.
+    CLASS-METHODS display_any_table
+                  IMPORTING any_table TYPE ANY TABLE.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA scarr_tab TYPE TABLE OF scarr.
+    SELECT * FROM scarr INTO TABLE scarr_tab.
+    display_any_table( scarr_tab ).
+  ENDMETHOD.                    "main
+  METHOD display_any_table.
+    DATA: text TYPE REF TO zcl_text,
+          text_line type zcl_text=>t_line,
+          tlen type i,
+          olen type i,
+          nlen type i,
+          offset type i.
+    FIELD-SYMBOLS: <wa> TYPE ANY,
+                   <comp> TYPE ANY.
+    text = zcl_text=>get_handle( ).
+    DESCRIBE FIELD text_line OUTPUT-LENGTH tlen.
+    LOOP AT any_table ASSIGNING <wa>.
+      CLEAR text_line.
+      offset = 0.
+      DO.
+        ASSIGN COMPONENT sy-index OF STRUCTURE <wa> TO <comp>.
+        IF sy-subrc <> 0.
+          EXIT.
+        ENDIF.
+        DESCRIBE FIELD <comp> OUTPUT-LENGTH olen.
+        nlen = offset + olen.
+        IF nlen > tlen.
+          EXIT.
+        ENDIF.
+        WRITE <comp> TO text_line+offset.
+        offset = offset + olen + 1.
+      ENDDO.
+      text->add_line( text_line ).
+    ENDLOOP.
+    text->display( ).
+  ENDMETHOD.                    "display_any_table
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

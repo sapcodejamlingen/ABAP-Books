@@ -1,0 +1,176 @@
+FUNCTION-POOL z_car_rental_screens.         "MESSAGE-ID ..
+*ABAP Objects S.109
+
+* Selection Screen for customer id
+
+SELECTION-SCREEN BEGIN OF SCREEN 1100 AS WINDOW
+                  TITLE text-cid.
+PARAMETERS id TYPE zcustomers_ab-id.
+SELECTION-SCREEN end of screen 1100.
+
+" Selection Screen for reservation data
+
+SELECTION-SCREEN BEGIN OF SCREEN 1200
+       AS WINDOW TITLE text-rsv.
+PARAMETERS category TYPE zcars_ab-category OBLIGATORY
+                      VALUE CHECK.
+
+PARAMETERS day_from TYPE zreservations_ab-date_from.
+PARAMETERS day_to TYPE zreservations_ab-date_to.
+SELECTION-SCREEN END OF SCREEN 1200.
+
+" Input check for selection screen.
+
+AT SELECTION-SCREEN.
+  CASE sy-dynnr.
+
+    WHEN 1200.
+      IF day_to < day_from.
+        MESSAGE 'Day_to must not be before DAY_FROM.'
+        TYPE 'E'.
+      ENDIF.
+  ENDCASE.
+
+
+FUNCTION z_input_customer.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  EXPORTING
+*"     REFERENCE(CUSTOMER_ID) TYPE  ZCUSTOMER_ID_AB
+*"----------------------------------------------------------------------
+*ABAP Objects S.114
+
+  CALL SELECTION-SCREEN 1100 STARTING AT 10 10.
+
+  IF sy-subrc <> 0.
+    LEAVE PROGRAM.
+  ENDIF.
+  customer_id = id.
+
+
+
+ENDFUNCTION.
+
+FUNCTION z_input_reservation.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  EXPORTING
+*"     REFERENCE(CAR_CATEGORY) TYPE  ZCARS_AB-CATEGORY
+*"     REFERENCE(DATE_FROM) TYPE  ZRESERVATIONS_AB-DATE_FROM
+*"     REFERENCE(DATE_TO) TYPE  ZRESERVATIONS_AB-DATE_TO
+*"----------------------------------------------------------------------
+*ABAP Objects S.115
+
+  CALL SELECTION-SCREEN 1200 STARTING AT 10 10.
+
+  IF sy-subrc <> 0.
+    LEAVE PROGRAM.
+  ENDIF.
+
+  car_category = category.
+  date_from = day_from.
+  date_to = day_to.
+
+
+
+ENDFUNCTION.
+
+
+
+*ABAP Objects S. 126
+METHOD class_constructor.
+  CREATE OBJECT car_reservations.
+
+ENDMETHOD.
+
+
+*ABAP Objects S. 126
+METHOD constructor.
+  SELECT * FROM zreservations_ab
+    INTO TABLE me->reservation_tab.
+ENDMETHOD.
+
+*ABAP Objects S. 122
+METHOD make_reservation.
+  DATA:     license_plate TYPE zcars_ab-license_plate,
+            reservation_wa LIKE LINE OF reservation_tab,
+            reservation_num TYPE i,
+            mess TYPE string.
+
+  reservation_num = LINES( reservation_tab ).
+
+  SELECT license_plate
+    FROM zcars_ab
+    into (license_plate)
+    WHERE category = category.
+
+    LOOP AT reservation_tab
+      TRANSPORTING NO FIELDS
+      WHERE license_plate = license_plate
+      AND NOT ( date_from > date_to OR
+              date_to < date_from ).
+    ENDLOOP.
+
+    IF sy-subrc <> 0.
+      reservation_wa-reservation_id = reservation_num + 1.
+      reservation_wa-customer_id = customer.
+      reservation_wa-license_plate = license_plate.
+      reservation_wa-date_from = date_from.
+      reservation_wa-date_to = date_to.
+      INSERT reservation_wa INTO TABLE reservation_tab.
+      IF sy-subrc = 0.
+        CONCATENATE license_plate ' reserved!' INTO mess.
+        MESSAGE mess TYPE 'I'.
+      ELSE.
+        MESSAGE 'Internal Error!' TYPE 'I' DISPLAY LIKE 'E'.
+        LEAVE PROGRAM.
+      ENDIF.
+      RETURN.
+    ENDIF.
+  ENDSELECT.
+
+  RAISE EXCEPTION TYPE zcx_no_car_available.
+
+
+ENDMETHOD.
+
+
+*ABAP Objects S. 128
+METHOD persist_reservations.
+  DELETE FROM zreservations_ab.
+  INSERT zreservations_ab
+          FROM TABLE reservation_tab.
+ENDMETHOD.
+
+*ABAP Objects S. 131
+METHOD constructor.
+  SELECT SINGLE * FROM zcustomers_ab
+    INTO customer_wa
+    WHERE id = id.
+
+  IF sy-subrc <> 0.
+    RAISE EXCEPTION TYPE zcx_no_customer.
+  ENDIF.
+ENDMETHOD.
+
+
+*ABAP Objects S134
+METHOD reserve_a_car.
+
+  DATA: category TYPE zcars_ab-category,
+        date_from TYPE zreservations_ab-date_from,
+        date_to TYPE zreservations_ab-date_to.
+
+  CALL FUNCTION 'Z_INPUT_RESERVATION'
+    IMPORTING
+      car_category = category
+      date_from    = date_from
+      date_to      = date_to.
+
+  car_reservations->make_reservation(
+                  customer = me->customer_wa-id
+                  category = category
+                  date_from = date_from
+                  date_to = date_to ).
+
+ENDMETHOD.

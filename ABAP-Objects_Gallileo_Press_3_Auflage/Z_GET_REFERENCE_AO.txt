@@ -1,0 +1,58 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_GET_REFERENCE_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_get_reference_ao.
+
+************************************************************************
+* Report Name  : Z_GET_REFERENCE_AO                                                 *
+* Report Title : Beschaffung einer Datenreferenz                                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/28/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen ABAP ObJEcTs S. 883               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.28.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODs: main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    TYPES char1 TYPE c LENGTH 1.
+    DATA: dref TYPE REF TO char1,
+          dref_tab LIKE TABLE OF dref,
+          text TYPE c LENGTH 10 VALUE '0123456789',
+          off TYPE i.
+    DO 10 TIMES.
+      off = sy-index - 1.
+      GET REFERENCE OF text+off(1) INTO dref.
+      APPEND dref TO dref_tab.
+    ENDDO.
+    LOOP AT dref_tab INTO dref.
+      MESSAGE dref->* TYPE 'I'.
+    ENDLOOP.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

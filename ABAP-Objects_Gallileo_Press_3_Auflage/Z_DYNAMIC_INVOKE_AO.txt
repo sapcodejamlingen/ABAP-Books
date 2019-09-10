@@ -1,0 +1,85 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_DYNAMIC_INVOKE_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_dynamic_invoke_ao.
+
+************************************************************************
+* Report Name  : Z_DYNAMIC_INVOKE_AO                                                 *
+* Report Title : Dynamischer Methodenaufruf                                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/28/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen ABAP ObJEcTs S. 908              *
+*              :                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.28.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS: p_class TYPE string
+                DEFAULT `CL_GUI_FRONTEND_SERVICES`,
+            p_meth TYPE string
+                DEFAULT `DIRECTORY_EXIST`,
+            p_in TYPE string
+                DEFAULT `DIRECTORY`,
+            p_value TYPE string
+                DEFAULT `c:\windows`,
+            p_out TYPE string
+               DEFAULT `RESULT`.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+    TYPE-POOLS abap.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: out_value TYPE string,
+          parameter TYPE abap_parmbind,
+          parameters TYPE abap_parmbind_tab,
+          error TYPE REF TO cx_root,
+          msg TYPE string.
+    parameter-name = p_in.
+    parameter-kind = cl_abap_objectdescr=>exporting.
+    GET REFERENCE OF p_value INTO parameter-value.
+    INSERT parameter INTO TABLE parameters.
+    parameter-name = p_out.
+    parameter-kind = cl_abap_objectdescr=>returning.
+    GET REFERENCE OF out_value INTO parameter-value.
+    INSERT parameter INTO TABLE parameters.
+    TRY.
+        CALL METHOD (p_class)=>(p_meth)
+          PARAMETER-TABLE
+            parameters.
+        CONCATENATE `Return value: ` out_value
+        INTO msg.
+        MESSAGE msg TYPE 'I'.
+      CATCH cx_sy_dyn_call_error INTO error.
+        MESSAGE error TYPE 'I' DISPLAY LIKE 'E'.
+    ENDTRY.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

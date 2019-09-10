@@ -1,0 +1,69 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_PARAMETER_PASSING_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_parameter_passing_ao.
+
+************************************************************************
+* Report Name  : Z_PARAMETER_PASSING_AO                                *
+* Report Title : Übergabeart von Formalparametern                      *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/05/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects Buch S. 378              *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.05.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION CREATE PRIVATE.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+  PRIVATE SECTION.
+    METHODS: meth1 IMPORTING value(idx) TYPE i,
+      meth2 IMPORTING reference(idx) TYPE i.
+    DATA msg TYPE string.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA oref TYPE REF TO demo.
+    CREATE OBJECT oref.
+    DO 2 TIMES.
+      oref->meth1( sy-index ).
+      oref->meth2( sy-index ).
+    ENDDO.
+  ENDMETHOD.                    "main
+  METHOD meth1.
+    DO 3 TIMES.
+      msg = idx.
+      CONCATENATE `meth1: ` msg INTO msg.
+      MESSAGE msg TYPE 'I'.
+    ENDDO.
+  ENDMETHOD.                                                "meth1
+  METHOD meth2.
+    DO 3 TIMES.
+      msg = idx.
+      CONCATENATE `meth2: ` msg INTO msg.
+      MESSAGE msg TYPE 'I'.
+    ENDDO.
+  ENDMETHOD.                                                "meth2
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

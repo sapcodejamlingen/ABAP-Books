@@ -1,0 +1,78 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_PROGRAM_LAYOUT_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_program_layout_ao.
+
+************************************************************************
+* Report Name  : Z_PROGRAM_LAYOUT_AO                                *
+* Report Title : Lokale klassische subroutine Pools                    *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/12/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen ABAP ObJEcTs Buch S. 165                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.12.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+INTERFACE intf.
+  METHODS meth IMPORTING text TYPE csequence.
+ENDINTERFACE.                    "intf
+
+*----------------------------------------------------------------------*
+*       CLASS cls DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS cls DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES intf.
+ENDCLASS.                    "cls DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS cls IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS cls IMPLEMENTATION.
+  METHOD intf~meth.
+    MESSAGE text TYPE 'I'.
+  ENDMETHOD.                    "intf~meth
+ENDCLASS.                    "cls IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA oref TYPE REF TO intf.
+    CREATE OBJECT oref TYPE cls.
+    oref->meth( 'Hallo ABAP!' ).
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

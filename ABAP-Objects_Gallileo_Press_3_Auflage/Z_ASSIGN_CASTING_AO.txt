@@ -1,0 +1,59 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_ASSIGN_CASTING_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_assign_casting_ao.
+
+************************************************************************
+* Report Name  : Z_ASSIGN_CASTING_AO                                                 *
+* Report Title : Casting mit Impliziter Typangabe                                        *
+* Report Title : Feldsymbole                                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/28/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen ABAP ObJEcTs S. 880               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.28.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    TYPES: BEGIN OF t_date,
+            year  TYPE n LENGTH 4,
+            month TYPE n LENGTH 2,
+            day   TYPE n LENGTH 2,
+      END OF t_date.
+    DATA msg TYPE string.
+    FIELD-SYMBOLS <date> TYPE t_date.
+    ASSIGN sy-datum TO <date> CASTING.
+    CONCATENATE <date>-year
+                <date>-month
+                <date>-day INTO msg SEPARATED BY '/'.
+    MESSAGE msg TYPE 'I'.
+  ENDMETHOD.                    "main
+
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

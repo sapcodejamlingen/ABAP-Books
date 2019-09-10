@@ -1,0 +1,77 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_ASXML_STRUCTURE_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_asxml_structure_ao.
+
+************************************************************************
+* Report Name  : Z_ASXML_STRUCTURE_AO                                                 *
+* Report Title : asXML für structuren                                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/31/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects Buch S.1006                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.31.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: BEGIN OF struct,
+          num TYPE i VALUE 20,
+          dat TYPE d VALUE '20060627',
+          END OF struct,
+          xmlstr TYPE xstring.
+    CALL TRANSFORMATION z_simple_structure_ao
+                          source structure = struct
+                                  RESULT XML xmlstr.
+    CALL FUNCTION 'DISPLAY_XML_STRING'
+      EXPORTING
+        xml_string = xmlstr.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).
+
+
+<?sap.transform simple?>
+<tt:transform xmlns:tt="http://www.sap.com/transformation-templates">
+
+  <tt:root name="structure"/>
+
+  <tt:template>
+    <STRUCTURE>
+      <tt:ref name=".structure">
+        <NUM>
+          <tt:value ref="num"/>
+        </NUM>
+        <DAT>
+          <tt:value ref="dat"/>
+        </DAT>
+      </tt:ref>
+    </STRUCTURE>
+  </tt:template>
+
+</tt:transform>

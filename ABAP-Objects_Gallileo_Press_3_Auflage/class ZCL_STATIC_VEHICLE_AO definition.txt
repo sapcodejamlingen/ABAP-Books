@@ -1,0 +1,13 @@
+class ZCL_STATIC_VEHICLE_AO definition
+  public
+  final
+  create public .
+
+*"* public components of class ZCL_STATIC_VEHICLE_AO
+*"* do not include other source files here!!!
+public section.
+
+  class-methods ACCELERATE
+    importing
+      !DELTA type I .
+  class-methods SHOW_SPEED .

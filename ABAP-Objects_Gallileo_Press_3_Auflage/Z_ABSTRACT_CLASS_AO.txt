@@ -1,0 +1,47 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_ABSTRACT_CLASS_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_abstract_class_ao.
+
+
+************************************************************************
+* Report Name  : Z_ABSTRACT_CLASS_AO                                  *
+* Report Title : Abstracte Klasse und Methoden                   *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/05/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects Buch S. 402              *
+*              : Darstellung der Unterschiede               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.05.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS vehicle DEFINITION ABSTRACT.
+  PUBLIC SECTION.
+    METHODS: accelerate IMPORTING delta TYPE i,
+      show_speed ABSTRACT.
+  PROTECTED SECTION.
+    DATA speed TYPE i.
+ENDCLASS.                    "vehicle DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle IMPLEMENTATION.
+  METHOD accelerate.
+    me->speed = me->speed + delta.
+  ENDMETHOD.                    "accelerate
+ENDCLASS.                    "vehicle IMPLEMENTATION

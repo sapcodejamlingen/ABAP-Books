@@ -1,0 +1,74 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_INCLUDE_STRUCTURE_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_include_structure_ao.
+
+************************************************************************
+* Report Name  : Z_INCLUDE_STRUCTURE_AO*
+* Report Title : Listnings ABAP Objects Buch                           *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/03/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen aus dem Buch SAP Objects                      *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01/03/19 | Author: M.Buescher| Destrcription/Transport  *
+************************************************************************
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+
+  PRIVATE SECTION.
+    CLASS-DATA: BEGIN OF street,
+      name TYPE c LENGTH 40,
+      no TYPE c LENGTH 4,
+      END OF street.
+
+    CLASS-DATA: BEGIN OF city,
+      zipcode TYPE n LENGTH 5,
+      name TYPE c LENGTH 40,
+      END OF city.
+    CLASS-DATA: BEGIN OF address,
+              name TYPE c LENGTH 30.
+            INCLUDE STRUCTURE street AS str
+            RENAMING WITH SUFFIX _str.
+            INCLUDE STRUCTURE city AS cty
+            RENAMING WITH SUFFIX _cty.
+    CLASS-DATA: END OF address.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    address-name = 'Han Solo'.
+    address-name_str = 'Crab Nebula'.
+    address-no_str = '18'.
+    address-zipcode_cty = '69121'.
+    address-name_cty = 'Dark Star'.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

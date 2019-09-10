@@ -1,0 +1,66 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_MESSAGE_RAISING_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_message_raising_ao.
+
+************************************************************************
+* Report Name  : Z_MESSAGE_RAISING_AO                                                 *
+* Report Title : Beispaiel Message und Raising                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/12/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP ObJEcTs Buch S. 550               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.12.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS lcl_demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS
+    divide IMPORTING zaehler TYPE i
+                      nenner TYPE i
+           EXPORTING result TYPE i
+             EXCEPTIONS divide_zero.
+ENDCLASS.                    "lcl_demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS lcl_demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS lcl_demo IMPLEMENTATION.
+  METHOD divide.
+    IF nenner = 0.
+      MESSAGE 'Division durch 0'
+      TYPE 'A' RAISING divide_zero.
+    ELSE.
+      result = zaehler / nenner.
+    ENDIF.
+  ENDMETHOD.                    "divide
+ENDCLASS.                    "lcl_demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  DATA l_result TYPE i.
+  lcl_demo=>divide( EXPORTING zaehler = 1
+                              nenner = 0
+                    IMPORTING result = l_result
+                      EXCEPTIONS divide_zero = 4 ).
+  IF sy-subrc = 4.
+    MESSAGE sy-msgv1 TYPE 'I' DISPLAY LIKE 'E'.
+  ENDIF.
+
+  lcl_demo=>divide( EXPORTING zaehler = 1
+                              nenner = 0
+                      IMPORTING result = l_result ).

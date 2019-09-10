@@ -1,0 +1,116 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_INTERFACE_DOWN_CAST_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_interface_down_cast_ao.
+
+************************************************************************
+* Report Name  : Z_INTERFACE_DOWN_CAST_AO                        *
+* Report Title : Down cast mit Interfaces                *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/07/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects S 446               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.07.18 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+  PRIVATE SECTION.
+    TYPES iref_tab_type TYPE TABLE OF REF TO zif_drive_object.
+    CLASS-METHODS: output IMPORTING iref_tab TYPE iref_tab_type,
+      serialzie IMPORTING iref TYPE REF TO zif_drive_object.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS electron DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS electron DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES: zif_drive_object,
+                if_serializable_object.
+  PRIVATE SECTION.
+    CONSTANTS c TYPE i VALUE 300000.
+    DATA speed_over_c TYPE p DECIMALS 3.
+ENDCLASS.                    "electron DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS electron IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS electron IMPLEMENTATION.
+  METHOD zif_drive_object~accelerate.
+    me->speed_over_c = me->speed_over_c + delta / c.
+  ENDMETHOD.                    "zif_drive_object~accelerate
+  METHOD zif_drive_object~show_speed.
+    DATA output TYPE string.
+    output = me->speed_over_c.
+    CONCATENATE `Electron speed/c: ` output INTO output.
+    MESSAGE output TYPE 'I'.
+  ENDMETHOD.                    "zif_drive_object~show_speed
+ENDCLASS.                    "electron IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+
+  METHOD main.
+    DATA: iref_tab TYPE iref_tab_type,
+          iref LIKE LINE OF iref_tab.
+    CREATE OBJECT iref TYPE zcl_vehicle_with_intf.
+    iref->accelerate( 100 ).
+    APPEND iref TO iref_tab.
+    CREATE OBJECT iref TYPE electron.
+    iref->accelerate( 250000 ).
+    APPEND iref TO iref_tab.
+    demo=>output( iref_tab ).
+  ENDMETHOD.                    "main
+
+  METHOD output.
+    DATA iref LIKE LINE OF iref_tab.
+    LOOP AT iref_tab INTO iref.
+      iref->show_speed( ).
+      serialzie( iref ).
+    ENDLOOP.
+  ENDMETHOD.                    "output
+
+  METHOD serialzie.
+    DATA: sref TYPE REF TO if_serializable_object,
+          xml_string TYPE xstring.
+    TRY.
+        sref ?= iref.
+        CALL TRANSFORMATION id SOURCE object = sref
+                                RESULT XML xml_string.
+      CATCH cx_sy_move_cast_error.
+        RETURN.
+    ENDTRY.
+    CALL FUNCTION 'DISPLAY_XML_STRING'
+      EXPORTING
+        xml_string = xml_string.
+  ENDMETHOD.                    "serialzie
+
+
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

@@ -1,0 +1,60 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_ASSIGN_STATIC_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  Z_ASSIGN_STATIC_AO.
+
+************************************************************************
+* Report Name  : Z_ASSIGN_STATIC_AO                                                 *
+* Report Title : Statischer ASSIGN mit Teillieferadressen                                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/28/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen ABAP ObJEcTs S. 870               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.28.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    data:
+    begin of address,
+        street  type c length 20
+                  value 'Dietmar-Hopp-Allee',
+        no      type c length  3 value '15a',
+        zip     type c length  5 value '69190',
+        city    type c length 20 value 'Walldorf',
+    end of address.
+
+     FIELD-SYMBOLS: <street_no> type c,
+                    <zip_city> type c.
+     ASSIGN: address(23) to <street_no>,
+             address+23(25) to <zip_city>.
+     Message <street_no> type 'I'.
+     MESSAGE <zip_city> type 'I'.
+  ENDMETHOD.                    "demo
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

@@ -1,0 +1,162 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_IXML_PARSING_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_ixml_parsing_ao.
+
+************************************************************************
+* Report Name  : Z_IXML_PARSING_AO                                                 *
+* Report Title : Parsen eines XML Dokumentes                                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/31/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects S.997                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.31.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+  PRIVATE SECTION.
+    CLASS-METHODS:
+    process_errors
+    IMPORTING parser TYPE REF TO if_ixml_parser,
+      process_dom
+      IMPORTING document TYPE REF TO if_ixml_node.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: ixml TYPE REF TO if_ixml,
+          factory TYPE REF TO if_ixml_stream_factory,
+          parser   TYPE REF TO if_ixml_parser,
+          istream TYPE REF TO if_ixml_istream,
+          document TYPE REF TO if_ixml_document,
+          xmldata TYPE string.
+    CONCATENATE
+  '<?xml version="1.0"?>'
+  '<order number ="4711">'
+  ' <head>'
+  '  <status>confirmed</status>'
+  '  <date format="mm-dd-yyyy">08-15-2006</date>'
+  ' </head>'
+  ' <body>'
+  '  <item units="2" price="17">ABAP Book</item>'
+  '  <item units="1" price="10">SAP NetWeaver Book</item>'
+  '  <item units="5" price="12">XML Book</item>'
+  ' </body>'
+  '</order>' INTO xmldata.
+    ixml = cl_ixml=>create( ).
+    factory = ixml->create_stream_factory( ).
+    istream = factory->create_istream_string( string = xmldata ).
+    document = ixml->create_document( ).
+    parser = ixml->create_parser( document = document
+                                  stream_factory = factory
+                                  istream = istream ).
+    IF parser->parse( ) <> 0.
+      process_errors( parser ).
+    ELSE.
+      process_dom( document ).
+    ENDIF.
+  ENDMETHOD.                    "demo
+  METHOD process_errors.
+    DATA: error TYPE REF TO if_ixml_parse_error,
+          msg TYPE string,
+          count TYPE i,
+          index TYPE i.
+    count = parser->num_errors( min_severity =
+              if_ixml_parse_error=>co_warning ).
+    IF count = 0.
+      RETURN.
+    ENDIF.
+    DO count TIMES.
+      index = sy-index - 1.
+      error = parser->get_error(
+      index = index
+      min_severity =
+      if_ixml_parse_error=>co_warning ).
+      msg = error->get_reason( ).
+      IF error->get_severity( ) =
+        if_ixml_parse_error=>co_warning.
+        MESSAGE msg TYPE 'I' DISPLAY LIKE 'W'.
+      ELSE.
+        MESSAGE msg TYPE 'I' DISPLAY LIKE 'E'.
+      ENDIF.
+    ENDDO.
+  ENDMETHOD.                    "process_errors
+  METHOD process_dom.
+    DATA: iterator TYPE REF TO if_ixml_node_iterator,
+          node     TYPE REF TO if_ixml_node,
+          nodemap     TYPE REF TO if_ixml_named_node_map,
+          attr TYPE REF TO if_ixml_node,
+          name TYPE string,
+          value TYPE string,
+          indent TYPE i,
+          count TYPE i,
+          index TYPE i,
+          output TYPE c LENGTH 80,
+          name_val TYPE string,
+          text TYPE REF TO zcl_text_ao.
+    IF document IS INITIAL.
+      RETURN.
+    ENDIF.
+    text = zcl_text_ao=>get_handle( ).
+    text->add_line( 'DOM Tree' ).
+    text->add_line( space ).
+    iterator = document->create_iterator( ).
+    node = iterator->get_next( ).
+    WHILE NOT node IS INITIAL.
+      indent = node->get_height( ) * 2.
+      indent = indent + 20.
+      CASE node->get_type( ).
+        WHEN if_ixml_node=>co_node_element.
+          name = node->get_name( ).
+          nodemap = node->get_attributes( ).
+          WRITE 'ELEMENT :' TO output.
+          WRITE name TO output+indent.
+          text->add_line( output ).
+          IF NOT nodemap IS INITIAL.
+            count = nodemap->get_length( ).
+            DO count TIMES.
+              index = sy-index - 1.
+              attr = nodemap->get_item( index ).
+              name = attr->get_name( ).
+              value = attr->get_value( ).
+              WRITE 'ATRIBUTE: ' TO output.
+              CONCATENATE name ` = ` value INTO name_val.
+              WRITE name_val TO output+indent.
+              text->add_line( output ).
+            ENDDO.
+          ENDIF.
+        WHEN if_ixml_node=>co_node_text OR
+             if_ixml_node=>co_node_cdata_section.
+          value = node->get_value( ).
+          WRITE 'Text   : ' TO output.
+          WRITE value TO output+indent.
+          text->add_line( output ).
+      ENDCASE.
+      node = iterator->get_next( ).
+    ENDWHILE.
+    text->display( ).
+  ENDMETHOD.                    "process_dom
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

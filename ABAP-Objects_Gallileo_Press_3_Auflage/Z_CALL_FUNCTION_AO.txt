@@ -1,0 +1,140 @@
+FUNCTION z_flight_list_get_ao.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(CARRID) TYPE  SPFLI-CARRID
+*"  EXPORTING
+*"     REFERENCE(FLIGHT_LIST) TYPE  SPFLI_TAB
+*"  RAISING
+*"      ZCX_NO_FLIGHTS
+*"----------------------------------------------------------------------
+
+  DATA buffer_line LIKE LINE OF g_buffer.
+  READ TABLE g_buffer
+          WITH TABLE KEY carrid = carrid
+          INTO buffer_line.
+  IF sy-subrc = 0.
+    flight_list = buffer_line-flight_list.
+  ELSE.
+    SELECT *
+      FROM spfli
+      INTO TABLE flight_list
+      WHERE carrid = carrid.
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE zcx_no_flights.
+    ENDIF.
+    buffer_line-carrid = carrid.
+    buffer_line-flight_list = flight_list.
+    INSERT buffer_line INTO TABLE g_buffer.
+  ENDIF.
+
+
+
+
+ENDFUNCTION.
+
+
+
+FUNCTION z_flight_list_display_ao.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     VALUE(FLIGHT_LIST) TYPE  SPFLI_TAB
+*"----------------------------------------------------------------------
+
+
+  DATA alv TYPE REF TO cl_salv_table.
+  TRY.
+      cl_salv_table=>factory(
+      IMPORTING r_salv_table = alv
+      CHANGING t_table = flight_list ).
+      alv->display( ).
+    CATCH cx_salv_msg.
+      MESSAGE 'ALV display not possible' TYPE 'I'
+      DISPLAY LIKE 'E'.
+  ENDTRY.
+
+
+ENDFUNCTION.
+
+
+
+
+*&---------------------------------------------------------------------*
+*& Report  Z_CALL_FUNCTION_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_call_function_ao.
+
+************************************************************************
+* Report Name  : Z_CALL_FUNCTION_AO                                   *
+* Report Title : Aufruf von Funktionsbausteinen                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/11/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects Buch S. 503 - 516              *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.11.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+SELECTION-SCREEN BEGIN OF SCREEN 100.
+PARAMETERS p_carrid TYPE spfli-carrid.
+SELECTION-SCREEN END OF SCREEN 100.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+  PRIVATE SECTION.
+    CLASS-DATA flights TYPE spfli_tab.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DO.
+      CALL SELECTION-SCREEN 100
+      STARTING AT 10 10.
+      IF sy-subrc = 0.
+        TRY.
+            CALL FUNCTION 'Z_FLIGHT_LIST_GET_AO'
+              EXPORTING
+                carrid      = p_carrid
+              IMPORTING
+                flight_list = flights.
+            CALL FUNCTION 'Z_FLIGHT_LIST_DISPLAY_AO'
+              EXPORTING
+                flight_list = flights.
+          CATCH zcx_no_flights.
+            MESSAGE 'No flights' TYPE 'I'
+            DISPLAY LIKE 'E'.
+        ENDTRY.
+      ELSE.
+        RETURN.
+      ENDIF.
+    ENDDO.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

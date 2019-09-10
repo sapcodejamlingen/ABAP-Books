@@ -1,0 +1,101 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_DRIVE_VIA_ALIASSES_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_drive_via_aliasses_ao.
+
+************************************************************************
+* Report Name  : Z_DRIVE_VIA_ALIASSES_AO                   *
+* Report Title : Aliasnamen in Klassen*
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/07/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects S 431                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.07.18 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+  PRIVATE SECTION.
+    TYPES iref_tab_type TYPE TABLE OF REF TO zif_drive_object.
+    CLASS-METHODS output IMPORTING iref_tab TYPE iref_tab_type.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS electron DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS electron DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES zif_drive_object.
+    ALIASES accelerate FOR zif_drive_object~accelerate.
+  PRIVATE SECTION.
+    CONSTANTS c TYPE i VALUE 300000.
+    DATA speed_over_c TYPE p DECIMALS 3.
+ENDCLASS.                    "electron DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS electron IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS electron IMPLEMENTATION.
+  METHOD accelerate.
+    me->speed_over_c = me->speed_over_c + delta / c.
+  ENDMETHOD.                    "accelerate
+  "zif_drive_object~accelerate
+  METHOD zif_drive_object~show_speed.
+    DATA output TYPE string.
+    output = me->speed_over_c.
+    CONCATENATE `Electron speed/c: ` output INTO output.
+    MESSAGE output TYPE 'I'.
+  ENDMETHOD.                    "zif_drive_object~show_speed
+ENDCLASS.                    "electron IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+
+  METHOD main.
+    DATA: vehicle TYPE REF TO zcl_vehicle_with_intf,
+          electron TYPE REF TO electron,
+          iref_tab TYPE iref_tab_type.
+    create object vehicle.
+    vehicle->accelerate( 100 ).
+    APPEND vehicle TO iref_tab.
+    CREATE OBJECT electron.
+    electron->accelerate( 250000 ).
+    APPEND electron TO iref_tab.
+    demo=>output( iref_tab ).
+  ENDMETHOD.                    "main
+
+
+
+  METHOD output.
+    DATA iref LIKE LINE OF iref_tab.
+    LOOP AT iref_tab INTO iref.
+      iref->show_speed( ).
+    ENDLOOP.
+  ENDMETHOD.                    "output
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

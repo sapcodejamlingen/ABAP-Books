@@ -1,0 +1,148 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_ALV_REPORTING_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_alv_reporting_ao.
+
+************************************************************************
+* Report Name  :  z_alv_reporting_ao             *
+* Report Title : reporting mit ALV Listen                             *
+* SAP Release 6.0                                                      *
+* Author�s Name: BUESCHERM                                         *
+* Create Date  : 01/16/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP ObJEcTs S. 722                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.16.19 | Author: M.B�scher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+  PRIVATE SECTION.
+    CLASS-DATA scarr_tab TYPE TABLE OF scarr.
+*----------------------------------------------------------------------*
+*       CLASS methods:  HANDLE_DOUBLE_
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+    CLASS-METHODS: handle_double_click
+      FOR EVENT double_click
+      OF cl_salv_events_table
+      IMPORTING row column,
+        detail
+      IMPORTING carrid TYPE scarr-carrid,
+        browser
+      IMPORTING url TYPE csequence.
+ENDCLASS.                    "methods:  HANDLE_DOUBLE_
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: alv TYPE REF TO cl_salv_table,
+          events TYPE REF TO cl_salv_events_table,
+          columns TYPE REF TO cl_salv_columns,
+          col_tab TYPE salv_t_column_ref.
+    FIELD-SYMBOLS <column> LIKE LINE OF col_tab.
+    SELECT * FROM
+      scarr INTO TABLE scarr_tab.
+    TRY.
+        cl_salv_table=>factory(
+        IMPORTING r_salv_table = alv
+          CHANGING t_table = scarr_tab ).
+        events = alv->get_event( ).
+        SET HANDLER handle_double_click FOR events.
+        columns = alv->get_columns( ).
+        col_tab = columns->get( ).
+        LOOP AT col_tab ASSIGNING <column>.
+          <column>-r_column->set_output_length( 40 ).
+          IF <column>-columnname = 'CARRNAME' OR
+                <column>-columnname = 'URL'.
+            <column>-r_column->set_visible( 'X' ).
+          ELSE.
+            <column>-r_column->set_visible( ' ' ).
+          ENDIF.
+        ENDLOOP.
+        alv->display( ).
+      CATCH cx_salv_msg.
+        MESSAGE 'ALV display not possible' TYPE 'i'
+        DISPLAY LIKE 'E'.
+    ENDTRY.
+  ENDMETHOD.                    "main
+  METHOD handle_double_click.
+    FIELD-SYMBOLS <scarr> TYPE scarr.
+    READ TABLE scarr_tab INDEX row ASSIGNING <scarr>.
+    IF sy-subrc <> 0.
+      RETURN.
+    ENDIF.
+    IF column = 'CARRNAME'.
+      demo=>detail( <scarr>-carrid ).
+    ELSEIF column = 'URL'.
+      demo=>browser( <scarr>-url ).
+    ENDIF.
+  ENDMETHOD.                    "handle_double_click
+  METHOD detail.
+    DATA: alv TYPE REF TO cl_salv_table,
+          BEGIN OF alv_line,
+            carrid TYPE spfli-carrid,
+            connid TYPE spfli-connid,
+            cityfrom TYPE spfli-cityfrom,
+            cityto TYPE spfli-cityto,
+            END OF alv_line,
+            alv_tab LIKE TABLE OF alv_line.
+    SELECT carrid connid cityfrom cityto
+      FROM spfli
+      INTO CORRESPONDING FIELDS OF TABLE alv_tab
+      WHERE carrid = carrid.
+    IF sy-subrc <> 0.
+      MESSAGE e007(sabapdocu).
+    ENDIF.
+    TRY.
+        cl_salv_table=>factory(
+        IMPORTING r_salv_table = alv
+          CHANGING t_table = alv_tab ).
+        alv->set_screen_popup( start_column = 1
+                                end_column = 60
+                                start_line = 1
+                                end_line = 12 ).
+        alv->display( ).
+      CATCH cx_salv_msg.
+        MESSAGE 'ALV display not possible' TYPE 'i'
+        DISPLAY LIKE 'E'.
+    ENDTRY.
+  ENDMETHOD.                    "detail
+  METHOD browser.
+    CALL FUNCTION 'CALL_BROWSER'
+     EXPORTING
+       url                          = url
+*                                                   WINDOW_NAME                  = ' '
+*                                                   NEW_WINDOW                   = ' '
+*                                                   BROWSER_TYPE                 =
+*                                                   CONTEXTSTRING                =
+*                                                 EXCEPTIONS
+*                                                   FRONTEND_NOT_SUPPORTED       = 1
+*                                                   FRONTEND_ERROR               = 2
+*                                                   PROG_NOT_FOUND               = 3
+*                                                   NO_BATCH                     = 4
+*                                                   UNSPECIFIED_ERROR            = 5
+*                                                   OTHERS                       = 6
+              .
+  ENDMETHOD.                    "browser
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

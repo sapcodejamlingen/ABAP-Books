@@ -1,0 +1,119 @@
+METHOD make_reservation.
+*ABAP ObJEcTs S. 836
+
+  DATA: cars            TYPE osreftab,
+        car             TYPE REF TO zcl_car_entity_ao,
+        reservation_id  TYPE zreservation_id_ab,
+        license_plate   TYPE zlicense_plate_ab.
+
+  FIELD-SYMBOLS <car> TYPE osref.
+  cars = zcl_car_entity_ao=>select_by_category(
+                category = category ).
+  LOOP AT cars ASSIGNING <car>.
+    car ?= <car>.
+    IF available = car->check_availability(
+                        from = from
+                        to = to ) = abap_true.
+      license_plate = car->get_license_plate( ).
+      reservation_id = new_reservation_id( ).
+      result =
+        zca_resevation_entity_ao=>agent->create_persistent(
+        i_reservation_id  = reservation_id
+        i_customer_id     = customer
+        i_license_plate   = license_plate
+        i_date_from       = from
+        i_date_to         = to ).
+      RETURN.
+    ENDIF.
+  ENDLOOP.
+  RAISE EXCEPTION TYPE zcx_no_car_available.
+ENDMETHOD.                    "MAKE_RESERVATION
+
+
+
+*&---------------------------------------------------------------------*
+*& Report  Z_OS_RENTAL_CAR_RESERVATION_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_os_rental_car_reservation_ao.
+
+************************************************************************
+* Report Name  : Z_OS_RENTAL_CAR_RESERVATION_AO                       *
+* Report Title : Mietwagenreservirung über Persistenzdienst            *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/22/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects S.837                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.22.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: customer_id   TYPE zcustomer_id_ab,
+          car_category  TYPE zcategory_ab,
+          date_from     TYPE zdate_from_ab,
+          date_to       TYPE zdate_to_ab,
+          agent         TYPE REF TO zca_customer_entity_ao,
+          customer      TYPE REF TO zcl_customer_entity_ao,
+          reservation   TYPE REF TO zcl_resevation_entity_ao.
+
+    CALL FUNCTION 'Z_INPUT_CUSTOMER'
+      IMPORTING
+        customer_id = customer_id.
+        agent = zca_customer_entity_ao=>agent.
+    TRY.
+        customer = agent->get_persistent( i_id = customer_id ).
+      CATCH cx_os_object_not_found.
+        MESSAGE 'Customer does not exist' TYPE 'I'
+        DISPLAY LIKE 'E'.
+        RETURN.
+    ENDTRY.
+    CALL FUNCTION 'Z_INPUT_RESERVATION'
+      IMPORTING
+        car_category = car_category
+        date_from    = date_from
+        date_to      = date_to.
+    TRY.
+        reservation = zcl_resevation_entity_ao=>make_reservation(
+        customer = customer_id
+        category = car_category
+        from = date_from
+        to = date_to ).
+        COMMIT WORK.
+      CATCH zcx_no_car_available.
+        MESSAGE 'No car available' TYPE 'I' DISPLAY LIKE 'E'.
+        RETURN.
+    ENDTRY.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).
+  .
+
+
+  .
+
+

@@ -1,0 +1,64 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_ASXML_OBJECT_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_asxml_object_ao.
+
+************************************************************************
+* Report Name  : Z_ASXML_OBJECT_AO                                                 *
+* Report Title : asxml für Objecte                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/31/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects Buch S.1008                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.31.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS serializable DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES if_serializable_object.
+    DATA attr TYPE string VALUE `Attribute`.
+ENDCLASS.                    "serializable DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: oref TYPE REF TO serializable,
+          xmlstr TYPE xstring.
+    CREATE OBJECT oref.
+    CALL TRANSFORMATION id SOURCE object = oref
+                                  RESULT XML xmlstr.
+    CALL FUNCTION 'DISPLAY_XML_STRING'
+      EXPORTING
+        xml_string = xmlstr.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

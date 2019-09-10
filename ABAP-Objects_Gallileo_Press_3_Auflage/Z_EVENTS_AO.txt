@@ -1,0 +1,69 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_EVENTS_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_events_ao.
+
+************************************************************************
+* Report Name  : Z_EVENTS_AO                                    *
+* Report Title : Verwendung von Ereignissen                          *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/08/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen aus dem Buch SAP Objects                      *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01/08/19 | Author: M.Buescher| Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA:
+          pilot       TYPE REF TO zcl_pilot_ao,
+          passenger1  TYPE REF TO zcl_passenger_ao,
+          passenger2  TYPE REF TO zcl_passenger_ao,
+          purser      TYPE REF TO zcl_flight_attendant_ao,
+          stewardess  TYPE REF TO zcl_flight_attendant_ao.
+
+    CREATE OBJECT:
+      pilot,
+      passenger1 EXPORTING seat_number = 11
+                           class = `Business Class`,
+      passenger2 EXPORTING seat_number = 333
+                           class = `Economy Class`,
+      purser     EXPORTING title = `Purser` ,
+      stewardess EXPORTING title = `Stewardess` .
+
+      SET HANDLER:
+      purser->help_the_pilot FOR pilot,
+      stewardess->help_a_passenger FOR ALL INSTANCES.
+
+      pilot->call_flight_attendant( ).
+      passenger1->call_flight_attendant( ).
+      passenger2->call_flight_attendant( ).
+
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

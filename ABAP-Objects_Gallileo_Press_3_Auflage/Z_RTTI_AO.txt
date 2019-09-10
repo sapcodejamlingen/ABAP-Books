@@ -1,0 +1,114 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_RTTI_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_rtti_ao.
+
+************************************************************************
+* Report Name  : Z_RTTI_AO                                                 *
+* Report Title : Demonstration zur Anwendung der RTTI                                       *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/28/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen ABAP ObJEcTs S. 894               *
+*              : Run Time Type Information                 *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.28.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS type TYPE c LENGTH 30.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS: main.
+  PRIVATE SECTION.
+    CLASS-DATA: text TYPE REF TO zcl_text_ao,
+                text_line TYPE zcl_text_ao=>t_line.
+    CLASS-METHODS analyze_type_object
+          IMPORTING
+            type_descr_ref TYPE REF TO cl_abap_typedescr.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    TYPES: BEGIN OF my_struc,
+      col1 TYPE d,
+      col2 TYPE t,
+      END OF my_struc.
+
+    DATA: my_data TYPE my_struc,
+          type_descr_ref TYPE REF TO cl_abap_typedescr.
+    text = zcl_text_ao=>get_handle( ).
+    type_descr_ref =
+    cl_abap_typedescr=>describe_by_data( my_data ).
+    analyze_type_object( type_descr_ref ).
+    text->add_line( space ).
+    type_descr_ref =
+      cl_abap_typedescr=>describe_by_object_ref( text ).
+    analyze_type_object( type_descr_ref ).
+    text->display( ).
+  ENDMETHOD.                    "main
+  METHOD analyze_type_object.
+    DATA: struct_descr_ref TYPE REF TO cl_abap_structdescr,
+          components TYPE
+          cl_abap_structdescr=>component_table,
+    class_descr_ref TYPE REF TO cl_abap_classdescr.
+    FIELD-SYMBOLS <component> LIKE LINE OF components.
+    CONCATENATE `Type Name: `
+               type_descr_ref->absolute_name
+              INTO text_line.
+    text->add_line( text_line ).
+    CASE type_descr_ref->type_kind.
+      WHEN cl_abap_typedescr=>typekind_struct1 OR
+            cl_abap_typedescr=>typekind_struct2.
+        struct_descr_ref ?= type_descr_ref.
+        components = struct_descr_ref->get_components( ).
+        LOOP AT components ASSIGNING <component>.
+          CONCATENATE `Name: ` <component>-name
+          INTO text_line.
+          text->add_line( text_line ).
+          CONCATENATE `Type name`
+                    <component>-type->absolute_name
+                    INTO text_line.
+          text->add_line( text_line ).
+          CONCATENATE `Typ kind: `
+              <component>-type->type_kind
+              INTO text_line.
+          text->add_line( text_line ).
+        ENDLOOP.
+      WHEN cl_abap_typedescr=>typekind_class.
+        class_descr_ref ?= type_descr_ref.
+        class_descr_ref =
+        class_descr_ref->get_super_class_type( ).
+        CONCATENATE `Super class: `
+        class_descr_ref->absolute_name
+        INTO text_line.
+        text->add_line( text_line ).
+      WHEN OTHERS.
+
+    ENDCASE.
+  ENDMETHOD.                    "analyze_type_object
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

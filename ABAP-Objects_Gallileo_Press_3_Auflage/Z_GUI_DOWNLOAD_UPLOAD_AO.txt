@@ -1,0 +1,174 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_GUI_DOWNLOAD_UPLOAD_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_gui_download_upload_ao.
+
+************************************************************************
+* Report Name  : Z_GUI_DOWNLOAD_UPLOAD_AO                              *
+* Report Title : Daten auf dem Präsentationsserver                     *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/23.2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects Buch S. 852 - 854               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.23.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS: p_downld    RADIOBUTTON GROUP grp,
+            p_upload    RADIOBUTTON GROUP grp,
+            p_delete    RADIOBUTTON GROUP grp.
+SELECTION-SCREEN SKIP.
+
+PARAMETERS: p_direct TYPE c LENGTH 30
+                     DEFAULT 'C:\GUI_DOWNLOAD_UPLOAD\'
+                     LOWER CASE,
+            p_fname  TYPE c LENGTH 30
+                     DEFAULT 'MYFILE.txt'
+                     LOWER CASE.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS: class_constructor,
+                   main.
+  PRIVATE SECTION.
+    CLASS-DATA: scarr_tab TYPE TABLE OF scarr,
+                fname     TYPE string.
+
+    CLASS-METHODS: download,
+                   upload,
+                   delete,
+                   create_directory,
+                   display IMPORTING value(result_tab)
+                   LIKE scarr_tab.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+
+  METHOD class_constructor.
+    SELECT *
+            FROM scarr
+            INTO TABLE scarr_tab
+            ORDER BY carrid.
+    CONCATENATE p_direct p_fname INTO fname.
+  ENDMETHOD.                    "class_constructor
+
+  METHOD main.
+    TRY.
+      IF p_downld = 'X'.
+        download( ).
+      ELSEIF p_upload = 'X'.
+        upload( ).
+      ELSEIF p_downld = 'X'.
+        download( ).
+      ELSEIF p_delete = 'X'.
+        delete( ).
+      ENDIF.
+    ENDTRY.
+  ENDMETHOD.                    "main
+
+  METHOD download.
+    DATA: table_line LIKE LINE OF scarr_tab,
+          size TYPE i.
+    create_directory( ).
+    DESCRIBE FIELD table_line LENGTH size IN BYTE MODE.
+    size = size * LINES( scarr_tab ).
+    cl_gui_frontend_services=>gui_download(
+      EXPORTING bin_filesize = size
+                filename = fname
+                filetype = 'BIN'
+      CHANGING  data_tab = scarr_tab
+                EXCEPTIONS OTHERS = 4 ).
+    IF sy-subrc = 0.
+      MESSAGE 'File was saved' TYPE 'I'.
+    ELSE.
+      MESSAGE 'File could not be saved' TYPE 'I'
+      DISPLAY LIKE 'E'.
+    ENDIF.
+  ENDMETHOD.                    "download
+  METHOD upload.
+    DATA result_tab LIKE scarr_tab.
+    cl_gui_frontend_services=>gui_upload(
+      EXPORTING filename = fname
+                filetype = 'BIN'
+      CHANGING  data_tab = result_tab
+        EXCEPTIONS OTHERS = 4 ).
+    IF sy-subrc = 0.
+      display( result_tab ).
+    ELSE.
+      MESSAGE 'File could not be loaded' TYPE 'I'
+      DISPLAY LIKE 'E'.
+    ENDIF.
+  ENDMETHOD.                    "upload
+  METHOD delete.
+    DATA rc TYPE i.
+    cl_gui_frontend_services=>file_delete(
+          EXPORTING filename = fname
+          CHANGING rc = rc
+          EXCEPTIONS OTHERS = 4 ).
+    IF sy-subrc <> 0 OR rc <> 0.
+      MESSAGE 'File could not be deleted' TYPE 'I'
+      DISPLAY LIKE 'E'.
+      LEAVE PROGRAM.
+    ELSE.
+      MESSAGE 'File was deleted' TYPE 'I'.
+    ENDIF.
+  ENDMETHOD.                    "delete
+  METHOD create_directory.
+    DATA: directory TYPE string,
+          rc TYPE i.
+    directory = p_direct.
+    CONCATENATE directory '/' INTO directory.
+    REPLACE ALL OCCURrENCES OF '\\' IN directory WITH '\'.
+    IF cl_gui_frontend_services=>directory_exist(
+    directory ) IS INITIAL.
+      cl_gui_frontend_services=>directory_create(
+            EXPORTING directory = directory
+            CHANGING rc = rc
+            EXCEPTIONS OTHERS = 4 ).
+      IF sy-subrc <> 0 OR rc <> 0.
+        MESSAGE 'Directory could not be created' TYPE 'I'
+              DISPLAY LIKE 'E'.
+        LEAVE PROGRAM.
+      ELSE.
+        MESSAGE 'Directory was created' TYPE 'I'.
+      ENDIF.
+    ENDIF.
+  ENDMETHOD.                    "create_directory
+  METHOD display.
+    DATA alv TYPE REF TO cl_salv_table.
+    TRY.
+        cl_salv_table=>factory(
+          IMPORTING r_salv_table = alv
+          CHANGING t_table = result_tab ).
+        alv->display( ).
+      CATCH cx_salv_msg.
+        MESSAGE 'ALV display not possible' TYPE 'I'
+            DISPLAY LIKE 'E'.
+    ENDTRY.
+  ENDMETHOD.                    "display
+ENDCLASS. "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

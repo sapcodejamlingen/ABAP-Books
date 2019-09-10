@@ -1,0 +1,60 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_CASE_AO
+*& S.327
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_case_ao.
+************************************************************************
+* Report Name  : Z_CASE_AO                                           *
+* Report Title : Listnings ABAP Objects Buch                           *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/03/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen aus dem Buch SAP Objects                      *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01/03/19 | Author: M.Buescher| Destrcription/Transport  *
+************************************************************************
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    CASE sy-datum+4(2).
+      WHEN '12' OR '01' OR '02'.
+        MESSAGE 'Winter' TYPE 'I'.
+      WHEN '03' OR '04' OR '05'.
+        MESSAGE 'Spring' TYPE 'I'.
+      WHEN '06' OR '07' OR '08'.
+        MESSAGE 'Summer' TYPE 'I'.
+      WHEN '09' OR '10' OR '11'.
+        MESSAGE 'Autum' TYPE 'I'.
+      WHEN OTHERS.
+        MESSAGE 'Illegal Date' TYPE 'I' DISPLAY LIKE 'E'.
+    ENDCASE.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

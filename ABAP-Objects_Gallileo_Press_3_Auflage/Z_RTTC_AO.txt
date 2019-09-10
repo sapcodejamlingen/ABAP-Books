@@ -1,0 +1,133 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_RTTC_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_rttc_ao.
+
+************************************************************************
+* Report Name  : Z_RTTC_AO                                             *
+* Report Title : Data Browser für beliebige Datenbanktabellen          *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/29/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen ABAP ObJEcTs S. 899               *
+*              : Run Time Type Information                 *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.29.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS: p_dbtab TYPE c LENGTH 132,
+            p_cols  TYPE c LENGTH 132,
+            p_where TYPE c LENGTH 132.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main IMPORTING dbtab TYPE csequence
+                                 cols  TYPE csequence
+                                 where TYPE csequence.
+  PRIVATE SECTION.
+    CLASS-METHODS display
+    IMPORTING value(result) TYPE STANDARD TABLE.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: type_descr TYPE REF TO cl_abap_typedescr,
+          struct_descr TYPE REF TO cl_abap_structdescr,
+          table_descr TYPE REF TO cl_abap_tabledescr,
+          table_ref TYPE REF TO data,
+                components TYPE
+                cl_abap_structdescr=>component_table,
+                component LIKE LINE OF components,
+                error TYPE REF TO cx_root.
+    FIELD-SYMBOLS <table> TYPE ANY TABLE.
+    cl_abap_typedescr=>describe_by_name(
+    EXPORTING p_name = dbtab
+     RECEIVING p_descr_ref = type_descr
+     EXCEPTIONS type_not_found = 4 ).
+    IF sy-subrc = 4.
+      MESSAGE 'Type not found' TYPE 'I'
+              DISPLAY LIKE 'E'.
+      RETURN.
+    ENDIF.
+    TRY.
+        struct_descr ?= type_descr.
+      CATCH cx_sy_move_cast_error INTO error.
+        MESSAGE  error TYPE 'I' DISPLAY LIKE 'E'.
+        RETURN.
+    ENDTRY.
+    components = struct_descr->get_components( ).
+    LOOP AT components INTO component.
+      CONCATENATE '\b' component-name '\b' INTO
+      component-name.
+      FIND REGEX component-name IN cols.
+      IF sy-subrc <> 0.
+        DELETE components INDEX sy-tabix.
+      ENDIF.
+    ENDLOOP.
+    TRY.
+        struct_descr = cl_abap_structdescr=>create( components ).
+        table_descr = cl_abap_tabledescr=>create( struct_descr ).
+      CATCH cx_sy_struct_creation
+        cx_sy_table_creation INTO error.
+        MESSAGE error TYPE 'I' DISPLAY LIKE 'E'.
+        RETURN.
+    ENDTRY.
+    TRY.
+        CREATE DATA table_ref TYPE HANDLE table_descr.
+        ASSIGN table_ref->* TO <table>.
+      CATCH cx_sy_create_data_error INTO error.
+        MESSAGE error TYPE 'I' DISPLAY LIKE 'E'.
+        RETURN.
+    ENDTRY.
+    TRY.
+        SELECT (cols)
+          FROM (dbtab)
+          INTO CORRESPONDING FIELDS OF TABLE <table>
+          WHERE (where).
+      CATCH cx_sy_sql_error INTO error.
+        MESSAGE error TYPE 'I' DISPLAY LIKE 'E'.
+        RETURN.
+    ENDTRY.
+    display( <table> ).
+  ENDMETHOD                    "main
+  .
+
+  METHOD display.
+data alv  type ref to cl_salv_table.
+try.
+  cl_salv_table=>factory(
+    IMPORTING r_salv_table = alv
+      changing  t_table = result ).
+  alv->display( ).
+  catch cx_salv_msg.
+    MESSAGE 'ALV display not possible' TYPE 'I'
+    DISPLAY LIKE 'E'.
+    endtry.
+  ENDMETHOD.                    "display
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( EXPORTING dbtab = p_dbtab
+                        cols  = p_cols
+                        where = p_where ).

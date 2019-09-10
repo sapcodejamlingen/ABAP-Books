@@ -1,0 +1,79 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_ENQUEUE_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_enqueue_ao.
+
+************************************************************************
+* Report Name  : Z_ENQUEUE_AO*
+* Report Title : Setzen einer SAP Sperre*
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 99/99/9999 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:99.99.99 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS p_resid TYPE zreservations-reservation_id.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+
+    DATA msg TYPE string.
+    CALL FUNCTION 'ENQUEUE_EZ_RESERV_AO'
+     EXPORTING
+       mode_zreservations       = 'E'
+*         CLIENT                   = SY-MANDT
+       reservation_id           = p_resid
+*         X_RESERVATION_ID         = ' '
+*         _SCOPE                   = '2'
+*         _WAIT                    = ' '
+*         _COLLECT                 = ' '
+     EXCEPTIONS
+       foreign_lock             = 1
+       system_failure           = 2
+       OTHERS                   = 3
+              .
+    CASE sy-subrc.
+      WHEN 0.
+        MESSAGE `Enqueue sucessful!` TYPE 'I'.
+      WHEN 1.
+        CONCATENATE `Record already locked by` sy-msgv1 INTO msg.
+        MESSAGE msg TYPE 'I' DISPLAY LIKE 'E'.
+      WHEN OTHERS.
+        MESSAGE `Error in Enqueue!` TYPE 'I' DISPLAY LIKE 'E'.
+        RETURN.
+    ENDCASE.
+    CALL TRANSACTION 'SM12'.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

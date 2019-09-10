@@ -1,0 +1,48 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_ASXML_ELEMENTARY_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  Z_ASXML_ELEMENTARY_AO.
+
+************************************************************************
+* Report Name  : Z_ASXML_ELEMENTARY_AO                                 *
+* Report Title : aXML für elementare Datenobjecte                      *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/31/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects Buch S.1004                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.31.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+class demo DEFINITION.
+  PUBLIC SECTION.
+  CLASS-METHODS main.
+  endclass.
+
+  CLASS demo IMPLEMENTATION.
+    method main.
+      data: num type i value 111,
+            dat type d VALUE '20060627',
+            xmlstr type xstring.
+      call TRANSFORMATION id source number  = num
+                                    date    = dat
+                                    result xml xmlstr.
+      call function 'DISPLAY_XML_STRING'
+      exporting xml_string = xmlstr.
+      endmethod.
+      ENDCLASS.
+
+      START-OF-SELECTION.
+      demo=>main( ).

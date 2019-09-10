@@ -1,0 +1,54 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_VEHICLE_AO
+*& S. 214
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_vehicle_ao.
+************************************************************************
+* Report Name  : z_vehicle_ao                                            *
+* Report Title : Listnings ABAP Objects Buch                           *
+* SAP Release 6.0                                                      *
+* Author�s Name: BUESCHERM                                         *
+* Create Date  : 01/02/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : �bung aus dem Buch SAP Objects  S. 214                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01/03/19 | Author: M.Buescher| Destrcription/Transport  *
+************************************************************************
+*----------------------------------------------------------------------*
+*       CLASS vehicle DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle DEFINITION.
+  PUBLIC SECTION.
+    METHODS: accelaerate IMPORTING delta TYPE i,
+                      show_speed.
+  PRIVATE SECTION.
+    DATA speed TYPE i.
+ENDCLASS.                    "vehicle DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle IMPLEMENTATION.
+  METHOD accelaerate.
+    speed = speed + delta.
+  ENDMETHOD.                    "accelaerate
+  METHOD show_speed.
+    DATA output TYPE string.
+    output = speed.
+    MESSAGE output TYPE 'I'.
+  ENDMETHOD.                    "show_speed
+ENDCLASS.                    "vehicle IMPLEMENTATION

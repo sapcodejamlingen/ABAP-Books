@@ -1,0 +1,63 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_ASSIGN_DYNAMIC_ACCESS_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_assign_dynamic_access_ao.
+
+************************************************************************
+* Report Name  : Z_ASSIGN_DYNAMIC_ACCESS_AO                                                 *
+* Report Title : Beispiel für dynamic access                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/28/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects S. 875                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.28.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS other_class DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS other_class DEFINITION.
+  PUBLIC SECTION.
+    CLASS-DATA: attr TYPE string
+    VALUE 'Dynamic Access'.
+ENDCLASS.                    "other_class DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: attr_name TYPE string VALUE `attr`,
+          class_name TYPE string VALUE `other_class`.
+    FIELD-SYMBOLS <attr> TYPE ANY.
+    ASSIGN (class_name)=>(attr_name) TO <attr>.
+    IF sy-subrc = 0.
+      MESSAGE <attr> TYPE 'I'.
+    ENDIF.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

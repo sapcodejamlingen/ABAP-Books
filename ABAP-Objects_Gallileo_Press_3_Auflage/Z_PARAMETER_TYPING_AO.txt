@@ -1,0 +1,67 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_PARAMETER_TYPING_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_parameter_typing_ao.
+
+************************************************************************
+* Report Name  : z_parameter_typing_ao.                               *
+* Report Title : Typisierung von Formalparametern                     *
+* SAP Release 6.0                                                      *
+* Author�s Name: BUESCHERM                                         *
+* Create Date  : 01/05/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects Buch S. 382              *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.05.19 | Author: M.B�scher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    METHODS: meth1 IMPORTING ipar TYPE any,
+      meth2 IMPORTING ipar TYPE ANY TABLE,
+        meth3 IMPORTING ipar TYPE INDEX TABLE.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD meth1.
+    DATA num TYPE string.
+    num = ipar.
+    "read table ipar index 1 transporting
+    " no fields.
+    "read table ipar with key table_line = '...'
+    " transporting no fields.
+  ENDMETHOD.                                                "meth1
+  METHOD meth2.
+    DATA num TYPE string.
+    "       num = ipar.
+    "read table ipar index 1 transporting
+    " no fields.
+    "read table ipar with key table_line = '...'
+    " transporting no fields.
+  ENDMETHOD.                                                "meth2
+  METHOD meth3.
+    DATA num TYPE string.
+    "     num = ipar.
+
+    "read table ipar with key table_line = '...'
+    " transporting no fields.
+    "read table ipar index 1 transporting
+    " no fields.
+  ENDMETHOD.                                                "meth3
+ENDCLASS.                    "demo IMPLEMENTATION

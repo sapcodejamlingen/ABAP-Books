@@ -1,0 +1,272 @@
+*******************************************************************
+*   System-defined Include-files.                                 *
+*******************************************************************
+  INCLUDE LZ_AIRLINES_AOTOP.                 " Global Data
+  INCLUDE LZ_AIRLINES_AOUXX.                 " Function Modules
+
+*******************************************************************
+*   User-defined Include-files (if necessary).                    *
+*******************************************************************
+* INCLUDE LZ_AIRLINES_AOF...                 " Subprograms
+ INCLUDE LZ_AIRLINES_AOO01...                 " PBO-Modules
+ INCLUDE LZ_AIRLINES_AOI01...                 " PAI-Modules
+ INCLUDE LZ_AIRLINES_AOP01...                 " PAI-Modules
+
+FUNCTION-POOL z_airlines_ao.                "MESSAGE-ID ..
+*ABAP Objects S. 658
+
+CLASS screen_handler DEFINITION CREATE PRIVATE.
+  PUBLIC SECTION.
+    CLASS-METHODS create_screen.
+    METHODS constructor.
+  PRIVATE SECTION.
+    CLASS-DATA screen TYPE REF TO screen_handler.
+    DATA: container_html
+          TYPE REF TO cl_gui_custom_container,
+          container_box
+          TYPE REF TO cl_gui_dialogbox_container,
+          picture TYPE REF TO cl_gui_picture,
+          tree TYPE REF TO cl_gui_simple_tree,
+          html_viewer TYPE REF TO cl_gui_html_viewer,
+          alv TYPE REF TO cl_salv_table.
+    METHODS: fill_tree,
+    fill_picture,
+    fill_html
+    IMPORTING carrid TYPE spfli-carrid,
+      fill_list
+      IMPORTING carrid TYPE spfli-carrid
+        connid TYPE spfli-connid,
+    handle_node_double_click
+    for event node_double_click
+    of cl_gui_simple_tree
+    importing node_key,
+      close_box
+      for event close
+      of cl_gui_dialogbox_container.
+ENDCLASS.                    "screen_handler DEFINITION
+
+*&---------------------------------------------------------------------*
+*&  Include           LZ_AIRLINES_AOP01
+*&---------------------------------------------------------------------*
+*ABAP ObJEcTs S. 659
+
+CLASS screen_handler IMPLEMENTATION.
+
+  METHOD create_screen.
+    IF screen IS INITIAL.
+      CREATE OBJECT screen.
+    ENDIF.
+  ENDMETHOD.                    "create_screen
+
+  METHOD constructor.
+    DATA: event_tab TYPE cntl_simple_events,
+          event LIKE LINE OF event_tab,
+          docking TYPE REF TO cl_gui_docking_container,
+          splitter TYPE REF TO cl_gui_splitter_container,
+          container_top TYPE REF TO cl_gui_container,
+          container_bottom TYPE REF TO cl_gui_container.
+
+    CREATE OBJECT container_html
+    EXPORTING container_name = 'CUSTOM_CONTROL'.
+
+    CREATE OBJECT docking
+    EXPORTING side = cl_gui_docking_container=>dock_at_left
+          extension = 135.
+
+    CREATE OBJECT splitter
+    EXPORTING parent = docking
+      rows = 2
+      columns = 1.
+
+    splitter->set_border( border = cl_gui_cfw=>false ).
+    splitter->set_row_mode( mode = splitter->mode_absolute ).
+    splitter->set_row_height( id = 1 height = 180 ).
+
+    container_top =
+    splitter->get_container( row = 1 column = 1 ).
+    container_bottom =
+    splitter->get_container( row = 2 column = 1 ).
+
+    CREATE OBJECT picture
+    EXPORTING parent = container_top.
+
+    CREATE OBJECT tree
+    EXPORTING parent = container_bottom
+      node_selection_mode =
+      cl_gui_simple_tree=>node_sel_mode_single.
+
+    event-eventid =
+    cl_gui_simple_tree=>eventid_node_double_click.
+    event-appl_event = ' '.
+    APPEND event TO event_tab.
+    tree->set_registered_events( events = event_tab ).
+    SET HANDLER me->handle_node_double_click FOR tree.
+
+    me->fill_picture( ).
+    me->fill_tree( ).
+  ENDMETHOD.                    "constructor
+
+  METHOD fill_picture.
+    DATA pict TYPE REF TO zcl_picture.
+    TRY.
+        pict = zcl_picture=>factory(
+        mime_file = '/SAP/PUBLIC/BC/ABAP/Sources/PLANE.GIF'
+        pict_type = 'GIF' ).
+      CATCH zcx_no_picture.
+        RETURN.
+    ENDTRY.
+    pict->display( picture ).
+  ENDMETHOD.                    "fill_picture
+
+  METHOD fill_tree.
+    DATA: node_table TYPE TABLE OF mtreesnode,
+          node TYPE mtreesnode,
+          spfli TYPE spfli,
+          spfli_tab TYPE zcl_airlines=>tspfli_tab.
+    spfli_tab = zcl_airlines=>get_spfli_tab( ).
+    node-isfolder = 'X'.
+    LOOP AT spfli_tab INTO spfli.
+      AT NEW carrid.
+        node-node_key = spfli-carrid.
+        CLEAR node-relatkey.
+        CLEAR node-relatship.
+        node-text = spfli-carrid.
+        CLEAR node-n_image.
+        CLEAR node-exp_image.
+        APPEND node TO node_table.
+      ENDAT.
+
+      AT NEW connid.
+        CONCATENATE spfli-carrid spfli-connid
+        INTO node-node_key.
+        node-relatkey = spfli-carrid.
+        node-relatship = cl_gui_simple_tree=>relat_last_child.
+        node-text = spfli-connid.
+        CALL FUNCTION 'ICON_CREATE'
+          EXPORTING
+            name   = 'ICON_FLIGHT'
+            info   = text-con
+          IMPORTING
+            RESULT = node-n_image
+          EXCEPTIONS
+            OTHERS = 4.
+        IF sy-subrc <> 0.
+          node-n_image = 'QAVQ'.
+        ENDIF.
+        node-exp_image = node-n_image.
+      ENDAT.
+      APPEND node TO node_table.
+    ENDLOOP.
+    tree->add_nodes( table_structure_name = 'MTREESNODE'
+    node_table = node_table ).
+  ENDMETHOD.                    "fill_tree
+
+
+  METHOD fill_html.
+    DATA url TYPE zcl_airlines=>turl.
+    IF html_viewer IS INITIAL.
+      CREATE OBJECT html_viewer
+      EXPORTING parent = container_html.
+    ENDIF.
+    url = zcl_airlines=>get_url( carrid ).
+    html_viewer->show_url( url = url ).
+  ENDMETHOD.                    "fill_html
+
+  METHOD fill_list.
+    DATA flight_tab TYPE zcl_airlines=>tflight_tab.
+    DATA settings TYPE REF TO cl_salv_display_settings.
+    DATA list_title TYPE lvc_title.
+
+    IF container_box IS INITIAL.
+      CREATE OBJECT container_box
+      EXPORTING
+         width = 300
+         height = 200
+         top = 100
+         left = 400
+         caption = text-fli.
+      SET HANDLER close_box FOR container_box.
+    ENDIF.
+
+    flight_tab = zcl_airlines=>get_flight_tab(
+    carrid = carrid
+    connid = connid ).
+
+    CONCATENATE carrid ` ` connid INTO list_title.
+
+    TRY.
+        IF alv IS INITIAL.
+          cl_salv_table=>factory(
+          EXPORTING r_container = container_box
+            IMPORTING r_salv_table = alv
+              CHANGING t_table = flight_tab ).
+          alv->display( ).
+        ELSE.
+          alv->set_data( CHANGING t_table = flight_tab ).
+        ENDIF.
+        settings = alv->get_display_settings( ).
+        settings->set_list_header( list_title ).
+        alv->refresh( ).
+      CATCH cx_salv_msg cx_salv_no_new_data_allowed.
+        MESSAGE text-alv TYPE 'I' DISPLAY LIKE 'E'.
+    ENDTRY.
+  ENDMETHOD.                    "fill_list
+
+  METHOD handle_node_double_click.
+
+    DATA: carrid TYPE spfli-carrid,
+          connid TYPE spfli-connid.
+
+    carrid = node_key(2).
+    connid = node_key+2(4).
+    IF connid IS INITIAL.
+      fill_html( carrid = carrid ).
+    ELSE.
+      fill_list( carrid = carrid
+                  connid = connid ).
+    ENDIF.
+  ENDMETHOD.                    "handle_node_double_click
+
+  METHOD close_box.
+    alv->close_screen( ).
+    container_box->free( ).
+    CLEAR: alv, container_box.
+  ENDMETHOD.                    "close_box
+
+ENDCLASS.                    "screen_handler IMPLEMENTATION
+
+
+*----------------------------------------------------------------------*
+*       CLASS ZCL_AIRLINES_AO  DEFINITIO
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+*ABAP ObJEcTs S. 670 
+CLASS zcl_airlines_ao DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+*"* public components of class ZCL_AIRLINES_AO
+*"* do not include other source files here!!!
+  PUBLIC SECTION.
+    TYPES:
+    tspfli_tab TYPE SORTED TABLE OF spfli
+    WITH UNIQUE KEY carrid connid,
+    turl TYPE scarr-url,
+    tflight_tab TYPE SORTED TABLE OF demofli
+    WITH NON-UNIQUE DEFAULT KEY.
+    CLASS-METHODS get_spfli_tab
+    RETURNING
+    value(spfli_tab) TYPE tspfli_tab.
+    CLASS-METHODS get_url
+    IMPORTING
+      carrid TYPE scarr-carrid
+      RETURNING
+      value(url) TYPE turl.
+    CLASS-METHODS get_flight_tab
+    IMPORTING
+      carrid TYPE sflight-carrid
+      connid TYPE sflight-connid
+      RETURNING
+      value(flight_tab) TYPE tflight_tab.

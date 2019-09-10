@@ -1,0 +1,145 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_POLYMORPHISM_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_polymorphism_ao.
+
+************************************************************************
+* Report Name  : Z_POLYMORPHISM_AO                                                 *
+* Report Title : Polymorphie                           *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/07/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen aus dem Buch SAP Objects    S. 450            *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01/03/19 | Author: M.Buescher| Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       INTERFACE i1 DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+INTERFACE i1.
+  METHODS m1.
+ENDINTERFACE.                    "i1 DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS c1 DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS c1 DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES i1.
+ENDCLASS.                    "c1 DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS c2 DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS c2 DEFINITION INHERITING FROM c1.
+  PUBLIC SECTION.
+    METHODS i1~m1 REDEFINITION.
+ENDCLASS.                    "c2 DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS c3 DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS c3 DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES i1.
+ENDCLASS.                    "c3 DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS user DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS user DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS meth IMPORTING ref TYPE REF TO i1.
+ENDCLASS.                    "user DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS c1 IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS c1 IMPLEMENTATION.
+  METHOD i1~m1.
+    MESSAGE 'I do this, ...' TYPE 'I'.
+  ENDMETHOD.                                                "i1~m1
+ENDCLASS.                    "c1 IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS c2 IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS c2 IMPLEMENTATION.
+  METHOD i1~m1.
+    MESSAGE ' ... and I do that, ...' TYPE 'I'.
+  ENDMETHOD.                                                "i1~m1
+ENDCLASS.                    "c2 IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS c3 IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS c3 IMPLEMENTATION.
+  METHOD i1~m1.
+    MESSAGE ' ... and I do nothing!' TYPE 'I'.
+  ENDMETHOD.                                                "i1~m1
+ENDCLASS.                    "c3 IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS user IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS user IMPLEMENTATION.
+  METHOD meth.
+    ref->m1( ).
+  ENDMETHOD.                    "meth
+ENDCLASS.                    "user IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA iref TYPE REF TO i1.
+    CREATE OBJECT iref TYPE c1.
+    user=>meth( iref ).
+    CREATE OBJECT iref TYPE c2.
+    user=>meth( iref ).
+    CREATE OBJECT iref TYPE c3.
+    user=>meth( iref ).
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

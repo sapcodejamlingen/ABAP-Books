@@ -1,0 +1,110 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_BANKING_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_banking_ao.
+
+************************************************************************
+* Report Name  : Z_BANKING_AO                                                 *
+* Report Title : Verwendung der Banknoten                          *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/08/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen aus dem Buch SAP Objects                      *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01/08/19 | Author: M.Buescher| Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+
+  PUBLIC SECTION.
+    CLASS-METHODS: main,
+                   withdraw
+                        IMPORTING
+                            account TYPE REF TO zif_account_ao
+                            amount TYPE zaccounts-amount,
+                   transfer
+                        IMPORTING
+                          source TYPE REF TO zif_account_ao
+                          target TYPE REF TO zif_account_ao
+                          amount TYPE zaccounts-amount.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+
+    DATA: account1 TYPE REF TO zif_account_ao,
+          account2 TYPE REF TO zif_account_ao,
+          acc_hndl TYPE REF TO zcl_account_management_ao.
+
+    CREATE OBJECT: account1 TYPE zcl_checking_account_ao
+                            EXPORTING id = '00000815',
+                   account2 TYPE zcl_savings_account_ao
+                            EXPORTING id = '00004711',
+                            acc_hndl.
+
+    SET HANDLER
+    acc_hndl->handle_debit_balance_ao FOR ALL INSTANCES.
+
+    demo=>withdraw( account = account1
+                    amount = 100 ).
+
+    demo=>transfer( source = account1
+                    target = account2
+                    amount = 500 ).
+
+    demo=>withdraw( account = account2
+                    amount = 1000 ).
+
+    demo=>transfer( source = account2
+                    target = account1
+                    amount = 1000 ).
+  ENDMETHOD.                    "main
+
+  METHOD withdraw.
+    DATA text TYPE string.
+    TRY.
+        account->withdraw( amount ).
+      CATCH zcx_negative_amount.
+        text = account->id.
+        CONCATENATE `Withdraw not possible from `
+                      text
+                      INTO text.
+        MESSAGE text TYPE 'I'.
+    ENDTRY.
+  ENDMETHOD.                    "withdraw
+
+  METHOD transfer.
+    DATA text TYPE string.
+    TRY.
+        source->transfer( amount = amount
+                          target = target ).
+      CATCH zcx_negative_amount.
+        text = source->id.
+        CONCATENATE `Transfer not possible from `
+                    text
+                     INTO
+                    text.
+        MESSAGE text TYPE 'I'.
+    ENDTRY.
+  ENDMETHOD.                    "transfer
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

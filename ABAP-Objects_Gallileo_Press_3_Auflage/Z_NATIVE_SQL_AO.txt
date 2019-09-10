@@ -1,0 +1,132 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_NATIVE_SQL_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_native_sql_ao.
+
+************************************************************************
+* Report Name  : Z_native_SQL_AO                      *
+* Report Title : Native SQL                          *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/18/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen aus dem Buch SAP Objects    S. 824            *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01/18/19 | Author: M.Buescher| Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS: p_create RADIOBUTTON GROUP grp,
+            p_insert RADIOBUTTON GROUP grp,
+            p_select RADIOBUTTON GROUP grp,
+            p_drop RADIOBUTTON GROUP grp.
+SELECTION-SCREEN SKIP.
+PARAMETERS p_key TYPE i DEFAULT 1.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+  PRIVATE SECTION.
+    CLASS-DATA: wa1 TYPE c LENGTH 10,
+                wa2 TYPE c LENGTH 10,
+                err TYPE REF TO cx_sy_native_sql_error.
+    CLASS-METHODS: create RAISING cx_sy_native_sql_error,
+                   insert RAISING cx_sy_native_sql_error,
+                   select RAISING cx_sy_native_sql_error,
+                   drop   RAISING cx_sy_native_sql_error.
+
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    TRY.
+        IF p_create = 'X'.
+          create( ).
+          MESSAGE 'Create was sucessful' TYPE 'S'.
+        ELSEIF p_insert = 'X'.
+          insert( ).
+          MESSAGE 'Insert was successful' TYPE 'S'.
+        ELSEIF p_select = 'X'.
+          select( ).
+          MESSAGE 'Select was sucessful' TYPE 'S'.
+        ELSEIF p_drop = 'X'.
+          drop( ).
+          MESSAGE 'Drop was sucessful' TYPE 'S'.
+        ENDIF.
+      CATCH cx_sy_native_sql_error INTO err.
+        MESSAGE err TYPE 'I' DISPLAY LIKE 'E'.
+    ENDTRY.
+  ENDMETHOD.                    "main
+  METHOD create.
+    EXEC SQL.
+      create table mytab (
+      val1 char(10) not null,
+      val2 char(10) not null,
+      primary key (val1) )
+    ENDEXEC.
+  ENDMETHOD.                    "create
+
+  METHOD insert.
+    DO 100 TIMES.
+      wa1 = sy-index.
+      wa2 = sy-index ** 2.
+      EXEC SQL.
+        insert into mytab values (:wa1, :wa2)
+      ENDEXEC.
+      IF sy-subrc <> 0.
+        RAISE EXCEPTION TYPE cx_sy_native_sql_error
+        EXPORTING textid =
+          cx_sy_native_sql_error=>key_already_exists.
+      ENDIF.
+    ENDDO.
+  ENDMETHOD.                    "insert
+  METHOD select.
+    DATA: msg TYPE c LENGTH 30,
+          key TYPE c LENGTH 10.
+    key = p_key.
+    EXEC SQL.
+      select val1, val2
+        into :wa1, :wa2
+        from mytab
+        where val1 = :key
+    ENDEXEC.
+
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE cx_sy_native_sql_error
+      EXPORTING textid =
+        cx_sy_native_sql_error=>key_not_found.
+    ENDIF.
+    WRITE: 'Result:' TO msg,
+    wa1 TO msg+10,
+    wa2 TO msg+20.
+    MESSAGE msg TYPE 'I'.
+  ENDMETHOD.                    "select
+  METHOD drop.
+    EXEC SQL.
+      drop table mytab
+    ENDEXEC.
+  ENDMETHOD.                    "drop
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

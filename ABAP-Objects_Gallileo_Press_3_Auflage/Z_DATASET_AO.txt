@@ -1,0 +1,154 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_DATASET_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_dataset_ao.
+
+************************************************************************
+* Report Name  : Z_DATASET_AO                                         *
+* Report Title : ABAP Dateischnittstelle                               *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/22/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects S.849                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.22.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+SELECTION-SCREEN BEGIN OF SCREEN 100.
+PARAMETERS: p_open    RADIOBUTTON GROUP grp,
+            p_transf  RADIOBUTTON GROUP grp,
+            p_read    RADIOBUTTON GROUP grp,
+            p_close   RADIOBUTTON GROUP grp,
+            p_delete  RADIOBUTTON GROUP grp.
+SELECTION-SCREEN END OF SCREEN 100.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS: class_constructor,
+                   main.
+  PRIVATE SECTION.
+    CLASS-DATA: scarr_tab  TYPE TABLE OF scarr,
+                scarr_wa   TYPE scarr.
+    CONSTANTS dset TYPE string
+                VALUE `C:\GUI_DOWNLOAD_UPLOAD\MYFILE.new`.  "D:\usr\sap\ECC\DVEBMGS00\work
+    CLASS-METHODS: open     RAISING cx_sy_file_access_error,
+                   transfer RAISING cx_sy_file_access_error,
+                   read     RAISING cx_sy_file_access_error,
+                   close    RAISING cx_sy_file_access_error,
+                   delete   RAISING cx_sy_file_access_error,
+                   display IMPORTING value(result_tab)
+                     LIKE scarr_tab.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD class_constructor.
+    SELECT *
+      FROM scarr
+      INTO TABLE scarr_tab
+      ORDER BY carrid.
+  ENDMETHOD.                    "class_constructor
+  METHOD main.
+    DATA err TYPE REF TO cx_sy_file_access_error.
+    DO.
+      CALL SELECTION-SCREEN 100.
+      IF sy-subrc <> 0.
+        RETURN.
+      ENDIF.
+      TRY.
+          IF p_open = 'X'.
+            open( ).
+          ELSEIF p_transf = 'X'.
+            transfer( ).
+          ELSEIF p_read = 'X'.
+            read( ).
+          ELSEIF p_close = 'X'.
+            close( ).
+          ELSEIF p_delete = 'X'.
+            delete( ).
+          ENDIF.
+        CATCH cx_sy_file_access_error INTO err.
+          MESSAGE err TYPE 'I' DISPLAY LIKE 'E'.
+      ENDTRY.
+    ENDDO.
+  ENDMETHOD.                    "main
+  METHOD open.
+    OPEN DATASET dset FOR OUTPUT IN BINARY MODE . " TEXT ENCODING UTF-8
+    IF sy-subrc = 0.
+      MESSAGE 'File opend' TYPE 'S'.
+    ELSE.
+      MESSAGE 'File not opened' TYPE 'S'
+      DISPLAY LIKE 'E'.
+    ENDIF.
+  ENDMETHOD.                    "open
+  METHOD transfer.
+    DATA msg TYPE string.
+    LOOP AT scarr_tab INTO scarr_wa.
+      TRANSFER scarr_wa TO dset.
+    ENDLOOP.
+    msg = LINES( scarr_tab ).
+    CONCATENATE msg ` Lines transferred` INTO msg.
+    MESSAGE msg TYPE 'S'.
+  ENDMETHOD.                    "transfer
+  METHOD read.
+    DATA result_tab LIKE scarr_tab.
+    SET DATASET dset POSITION 0.
+    DO.
+      READ DATASET dset INTO scarr_wa.
+      IF sy-subrc <> 0.
+        EXIT.
+      ENDIF.
+      APPEND scarr_wa TO result_tab.
+    ENDDO.
+    display( result_tab ).
+  ENDMETHOD.                    "read
+  METHOD close.
+    CLOSE DATASET dset.
+    MESSAGE 'File closed' TYPE 'S'.
+  ENDMETHOD.                    "close
+  METHOD delete.
+    DELETE DATASET dset.
+    IF sy-subrc = 0.
+      MESSAGE 'File deleted' TYPE 'S'.
+    ELSE.
+      MESSAGE 'File not deleted' TYPE 'S'
+      DISPLAY LIKE 'E'.
+    ENDIF.
+  ENDMETHOD.                    "delete
+  METHOD display.
+    DATA alv TYPE REF TO cl_salv_table.
+    TRY.
+        cl_salv_table=>factory(
+        IMPORTING r_salv_table = alv
+          CHANGING t_table = result_tab ).
+        alv->display( ).
+      CATCH cx_salv_msg.
+        MESSAGE 'ALV display not possible' TYPE 'I'
+            DISPLAY LIKE 'E'.
+    ENDTRY.
+  ENDMETHOD.                    "display
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

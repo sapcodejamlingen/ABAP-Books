@@ -1,0 +1,99 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_FUNCTIONAL_METHOD_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_functional_method_ao.
+
+************************************************************************
+* Report Name  :  z_functional_method_ao.                               *
+* Report Title : Funktionale Methoden                     *
+* SAP Release 6.0                                                      *
+* Author�s Name: BUESCHERM                                         *
+* Create Date  : 01/05/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects Buch S. 388              *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.05.19 | Author: M.B�scher | Destrcription/Transport  *
+************************************************************************
+
+SELECTION-SCREEN BEGIN OF SCREEN 100.
+PARAMETERS: p_radius TYPE i,
+p_height TYPE i.
+SELECTION-SCREEN END OF SCREEN 100.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS cylinder DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS cylinder DEFINITION.
+  PUBLIC SECTION.
+    METHODS: constructor IMPORTING i_radius   TYPE numeric
+                                   i_height   TYPE numeric,
+                                   get_area   RETURNING value(r_area) TYPE f,
+                                   get_volume RETURNING value(r_volume) TYPE f.
+  PRIVATE SECTION.
+    CONSTANTS pi TYPE f VALUE '3.14159265'.
+    DATA: radius TYPE f,
+          height TYPE f.
+ENDCLASS.                    "cylinder DEFINITION
+*----------------------------------------------------------------------*
+*       CLASS cylinder IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS cylinder IMPLEMENTATION.
+  METHOD constructor.
+    me->radius = i_radius.
+    me->height = i_height.
+  ENDMETHOD.                    "constructor
+  METHOD get_area.
+    r_area = pi * me->radius ** 2.
+  ENDMETHOD.                    "get_area
+  METHOD get_volume.
+    r_volume = me->get_area( ) * me->height.
+  ENDMETHOD.                    "get_volume
+ENDCLASS.                    "cylinder IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: oref TYPE REF TO cylinder,
+          volume TYPE string.
+    CALL SELECTION-SCREEN 100 STARTING AT 10 10.
+    IF sy-subrc = 0.
+      CREATE OBJECT oref EXPORTING i_radius = p_radius
+                                      i_height = p_height.
+      volume = oref->get_volume( ).
+      CONCATENATE `Volume: ` volume INTO volume.
+      MESSAGE volume TYPE 'I'.
+    ENDIF.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

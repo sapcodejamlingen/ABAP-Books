@@ -1,0 +1,72 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_GENERATE_SOUBROUTINE_POOL_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_generate_soubroutine_pool_ao.
+
+************************************************************************
+* Report Name  : Z_GENERATE_SOUBROUTINE_POOL_AO                                                 *
+* Report Title : Transiente Programmgenerierung                                       *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/28/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen ABAP ObJEcTs S. 914               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.28.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+************************************************************************
+
+
+PARAMETERS p_dbtab TYPE string.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: source TYPE TABLE OF string,
+          prog TYPE string,
+          msg TYPE string.
+    READ REPORT 'Z_DATA_BROWSER_TEMPLATE_AO' INTO source.
+    IF sy-subrc <> 0.
+      MESSAGE 'Template not found' TYPE 'I'
+      DISPLAY LIKE 'E'.
+      RETURN.
+    ENDIF.
+    REPLACE ALL OCCURRENCES OF 'T100' IN TABLE source
+    WITH p_dbtab IGNORING CASE.
+    GENERATE SUBROUTINE POOL source NAME prog
+    MESSAGE msg.
+    IF sy-subrc = 0.
+      PERFORM entry IN PROGRAM (prog).
+    ELSE.
+      MESSAGE msg TYPE 'I' DISPLAY LIKE 'E'.
+    ENDIF.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

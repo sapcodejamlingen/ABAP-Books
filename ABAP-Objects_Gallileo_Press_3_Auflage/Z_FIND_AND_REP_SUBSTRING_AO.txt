@@ -1,0 +1,59 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_FIND_AND_REP_SUBSTRING_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_find_and_rep_substring_ao.
+
+************************************************************************
+* Report Name  : Z_FIND_AND_REP_SUBSTRING_AO                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 99/99/9999 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:99.99.99 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA text TYPE string.
+    text = 'Programming SAP Web AS with ABAP'.
+    FIND FIRST OCCURRENCE OF SUBSTRING 'Web AS' IN text
+    IGNORING CASE.
+    IF sy-subrc = 0.
+      REPLACE ALL OCCURRENCES
+      OF SUBSTRING 'Web AS' IN text
+      WITH 'NetWeaver' RESPECTING CASE.
+      REPLACE ALL OCCURRENCES OF SUBSTRING 'ABAP' IN text
+      WITH 'ABAP Objects' RESPECTING CASE.
+    ENDIF.
+    IF sy-subrc = 0.
+      MESSAGE text TYPE 'I'.
+    ENDIF.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

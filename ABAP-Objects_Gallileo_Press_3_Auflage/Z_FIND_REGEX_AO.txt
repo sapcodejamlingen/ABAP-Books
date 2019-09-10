@@ -1,0 +1,57 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_FIND_REGEX_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_find_regex_ao.
+
+************************************************************************
+* Report Name  : Z_FIND_REGEX_AO                                    *
+* Report Title : Suchen mit regulären Ausdrücken.                      *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 99/99/9999 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects Buch S. 336               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:99.99.99 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: text TYPE string,
+          regx TYPE string VALUE `(.AT)|(\<.AT\>)`,
+          result_tab TYPE match_result_tab.
+    text = `Cathy's Cat with the hat sat on Matt's mat.`.
+    FIND FIRST OCCURRENCE OF REGEX regx IN text
+    IGNORING CASE RESULTS result_tab.
+    FIND FIRST OCCURRENCE OF REGEX regx IN text
+    RESPECTING CASE RESULTS result_tab.
+    FIND ALL OCCURRENCES OF REGEX regx IN text
+    IGNORING CASE RESULTS result_tab.
+    FIND ALL OCCURRENCES OF REGEX regx IN text
+    RESPECTING CASE RESULTS result_tab.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

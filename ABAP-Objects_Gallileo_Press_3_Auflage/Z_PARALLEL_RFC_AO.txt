@@ -1,0 +1,112 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_PARALLEL_RFC_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_parallel_rfc_ao.
+
+************************************************************************
+* Report Name  : Z_PARALLEL_RFC_AO                                  *
+* Report Title : Parallelverarbeitung mit asynchronem RFC         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/28/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen ABAP ObJEcTs S. 935              *
+*              :                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.28.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS: main,
+                   callback_meth
+                    IMPORTING p_task TYPE clike.
+  PRIVATE SECTION.
+    TYPES: BEGIN OF task_type,
+            name TYPE string,
+            dest TYPE string,
+           END OF task_type.
+    CLASS-DATA:
+      task_list TYPE STANDARD TABLE OF task_type,
+      task_wa   TYPE task_type,
+      rcv_jobs  TYPE i,
+      mess      TYPE c LENGTH 80.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: snd_jobs TYPE i,
+    exc_flag TYPE i,
+    indx TYPE c LENGTH 4,
+    name TYPE c LENGTH 8.
+    DO 10 TIMES.
+      indx = sy-index.
+      CONCATENATE 'TASK' indx INTO name.
+      CALL FUNCTION 'RFC_SYSTEM_INFO'
+        STARTING NEW TASK name
+        DESTINATION IN GROUP DEFAULT
+        CALLING callback_meth ON END OF TASK
+        EXCEPTIONS
+          system_failure        = 1  MESSAGE mess
+          communication_failure = 2  MESSAGE mess
+          resource_failure      = 3.
+      CASE sy-subrc.
+        WHEN 0.
+          snd_jobs = snd_jobs + 1.
+        WHEN 1 OR 2.
+          MESSAGE mess TYPE 'I'.
+        WHEN 3.
+          IF snd_jobs >= 1 AND
+            exc_flag = 0.
+            exc_flag = 1.
+            WAIT UNTIL rcv_jobs >= snd_jobs
+            UP TO 5 SECONDS.
+          ENDIF.
+          IF sy-subrc = 0.
+            exc_flag = 0.
+          ELSE.
+            MESSAGE 'Resource failure ' TYPE 'I'.
+          ENDIF.
+        WHEN OTHERS.
+          MESSAGE 'Other error' TYPE 'I'.
+      ENDCASE.
+    ENDDO.
+    WAIT UNTIL rcv_jobs >= snd_jobs.
+    LOOP AT task_list INTO task_wa.
+      WRITE: / task_wa-name,  task_wa-dest.
+    ENDLOOP.
+  ENDMETHOD.                    "main
+  METHOD callback_meth.
+    DATA info TYPE rfcsi.
+    task_wa-name = p_task.
+    rcv_jobs = rcv_jobs + 1.
+    RECEIVE RESULTS FROM FUNCTION 'RFC_SYSTEM_INFO'
+    IMPORTING
+      rfcsi_export = info
+      EXCEPTIONS
+        system_failure = 1 message mess
+        communication_failure = 2 message mess.
+    IF sy-subrc = 0.
+      task_wa-dest = mess.
+    ENDIF.
+    APPEND task_wa TO task_list.
+  ENDMETHOD.                    "callback_meth
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

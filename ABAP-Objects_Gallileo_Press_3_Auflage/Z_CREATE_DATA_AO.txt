@@ -1,0 +1,103 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_CREATE_DATA_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_create_data_ao.
+
+************************************************************************
+* Report Name  : Z_CREATE_DATA_AO                                                 *
+* Report Title : Dynamische Datenstruktur in Form einer verketteten List                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/28/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen ABAP ObJEcTs S. 883               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.28.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+CLASS zcl_text_ao DEFINITION LOAD.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS: main.
+  PRIVATE SECTION.
+    TYPES: BEGIN OF t_item,
+            content TYPE zcl_text_ao=>t_line,
+      next TYPE REF TO data,
+            END OF t_item.
+    CLASS-DATA: dref_start TYPE REF TO t_item,
+    dref_new TYPE REF TO t_item.
+    CLASS-METHODS: create_list,
+    append_item,
+    show_list.
+
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    create_list( ).
+    show_list( ).
+  ENDMETHOD.                    "main
+  METHOD create_list.
+    DATA ncontent TYPE n LENGTH 3.
+    DO 10 TIMES.
+      ncontent    = sy-index.
+      CREATE DATA dref_new.
+      CONCATENATE 'List element:'
+      dref_new->content ncontent
+        INTO dref_new->content SEPARATED BY space.
+      IF sy-index = 1.
+        dref_start = dref_new.
+      ENDIF.
+      append_item( ).
+    ENDDO.
+  ENDMETHOD.                    "create_list
+  METHOD append_item.
+    DATA dref_cur TYPE REF TO t_item.
+    IF dref_start = dref_new.
+      EXIT.
+    ENDIF.
+    dref_cur = dref_start.
+    WHILE dref_cur->next IS BOUND.
+      dref_cur ?= dref_cur->next.
+    ENDWHILE.
+    dref_cur->next = dref_new.
+  ENDMETHOD.                    "create_list
+  METHOD show_list.
+    DATA: text TYPE REF TO zcl_text_ao,
+          text_line TYPE zcl_text_ao=>t_line,
+          dref_cur TYPE REF TO t_item.
+    text = zcl_text_ao=>get_handle( ).
+    dref_cur = dref_start.
+    WHILE dref_cur IS BOUND.
+      text->add_line( dref_cur->content ).
+      dref_cur ?= dref_cur->next.
+    ENDWHILE.
+    text->display( ).
+  ENDMETHOD.                    "show_list
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

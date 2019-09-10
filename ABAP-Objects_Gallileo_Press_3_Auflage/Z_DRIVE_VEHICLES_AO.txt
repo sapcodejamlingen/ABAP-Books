@@ -1,0 +1,53 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_DRIVE_VEHICLES_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  Z_DRIVE_VEHICLES_AO.
+
+************************************************************************
+* Report Name  : Z_DRIVE_VEHICLES_AO *
+* Report Title : Listnings ABAP Objects Buch                           *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/03/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen aus dem Buch SAP Objects                      *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01/03/19 | Author: M.Buescher| Destrcription/Transport  *
+************************************************************************
+
+class demo definition.
+  public section.
+  class-methods main.
+  endclass.
+
+  class demo implementation.
+    method main.
+
+      data: vehicle1 type ref to zcl_vehicle,
+            vehicle2 type ref to zcl_vehicle.
+
+      create object: vehicle1,
+                     vehicle2.
+
+      vehicle1->accelerate( 100 ).
+      vehicle1->show_speed( ).
+
+      vehicle2->accelerate( 200 ).
+      vehicle2->show_speed( ).
+
+      endmethod.
+      endclass.
+
+      START-OF-SELECTION.
+      demo=>main( ).

@@ -1,0 +1,82 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_DREF_DOWN_CAST_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_dref_down_cast_ao.
+
+************************************************************************
+* Report Name  : Z_DREF_DOWN_CAST_AO
+* Report Title : Down cast bei Datenreferenzvariablen
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/28/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen ABAP ObJEcTs S. 891               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.28.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS type TYPE c LENGTH 30.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS: main,
+                   string_processor
+                    IMPORTING dref TYPE REF TO data.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA dref TYPE REF TO data.
+    TRY.
+        CREATE DATA dref TYPE (type).
+      CATCH cx_sy_create_data_error.
+        MESSAGE 'Wrong data type!' TYPE 'I'
+              DISPLAY LIKE 'E'.
+        RETURN.
+    ENDTRY.
+    string_processor( dref ).
+  ENDMETHOD.                    "main
+  METHOD string_processor.
+    DATA: sref TYPE REF TO string,
+          xref TYPE REF TO xstring.
+    IF dref IS NOT BOUND.
+      RETURN.
+    ENDIF.
+    TRY.
+        sref ?= dref.
+        MESSAGE 'Processing string..' TYPE 'S'.
+      CATCH cx_sy_move_cast_error.
+        TRY.
+            xref ?= dref.
+            MESSAGE 'Processing xstring ...' TYPE 'S'.
+          CATCH cx_sy_move_cast_error.
+            MESSAGE 'Not a string or xstring!' TYPE 'I'
+            DISPLAY LIKE 'E'.
+        ENDTRY.
+    ENDTRY.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

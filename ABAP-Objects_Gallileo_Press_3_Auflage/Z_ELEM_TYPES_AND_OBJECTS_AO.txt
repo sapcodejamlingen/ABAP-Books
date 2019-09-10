@@ -1,0 +1,59 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_ELEM_TYPES_AND_OBJECTS_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_elem_types_and_objects_ao.
+
+************************************************************************
+* Report Name  : Z_ELEM_TYPES_AND_OBJECTS_AO*
+* Report Title : Listnings ABAP Objects Buch                           *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/03/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen aus dem Buch SAP Objects                      *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01/03/19 | Author: M.Buescher| Destrcription/Transport  *
+************************************************************************
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+
+  METHOD main.
+    TYPES calc_type TYPE p LENGTH 8 DECIMALS 2.
+    DATA: number_1 TYPE calc_type VALUE 3,
+          number_2 TYPE calc_type VALUE 4,
+          result TYPE calc_type,
+          output TYPE string.
+    result = number_1 / number_2.
+    output = result.
+    MESSAGE output TYPE 'I'.
+  ENDMETHOD.                    "main
+  endclass.
+
+  START-OF-SELECTION.
+  demo=>main( ).

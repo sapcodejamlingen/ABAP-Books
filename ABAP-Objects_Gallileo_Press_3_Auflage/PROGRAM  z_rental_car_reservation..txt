@@ -1,0 +1,97 @@
+PROGRAM  z_rental_car_reservation.
+* ABAP Objects S. 136
+
+************************************************************************
+* Report Name  : z_rental_car_reservation                              *
+* Report Title : Listnings ABAP Objects Buch                           *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 08/07/2018 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen aus dem Buch SAP Objects                      *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01/03/19 | Author: M.Buescher| Destrcription/Transport  *
+************************************************************************
+
+CLASS cl_car_rental DEFINITION.
+
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "cl_car_rental DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS cl_car_rental IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS cl_car_rental IMPLEMENTATION.
+  METHOD main.
+    DATA: id  TYPE zcustomers_ab-id,
+          customer TYPE REF TO zcl_customer,
+          ans TYPE c LENGTH 1,
+          reservations TYPE REF TO zcl_car_reservations.
+
+    CALL FUNCTION 'Z_INPUT_CUSTOMER'
+      IMPORTING
+        customer_id = id.
+    TRY.
+        CREATE OBJECT customer EXPORTING id = id.
+      CATCH zcx_no_customer.
+        MESSAGE 'Unknown Customer' TYPE 'I' DISPLAY LIKE 'E'.
+        RETURN.
+    ENDTRY.
+
+    "Create Object for reservations
+    reservations = zcl_car_reservations=>car_reservations.
+
+    DO.
+
+      "Customer reserves a car
+      TRY.
+          customer->reserve_a_car( reservations ).
+        CATCH zcx_no_car_available.
+          MESSAGE 'No Car availeble!' TYPE 'I' DISPLAY LIKE 'E'.
+      ENDTRY.
+
+      CALL FUNCTION 'POPUP_TO_CONFIRM'
+        EXPORTING
+*             TITLEBAR                    = ' '
+*             DIAGNOSE_OBJECT             = ' '
+          text_question               = 'Other Reservations?'
+         text_button_1               = 'Ja'(001)
+         icon_button_1               = ' '
+         text_button_2               = 'Nein'(002)
+*             ICON_BUTTON_2               = ' '
+*             DEFAULT_BUTTON              = '1'
+         display_cancel_button       = ' '
+*             USERDEFINED_F1_HELP         = ' '
+*             START_COLUMN                = 25
+*             START_ROW                   = 6
+*             POPUP_TYPE                  =
+*             IV_QUICKINFO_BUTTON_1       = ' '
+*             IV_QUICKINFO_BUTTON_2       = ' '
+       IMPORTING
+         answer                      = ans
+*           TABLES
+*             PARAMETER                   =
+*           EXCEPTIONS
+*             TEXT_NOT_FOUND              = 1
+*             OTHERS                      = 2
+                .
+      IF ans = '2'.
+        EXIT.
+      ENDIF.
+    ENDDO.
+
+    "Persist data on database
+
+    reservations->persist_reservations( ).
+
+  ENDMETHOD.                    "main
+ENDCLASS.                    "cl_car_rental IMPLEMENTATION

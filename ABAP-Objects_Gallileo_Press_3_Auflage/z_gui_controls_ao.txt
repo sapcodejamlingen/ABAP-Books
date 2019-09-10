@@ -1,0 +1,93 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_GUI_CONTROLS_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_gui_controls_ao.
+
+************************************************************************
+* Report Name  : Z_GUI_CONTROLS_AO                                     *
+* Report Title : Verschidene Verwendungen des Browser Controls         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/14/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP ObJEcTs S. 655               *
+*              : Verschiedene Verwendungen des Browser Contols       *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.14.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+  PRIVATE SECTION.
+    CLASS-DATA container
+    TYPE REF TO cl_gui_custom_container.
+    CLASS-METHODS: ctrl1, ctrl2.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    ctrl1( ).
+    ctrl2( ).
+  ENDMETHOD.                    "main
+  METHOD ctrl1.
+    DATA oref TYPE REF TO cl_dd_document.
+    CREATE OBJECT container
+    EXPORTING container_name = 'CUSTOM_CONTROL'.
+    CREATE OBJECT oref.
+
+    oref->add_text( text = 'HEADER'
+    sap_emphasis = cl_dd_area=>strong ).
+    oref->new_line( ).
+    oref->add_text( text = 'Text' ).
+    oref->display_document( parent = container ).
+
+    CALL SCREEN 100.
+    container->free( ).
+  ENDMETHOD.                                                "ctrl1
+
+  METHOD ctrl2.
+    DATA oref TYPE REF TO cl_gui_html_viewer.
+    DATA html TYPE w3htmltab.
+    DATA url TYPE c LENGTH 255.
+    CREATE OBJECT container
+    EXPORTING container_name = 'CUSTOM_CONTROL'.
+    CREATE OBJECT oref
+    EXPORTING parent = container.
+
+
+    APPEND '<html>'                        TO html.
+    APPEND '<body>'                        TO html.
+    APPEND '<font face="arial" size ="2">' TO html.
+    APPEND '<b>Header</b>'                 TO html.
+    APPEND '<br>'                          TO html.
+    APPEND '<Text>'                        TO html.
+    APPEND '</font>'                       TO html.
+    APPEND '</body>'                       TO html.
+    APPEND '</html>'                       TO html.
+    oref->load_data( IMPORTING assigned_url = url
+                      CHANGING data_table = html ).
+    oref->show_url( url = url ).
+
+    CALL SCREEN 100.
+    container->free( ).
+  ENDMETHOD.                                                "ctrl2
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

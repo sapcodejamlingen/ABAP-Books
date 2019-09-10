@@ -1,0 +1,45 @@
+
+
+method ONACTIONSEARCH .
+*ABAP Objects S. 758
+
+  wd_comp_controller->execute_bapi_flight_getlist(
+  ).
+
+  DATA:
+    node_flight_list                    TYPE REF TO if_wd_context_node,
+    elem_flight_list                    TYPE REF TO
+if_wd_context_element,
+    stru_flight_list                    TYPE
+if_z_flight_data_viewao=>element_flight_list .
+* navigate from <CONTEXT> to <FLIGHT_LIST> via lead selection
+  node_flight_list = wd_context->get_child_node( name =
+if_z_flight_data_viewao=>wdctx_flight_list ).
+
+
+* @TODO handle not set lead selection
+  IF ( node_flight_list IS INITIAL ).
+  ENDIF.
+
+* get element via lead selection
+  elem_flight_list = node_flight_list->get_element(  ).
+
+* @TODO handle not set lead selection
+  IF ( elem_flight_list IS INITIAL ).
+      wd_this->fire_no_flights_found_plg(
+      ).
+
+  ENDIF.
+
+
+
+endmethod.
+
+
+
+
+
+method ONACTIONNEW_SEARCH .
+  wd_this->fire_goto_flight_data_plg(
+  ).
+endmethod.
