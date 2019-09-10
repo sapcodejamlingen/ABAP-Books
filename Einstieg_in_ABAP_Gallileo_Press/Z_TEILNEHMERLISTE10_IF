@@ -1,0 +1,88 @@
+REPORT  z_teilnehmerliste10_if.
+*Einstieg in ABAP S. 243
+
+*Tabellen deklarieren
+TABLES zteilnehmer2.
+
+*Zeichnketten deklarieren
+DATA: tz_pc_grundlagen    TYPE i,
+      tz_netzwerktechnik  TYPE i,
+      tz_sap_grundlagen   TYPE i,
+      tz_sonst            TYPE i,
+      tz_total            TYPE i.
+
+* vollständigen Tabellinhalt ausgeben
+SELECT * FROM zteilnehmer2.
+  WRITE: / zteilnehmer2-tnummer,
+           zteilnehmer2-tname,
+           zteilnehmer2-tgeburtsdatum,
+           zteilnehmer2-tgeschlecht,
+           zteilnehmer2-tkurspreis,
+           zteilnehmer2-twaehrung,
+           zteilnehmer2-zzkfztyp,
+           zteilnehmer2-zzkurstitel.
+ENDSELECT.
+SKIP.
+
+*Tabelleninhalt selektieren mit bedingung
+SELECT * FROM zteilnehmer2
+WHERE zzkurstitel = 'Netzwerktechnik'.
+  WRITE: / zteilnehmer2-tnummer,
+           zteilnehmer2-tname,
+           zteilnehmer2-tgeburtsdatum,
+           zteilnehmer2-zzkurstitel.
+ENDSELECT.
+
+*alle sätze aus der Tabelle lesen, aber nur bestimmte Sätze verarbeiten.
+SELECT * FROM zteilnehmer2.
+  IF zteilnehmer2-zzkurstitel = 'PC-Grundlagen'.
+    tz_pc_grundlagen = tz_pc_grundlagen + 1.
+  ENDIF.
+ENDSELECT.
+SKIP.
+
+WRITE: / tz_pc_grundlagen, 'Personen besuchen den Kurs PC-Grundlagen'.
+
+* alle Sätze einer Tabelle lesen, Anz. der Teilnehmer grob aufteilen.
+SELECT * FROM zteilnehmer2.
+  IF zteilnehmer2-zzkurstitel = 'SAP-Grundlagen'.
+    tz_sap_grundlagen = tz_sap_grundlagen + 1.
+  ELSE.
+    tz_sonst = tz_sonst + 1.
+  ENDIF.
+ENDSELECT.
+
+tz_total = tz_sap_grundlagen + tz_sonst.
+SKIP.
+
+WRITE: / 'von den',
+       / tz_total, 'Teilnehmern besuchten',
+       / tz_sap_grundlagen, 'den Kurs SAP-Grundlagen', 'und',
+       / tz_sonst, 'sonstige Kurse'.
+
+*wieder benötigte Zähler initialisieren
+CLEAR: tz_netzwerktechnik,
+       tz_pc_grundlagen,
+       tz_sap_grundlagen,
+       tz_sonst.
+
+* alle Sätze der Tabelle lesen
+*Anzahl der Kursteilnehmer fein Aufteilen
+SELECT * FROM zteilnehmer2.
+  IF zteilnehmer2-zzkurstitel = 'Netzwerktechnik'.
+    tz_netzwerktechnik = tz_netzwerktechnik + 1.
+  ELSEIF zteilnehmer2-zzkurstitel = 'PC-Grundlagen'.
+    tz_pc_grundlagen = tz_pc_grundlagen + 1.
+  ELSEIF zteilnehmer2-zzkurstitel = 'SAP-Grundlagen'.
+    tz_sap_grundlagen = tz_sap_grundlagen + 1.
+  ELSE.
+    tz_sonst = tz_sonst + 1.
+  ENDIF.
+ENDSELECT.
+SKIP.
+
+WRITE: / 'Verteilung der Personen auf die Kurse:',
+          tz_pc_grundlagen , 'PC-Grundlagen',
+          tz_netzwerktechnik, 'Netzwerktechnik',
+          tz_sap_grundlagen, 'SAP-Grundlagen',
+          tz_sonst,  'sonstige Kurse'.
