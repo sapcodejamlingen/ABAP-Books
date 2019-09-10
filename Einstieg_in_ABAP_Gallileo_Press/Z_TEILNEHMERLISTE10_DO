@@ -1,0 +1,106 @@
+REPORT  z_teilnehmerliste10_do.
+*Einstieg in ABAP S. 253
+
+*Tabellen deklarieren
+TABLES zteilnehmer2.
+
+*Zeichnketten deklarieren
+DATA: min TYPE i,
+      sek TYPE i,
+      std TYPE i.
+
+* vollständigen Tabellinhalt ausgeben
+SELECT * FROM zteilnehmer2.
+  WRITE: / zteilnehmer2-tnummer,
+           zteilnehmer2-tname,
+           zteilnehmer2-tgeburtsdatum,
+           zteilnehmer2-tgeschlecht,
+           zteilnehmer2-tkurspreis,
+           zteilnehmer2-twaehrung,
+           zteilnehmer2-zzkfztyp,
+           zteilnehmer2-zzkurstitel.
+ENDSELECT.
+SKIP.
+
+
+
+*Schleife über alle Sätze der Tabelle mit bedingung
+SELECT * FROM zteilnehmer2.
+  IF zteilnehmer2-tgeburtsdatum LT '19700101'.
+    CONTINUE.
+  ENDIF.
+  WRITE: / zteilnehmer2-tnummer,
+           zteilnehmer2-tname,
+           zteilnehmer2-tgeburtsdatum,
+           zteilnehmer2-tgeschlecht,
+           zteilnehmer2-tkurspreis,
+           zteilnehmer2-twaehrung,
+           zteilnehmer2-zzkfztyp,
+           zteilnehmer2-zzkurstitel.
+ENDSELECT.
+SKIP.
+
+
+
+SELECT * FROM zteilnehmer2.
+  CHECK zteilnehmer2-tgeschlecht = 'W'.
+  WRITE: / zteilnehmer2-tnummer,
+           zteilnehmer2-tname,
+           zteilnehmer2-tgeburtsdatum,
+           zteilnehmer2-tgeschlecht,
+           zteilnehmer2-tkurspreis,
+           zteilnehmer2-twaehrung,
+           zteilnehmer2-zzkfztyp,
+           zteilnehmer2-zzkurstitel.
+ENDSELECT.
+SKIP.
+
+*Ablauflogik für Zeitmesser mit Abbruch durch Exit.
+
+WRITE: std, min, sek. "Sy-index.
+SKIP.
+
+DO 24 TIMES.
+  IF sy-index = 3.
+    EXIT.
+  ENDIF.
+  min = 0.
+  DO 60 TIMES.
+    IF sy-index = 3.
+      EXIT.
+    ENDIF.
+    sek = 0.
+    DO 60 TIMES.
+      WRITE: / std, min, sek.
+      sek = sek + 1.
+      IF sy-index = 3.
+        EXIT.
+      ENDIF.
+    ENDDO.
+    min = min + 1.
+  ENDDO.
+  std = std + 1.
+ENDDO.
+SKIP.
+WRITE: / std, min, sek.
+* Programmabbruch
+EXIT.
+WRITE: / std, min, sek.
+SKIP.
+
+*Ablauflogik für Zeitmesser mit 24 Stdunden, Minuten, Sekunden.
+DO 24 TIMES.
+  min = 0.
+  DO 60 TIMES.
+    sek = 0.
+    DO 60 TIMES.
+      WRITE: / std, min, sek.
+      sek = sek + 1.
+    ENDDO.
+    min = min + 1.
+  ENDDO.
+  std = std + 1.
+ENDDO.
+SKIP.
+
+WRITE: / std, min, sek.
