@@ -1,0 +1,64 @@
+REPORT  z_teilnehmerliste09_INSERT.
+*Einstig in ABAP S.205
+
+* Tabellen deklarieren
+TABLES zteilnehmer2.
+
+*Zeichenketten deklarieren
+DATA: tnr LIKE zteilnehmer2-tnummer.
+
+*Arbeitsbereiche deklarieren
+DATA: wa_zteilnehmer02 LIKE zteilnehmer2.
+
+*Tabellenzeilen vor der Veränderung der Tabelle
+SELECT * FROM zteilnehmer2.
+  WRITE: / zteilnehmer2-tnummer,
+         zteilnehmer2-tname,
+         zteilnehmer2-tgeburtsdatum,
+         zteilnehmer2-tgeschlecht,
+         zteilnehmer2-tkurspreis,
+         zteilnehmer2-twaehrung,
+         zteilnehmer2-zzkfztyp,
+         zteilnehmer2-zzkurstitel.
+ENDSELECT.
+tnr = zteilnehmer2-tnummer.
+SKIP.
+
+* neuen Datensatz anlegen aus Tabellenarbeitsbereich
+tnr = tnr + 1.
+CLEAR zteilnehmer2.
+zteilnehmer2-tnummer = tnr.
+zteilnehmer2-tname = 'Schmidt'.
+zteilnehmer2-tgeburtsdatum = '19980808'.
+zteilnehmer2-tgeschlecht = 'M'.
+zteilnehmer2-tkurspreis = '999'.
+zteilnehmer2-twaehrung = 'EUR'.
+zteilnehmer2-zzkfztyp = 'KOMBI'.
+zteilnehmer2-zzkurstitel = 'SAP-Finanzwesen'.
+INSERT zteilnehmer2.
+WRITE: / ' Insert aus Tabellenbereich liefer sy-subrc', sy-subrc.
+
+*Neuen Datensatz anlegen aus Workarea
+tnr = tnr + 1.
+wa_zteilnehmer02-tnummer = tnr.
+wa_zteilnehmer02-tname = 'Schmidt'.
+wa_zteilnehmer02-tgeburtsdatum = '19990909'.
+wa_zteilnehmer02-tgeschlecht = 'W'.
+wa_zteilnehmer02-tkurspreis = '999'.
+wa_zteilnehmer02-twaehrung = 'EUR'.
+wa_zteilnehmer02-zzkfztyp = 'KOMBI'.
+wa_zteilnehmer02-zzkurstitel = 'SAP-Finanzwesen'.
+INSERT zteilnehmer2 FROM wa_zteilnehmer02.
+WRITE: / ' Insert aus Workarea liefert sy-subrc', sy-subrc.
+
+SELECT * FROM zteilnehmer2.
+  WRITE: / zteilnehmer2-tnummer,
+         zteilnehmer2-tname,
+         zteilnehmer2-tgeburtsdatum,
+         zteilnehmer2-tgeschlecht,
+         zteilnehmer2-tkurspreis,
+         zteilnehmer2-twaehrung,
+         zteilnehmer2-zzkfztyp,
+         zteilnehmer2-zzkurstitel.
+
+ENDSELECT.
