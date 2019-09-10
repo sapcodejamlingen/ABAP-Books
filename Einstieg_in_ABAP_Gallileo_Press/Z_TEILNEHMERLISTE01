@@ -1,0 +1,36 @@
+REPORT  z_teilnehmerliste01.
+*Einstieg in ABAP S. 72/73
+
+
+
+
+
+
+
+TABLES zteilnehmer.
+WRITE 'Dies ist meine erste Liste'.
+ULINE.
+
+* alle Sätze der Tabelle mit allen Feldern
+* satzweise in Programmstruktur übertragen,
+* Struktur in neuer Zeile ausgeben.
+SELECT * FROM zteilnehmer.
+  WRITE / zteilnehmer.
+ENDSELECT.
+SKIP.
+* select anweisung wie oben,
+* einzelne Felder eines Satzes in
+*neuer Zeile ausgeben
+SELECT * FROM zteilnehmer.
+  WRITE / zteilnehmer-tgeburtsdatum.
+  WRITE zteilnehmer-tname.
+ENDSELECT.
+SKIP.
+
+* Selct-Anweisung wie oben
+* Felder ausgeben wie oben, jedoch
+* WRITE - Anweisung als Kettensatz
+SELECT * FROM zteilnehmer.
+  WRITE: / zteilnehmer-tgeburtsdatum,
+           zteilnehmer-tname.
+ENDSELECT.
