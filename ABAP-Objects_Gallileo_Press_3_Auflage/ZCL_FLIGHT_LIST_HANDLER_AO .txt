@@ -1,0 +1,29 @@
+class ZCL_FLIGHT_LIST_HANDLER_AO definition
+  public
+  final
+  create private .
+
+*"* public components of class ZCL_FLIGHT_LIST_HANDLER_AO
+*"* do not include other source files here!!!
+public section.
+
+  class-data FLIGHT_LIST_HANDLER type ref to ZCL_FLIGHT_LIST_HANDLER_AO .
+
+  class-methods CLASS_CONSTRUCTOR .
+  methods GET_FLIGHT_LIST
+    returning
+      value(FLIGHTS) type ref to SPFLI_TAB
+    raising
+      ZCX_NO_FLIGHTS .
+
+*"* protected components of class ZCL_FLIGHT_LIST_HANDLER_AO
+*"* do not include other source files here!!!
+protected section.
+
+*"* private components of class ZCL_FLIGHT_LIST_HANDLER_AO
+*"* do not include other source files here!!!
+private section.
+
+  data AREA_HANDLE type ref to ZCL_FLIGHTS_AO .
+
+  methods CREATE_FLIGHT_LIST .

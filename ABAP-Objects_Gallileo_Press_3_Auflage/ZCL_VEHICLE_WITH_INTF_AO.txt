@@ -1,0 +1,79 @@
+class ZCL_VEHICLE_WITH_INTF_AO definition
+  public
+  final
+  create public .
+
+*"* public components of class ZCL_VEHICLE_WITH_INTF_AO
+*"* do not include other source files here!!!
+public section.
+
+  interfaces ZIF_DRIVE_OBJECT .
+
+  aliases ACCELERATE
+    for ZIF_DRIVE_OBJECT~ACCELERATE .
+
+
+
+
+
+*&---------------------------------------------------------------------*
+*& Report  Z_VEHICLE_WITH_INTF_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_vehicle_with_intf_ao.
+
+************************************************************************
+* Report Name  : Z_VEHICLE_WITH_INTF_AO                                *
+* Report Title :Deklaration und Implementierung eines lokalen Interface*
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/07/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects S 421                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.07.18 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+INTERFACE drive_object.
+  METHODS: accelerate IMPORTING delta TYPE i,
+            show_speed.
+ENDINTERFACE.                    "drive_object
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES drive_object.
+  PRIVATE SECTION.
+    DATA speed TYPE i.
+ENDCLASS.                    "vehicle DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle IMPLEMENTATION.
+  METHOD drive_object~accelerate.
+    speed = speed + delta.
+  ENDMETHOD.                    "drive_object~accelerate
+  METHOD drive_object~show_speed.
+    DATA output TYPE string.
+    output = speed.
+    CONCATENATE `Vehicle speed: ` output INTO output.
+    MESSAGE output TYPE 'I'.
+  ENDMETHOD.                    "drive_object~show_speed
+ENDCLASS.                    "vehicle IMPLEMENTATION

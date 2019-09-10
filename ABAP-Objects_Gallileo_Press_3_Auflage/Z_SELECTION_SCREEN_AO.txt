@@ -1,0 +1,315 @@
+
+*******************************************************************
+*   System-defined Include-files.                                 *
+*******************************************************************
+*ABAP ObJEcTs S. 677
+  INCLUDE LZ_SELECTION_SCREEN_AOTOP.         " Global Data
+  INCLUDE LZ_SELECTION_SCREEN_AOUXX.         " Function Modules
+
+*******************************************************************
+*   User-defined Include-files (if necessary).                    *
+*******************************************************************
+* INCLUDE LZ_SELECTION_SCREEN_AOF...         " Subprograms
+* INCLUDE LZ_SELECTION_SCREEN_AOO...         " PBO-Modules
+* INCLUDE LZ_SELECTION_SCREEN_AOI...         " PAI-Modules
+ INCLUDE LZ_SELECTION_SCREEN_AOE01...         " PAI-Modules
+
+
+
+
+
+
+
+
+
+FUNCTION-POOL z_selection_screen_ao.        "MESSAGE-ID ..
+*ABAP Objects S. 678
+
+
+* Selection Screen with Parameters
+SELECTION-SCREEN BEGIN OF SCREEN 100
+  AS WINDOW TITLE text-100.
+PARAMETERS p_input TYPE c LENGTH 16 DEFAULT 'Parameter'.
+SELECTION-SCREEN: SKIP,
+BEGIN OF BLOCK b1
+  WITH FRAME TITLE text-110.
+PARAMETERS: p_check1 AS CHECKBOX,
+            p_check2 AS CHECKBOX,
+            p_check3 AS CHECKBOX.
+SELECTION-SCREEN: END OF BLOCK b1,
+SKIP,
+BEGIN OF BLOCK b2
+  WITH FRAME TITLE text-120.
+PARAMETERS: p_radio1 RADIOBUTTON GROUP rad,
+p_radio2 RADIOBUTTON GROUP rad,
+p_radio3 RADIOBUTTON GROUP rad.
+SELECTION-SCREEN: END OF BLOCK b2,
+END OF SCREEN 100.
+
+
+* Selection Screen with Selection Criterion
+DATA g_carrid TYPE scarr-carrid.
+
+SELECTION-SCREEN BEGIN OF SCREEN 200 TITLE text-200.
+SELECT-OPTIONS s_carrid FOR g_carrid.
+SELECTION-SCREEN END OF SCREEN 200.
+
+* Selection Screen with Tabstrips and Subscreens
+SELECTION-SCREEN: BEGIN OF SCREEN 300 TITLE text-300,
+                  BEGIN OF TABBED BLOCK mytab FOR 10 LINES,
+                    TAB (20) button1 USER-COMMAND push1
+                             DEFAULT SCREEN 310,
+                    TAB (20) button2 USER-COMMAND push2
+                             DEFAULT SCREEN 320,
+                    END OF BLOCK mytab,
+                    END OF SCREEN 300.
+
+SELECTION-SCREEN: BEGIN OF SCREEN 310 AS SUBSCREEN,
+                  SKIP 3,
+                  COMMENT /1(30) text-310,
+                  END OF SCREEN 310.
+
+SELECTION-SCREEN: BEGIN OF SCREEN 320 AS SUBSCREEN,
+                  SKIP 3,
+                  COMMENT /1(30) text-320,
+                  END OF SCREEN 320.
+
+
+
+* Selection Screen with Authority Check
+
+SELECTION-SCREEN BEGIN OF: SCREEN 400 TITLE text-400,
+                            BLOCK block WITH FRAME.
+PARAMETERS: p_carrid TYPE demo_conn-carrid,
+            p_connid TYPE demo_conn-connid.
+SELECTION-SCREEN END OF: BLOCK block,
+            SCREEN 400.
+
+*Selection Screens with function Codes
+
+Tables sscrfields.
+DATA ucomm TYPE sscrfields-ucomm.
+
+SELECTION-SCREEN BEGIN OF SCREEN 500
+  AS WINDOW TITLE text-500.
+PARAMETERS: p_alter1 RADIOBUTTON GROUP grp
+USER-COMMAND selected,
+p_alter2 RADIOBUTTON GROUP grp,
+p_alter3 RADIOBUTTON GROUP grp.
+SELECTION-SCREEN END OF SCREEN 500.
+
+SELECTION-SCREEN:
+BEGIN OF SCREEN 510 AS WINDOW TITLE text-510,
+  COMMENT 1(40) text-512,
+  BEGIN OF LINE,
+    PUSHBUTTON 1(10) text-514 USER-COMMAND yes,
+    PUSHBUTTON 11(10) text-516 USER-COMMAND no,
+    END OF LINE,
+    END OF SCREEN 510.
+
+
+FUNCTION z_parameters_ao.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  EXPORTING
+*"     REFERENCE(CHECK1) TYPE  CHAR1
+*"     REFERENCE(CHECK2) TYPE  CHAR1
+*"     REFERENCE(CHECK3) TYPE  CHAR1
+*"     REFERENCE(INPUT) TYPE  CHAR16
+*"     REFERENCE(SELECTION) TYPE  I
+*"----------------------------------------------------------------------
+
+  CALL SELECTION-SCREEN 100 STARTING AT 10 10.
+
+  input = p_input.
+
+  check1 = p_check1.
+  check2 = p_check2.
+  check3 = p_check3.
+
+  IF p_radio1 = 'X'.
+    selection = 1.
+  ELSEIF p_radio2 = 'X'.
+    selection = 2.
+  ELSEIF p_radio3 = 'X'.
+    selection = 3.
+  ENDIF.
+
+ENDFUNCTION.
+
+
+FUNCTION z_selection_criterion_ao.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  EXPORTING
+*"     REFERENCE(SELTAB) TYPE  STANDARD TABLE
+*"     REFERENCE(RC) TYPE  SYST-SUBRC
+*"----------------------------------------------------------------------
+
+  CALL SELECTION-SCREEN 200.
+  IF sy-subrc = 4.
+    rc = sy-subrc.
+    RETURN.
+  ELSE.
+    seltab = s_carrid[].
+  ENDIF.
+
+ENDFUNCTION.
+
+
+*&---------------------------------------------------------------------*
+*& Report  Z_SELECTION_CRITERION_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_selection_criterion_ao.
+
+************************************************************************
+* Report Name  : Z_SELECTION_CRITERION_AO                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 99/99/9999 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:99.99.99 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: selection TYPE RANGE OF scarr-carrid,
+          scarr_tab TYPE TABLE OF scarr,
+          alv TYPE REF TO cl_salv_table,
+          subrc TYPE syst-subrc.
+    CALL FUNCTION 'Z_SELECTION_CRITERION_AO'
+      IMPORTING
+        seltab = selection.
+
+    IF sy-subrc = 4.
+      RETURN.
+    ENDIF.
+    SELECT * FROM scarr
+      INTO TABLE scarr_tab
+      WHERE carrid IN selection.
+    TRY.
+        cl_salv_table=>factory(
+        IMPORTING r_salv_table = alv
+          CHANGING t_table = scarr_tab ).
+        alv->display( ).
+      CATCH cx_salv_msg.
+        MESSAGE 'ALV display not possible' TYPE 'I'
+        DISPLAY LIKE 'E'.
+    ENDTRY.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).
+
+
+
+FUNCTION z_tab_strip_ao.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"----------------------------------------------------------------------
+
+  button1 = text-bu1.
+  button2 = text-bu2.
+  CALL SCREEN 300.
+
+
+
+ENDFUNCTION.
+
+
+FUNCTION z_authority_check_ao.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"----------------------------------------------------------------------
+
+
+  CALL SELECTION-SCREEN 400.
+
+
+ENDFUNCTION.
+
+*&---------------------------------------------------------------------*
+*&  Include           LZ_SELECTION_SCREEN_AOE01
+*&---------------------------------------------------------------------*
+*ABAP ObJEcTs S. 692
+
+AT SELECTION-SCREEN ON BLOCK block.
+  CASE sy-dynnr.
+    WHEN 400.
+      AUTHORITY-CHECK OBJECT 'S_CARRID'
+      ID 'CARRID' FIELD p_carrid
+      ID 'ACTVT' FIELD '03'.
+      IF sy-subrc <> 0.
+        MESSAGE e045(sabapdocu) WITH p_carrid.
+      ENDIF.
+  ENDCASE.
+
+AT SELECTION-SCREEN.
+  CASE sy-dynnr.
+    WHEN 500.
+      CASE sscrfields-ucomm.
+        WHEN 'SELECTED'.
+          CALL SELECTION-SCREEN 510 STARTING AT 30 12.
+          IF ucomm = 'YES'.
+            sscrfields-ucomm = 'CRET'.
+            MESSAGE text-518 TYPE 'S'.
+          ENDIF.
+        WHEN 'CRET'.
+          MESSAGE text-518 TYPE 'S'.
+      ENDCASE.
+    WHEN 510.
+      CASE sscrfields-ucomm.
+        WHEN 'YES'.
+          ucomm = sscrfields-ucomm.
+          sscrfields-ucomm = 'CRET'.
+        WHEN 'NO'.
+          ucomm = sscrfields-ucomm.
+          sscrfields-ucomm = 'CRET'.
+      ENDCASE.
+  ENDCASE.
+
+
+
+FUNCTION z_user_command_ao.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  EXPORTING
+*"     REFERENCE(BUTTON_1) TYPE  CHAR1
+*"     REFERENCE(BUTTON_2) TYPE  CHAR1
+*"     REFERENCE(BUTTON_3) TYPE  CHAR1
+*"----------------------------------------------------------------------
+
+  CALL SELECTION-SCREEN 500 STARTING AT 10 10.
+  IF sy-subrc = 0.
+    button_1 = p_alter1.
+    button_2 = p_alter2.
+    button_3 = p_alter3.
+  ENDIF.
+
+
+ENDFUNCTION.

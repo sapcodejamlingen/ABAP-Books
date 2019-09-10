@@ -1,0 +1,92 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SELECT_VIEW_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_select_view_ao.
+
+
+************************************************************************
+* Report Name  : z_select_view_ao.                      *
+* Report Title : Select auf View  *
+* SAP Release 6.0                                                      *
+* Author�s Name: BUESCHERM                                         *
+* Create Date  : 01/18/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP ObJEcTs S. 793             *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.18.19 | Author: M.B�scher | Destrcription/Transport  *
+************************************************************************
+
+
+PARAMETERS p_cityfr TYPE spfli-cityfrom DEFAULT 'Frankfurt'.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main
+        IMPORTING i_cityfrom TYPE spfli-cityfrom.
+  PRIVATE SECTION.
+    TYPES: BEGIN OF flight,
+      carrid TYPE spfli-carrid,
+      connid TYPE spfli-connid,
+      cityto TYPE spfli-cityto,
+      fldate TYPE sflight-fldate,
+      END OF flight.
+    CLASS-DATA flight_tab TYPE TABLE OF flight.
+    CLASS-METHODS display.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION..
+  METHOD main.
+    DATA: t0 TYPE i,
+          rt TYPE i,
+          msg TYPE string.
+    GET RUN TIME FIELD t0.
+    SELECT carrid connid cityto fldate
+      FROM zspflisflightao
+      INTO CORRESPONDING FIELDS OF TABLE flight_tab
+      WHERE cityfrom = i_cityfrom.
+    GET RUN TIME FIELD rt.
+    rt = rt - t0.
+    msg = rt.
+    CONCATENATE `Runtime: ` msg INTO msg.
+    MESSAGE msg TYPE 'I'.
+    display( ).
+  ENDMETHOD.                    "main
+
+  METHOD display.
+    DATA alv TYPE REF TO cl_salv_table.
+    SORT flight_tab BY carrid connid cityto fldate.
+    TRY.
+        cl_salv_table=>factory(
+        IMPORTING r_salv_table = alv
+          CHANGING t_table = flight_tab ).
+        alv->display( ).
+      CATCH cx_salv_msg.
+        MESSAGE 'ALV display not possible' TYPE 'I'
+        DISPLAY LIKE 'E'.
+    ENDTRY.
+  ENDMETHOD.                    "display
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( i_cityfrom = p_cityfr ).

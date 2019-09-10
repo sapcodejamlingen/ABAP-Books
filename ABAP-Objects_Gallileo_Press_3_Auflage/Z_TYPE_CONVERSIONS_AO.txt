@@ -1,0 +1,82 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_TYPE_CONVERSIONS_AO
+*& S. 303
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_type_conversions_ao.
+************************************************************************
+* Report Name  : Report  Z_TYPE_CONVERSIONS_AO*
+* Report Title : Listnings ABAP Objects Buch                           *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/03/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übung aus dem Buch SAP Objects S. 303                 *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01/03/19 | Author: M.Buescher| Destrcription/Transport  *
+************************************************************************
+SELECTION-SCREEN BEGIN OF SCREEN 100.
+PARAMETERS number TYPE c LENGTH 30.
+SELECTION-SCREEN END OF SCREEN 100.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+  PRIVATE SECTION.
+    CLASS-METHODS convert CHANGING target TYPE numeric.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: i_target TYPE i,
+          p_target TYPE p LENGTH 8 DECIMALS 2,
+          f_target TYPE f.
+    DO.
+      CALL SELECTION-SCREEN 100.
+      if sy-subrc <> 0.
+      EXIT.
+    ENDIF.
+    convert( CHANGING target = i_target ).
+    convert( CHANGING target = p_target ).
+    convert( CHANGING target = f_target ).
+  ENDDO.
+ENDMETHOD.                    "main
+
+METHOD convert.
+  DATA: msg TYPE c LENGTH 50,
+          typ type c length 1.
+  DESCRIBE FIELD target TYPE typ.
+  TRY.
+      target = number.
+      WRITE target TO msg LEFT-JUSTIFIED.
+      CONCATENATE `Type ` typ `: ` msg INTO msg.
+    CATCH cx_sy_conversion_error.
+      CONCATENATE `Ìnput not convertible to ` typ
+      INTO msg.
+  ENDTRY.
+  MESSAGE msg TYPE 'I'.
+ENDMETHOD.                    "convert
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

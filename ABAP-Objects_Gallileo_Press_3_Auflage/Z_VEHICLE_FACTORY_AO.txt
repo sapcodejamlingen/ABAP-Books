@@ -1,0 +1,93 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_VEHICLE_FACTORY_AO
+*& S.226
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_vehicle_factory_ao.
+
+************************************************************************
+* Report Name  : Z_VEHICLE_FACTORY_AO *
+* Report Title : Listnings ABAP Objects Buch                           *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/02/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übung aus dem Buch SAP Objects S. 226               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01/03/19 | Author: M.Buescher| Destrcription/Transport  *
+************************************************************************
+*----------------------------------------------------------------------*
+*       CLASS vehicle DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+
+CLASS vehicle DEFINITION CREATE PRIVATE.
+  PUBLIC SECTION.
+    CLASS-METHODS create RETURNING value(ref)
+              TYPE REF TO vehicle.
+
+    METHODS: accelerate IMPORTING delta TYPE i,
+                  show_speed.
+  PRIVATE SECTION.
+    DATA speed TYPE i.
+ENDCLASS.                    "vehicle DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle IMPLEMENTATION.
+  METHOD create.
+    CREATE OBJECT ref.
+  ENDMETHOD.                    "create
+  METHOD accelerate.
+    me->speed = me->speed + delta.
+  ENDMETHOD.                    "ACCELERATE
+  METHOD show_speed.
+    DATA output TYPE string.
+    output = me->speed.
+    MESSAGE output TYPE 'I'.
+  ENDMETHOD.                    "show_speed
+ENDCLASS.                    "vehicle IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+
+    DATA vehicle type REF TO vehicle.
+
+    vehicle = vehicle=>create( ).
+
+    vehicle->accelerate( 100 ).
+    vehicle->show_speed( ).
+
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

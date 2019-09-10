@@ -1,0 +1,26 @@
+
+class ZCL_CHECKING_ACCOUNT_AO definition
+  public
+  inheriting from ZCL_ACCOUNT_AO
+  final
+  create public .
+
+*"* public components of class ZCL_CHECKING_ACCOUNT_AO
+*"* do not include other source files here!!!
+public section.
+
+  events OVERDRAW
+    exporting
+      value(AMOUNT) type ZACCOUNTS-AMOUNT
+      value(ID) type ZACCOUNTS-ID .
+
+  methods ZIF_ACCOUNT_AO~WITHDRAW
+    redefinition .
+
+*"* protected components of class ZCL_CHECKING_ACCOUNT_AO
+*"* do not include other source files here!!!
+protected section.
+
+*"* private components of class ZCL_CHECKING_ACCOUNT_AO
+*"* do not include other source files here!!!
+private section.

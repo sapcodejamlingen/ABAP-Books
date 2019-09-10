@@ -1,0 +1,70 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SELECT_ENDSELECT_ALL_COL_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_select_endselect_all_col_ao.
+
+
+************************************************************************
+* Report Name  : z_select_endselect_all_col_ao.                      *
+* Report Title : Lesen aller Spalten mehrerer Zeilen in einer Schleife *
+* SAP Release 6.0                                                      *
+* Author�s Name: BUESCHERM                                         *
+* Create Date  : 01/17/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP ObJEcTs S. 781               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.16.19 | Author: M.B�scher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS: p_carrid TYPE spfli-carrid,
+            p_connid TYPE spfli-connid.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main
+    IMPORTING  i_carrid TYPE spfli-carrid
+               i_connid TYPE spfli-connid.
+
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: spfli_wa TYPE spfli,
+          msg TYPE string,
+          cnt TYPE string.
+    msg = `sy-dbcnt: `.
+    SELECT *
+      FROM spfli
+      INTO spfli_wa
+      WHERE carrid = i_carrid.
+      cnt = sy-dbcnt.
+      CONCATENATE msg ` ` cnt INTO msg.
+    ENDSELECT.
+    MESSAGE msg TYPE 'I'.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( i_carrid = p_carrid
+              i_connid = p_connid ).

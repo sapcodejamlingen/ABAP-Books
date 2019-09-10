@@ -1,0 +1,54 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_STRING_PROZESSING_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_string_prozessing_ao.
+
+************************************************************************
+* Report Name  : Z_STRING_PROZESSING_AO                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BuscherM                                        *
+* Create Date  : 99/99/9999 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : SAP ABAP Buch S. 332               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.03.19 | Author:M.Büscher  | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: text TYPE string,
+          text_tab TYPE TABLE OF string.
+    text = `ABAP and ABAP Objects` .
+    MESSAGE text TYPE 'I'.
+    SPLIT text AT ` ` INTO TABLE text_tab.
+    DELETE text_tab FROM 1 TO 2.
+    CONCATENATE LINES OF text_tab INTO
+    text SEPARATED BY ` `.
+    MESSAGE text TYPE 'I'.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

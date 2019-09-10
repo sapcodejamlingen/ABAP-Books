@@ -1,0 +1,66 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SELECT_TABLE_ALL_COLUMNS_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_select_single_all_columns_ao.
+
+************************************************************************
+* Report Name  : Z_SELECT_SINGLE_ALL_COLUMNS_AO                       *
+* Report Title : Lesen aller Spalten einer Zeile in eine Struktur.     *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/17/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP ObJEcTs S. 781               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.16.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS: p_carrid TYPE spfli-carrid,
+            p_connid TYPE spfli-connid.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main
+    IMPORTING  i_carrid TYPE spfli-carrid
+               i_connid TYPE spfli-connid.
+
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: spfli_tab TYPE TABLE OF spfli,
+          msg TYPE string.
+
+    SELECT * FROM spfli
+      INTO TABLE spfli_tab
+      WHERE carrid = i_carrid.
+    msg = sy-dbcnt.
+    CONCATENATE `sy-subrc: ` msg INTO msg.
+    MESSAGE msg TYPE 'I'.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( i_carrid = p_carrid
+              i_connid = p_connid ).

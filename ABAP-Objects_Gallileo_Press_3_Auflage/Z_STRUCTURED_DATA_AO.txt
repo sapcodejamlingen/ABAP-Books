@@ -1,0 +1,71 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_STRUCTURED_DATA_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_structured_data_ao.
+
+************************************************************************
+* Report Name  : Z_STRUCTURED_DATA_AO                                  *
+* Report Title : Listnings ABAP Objects Buch                           *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/03/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen aus dem Buch SAP Objects                      *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01/03/19 | Author: M.Buescher| Destrcription/Transport  *
+************************************************************************
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    TYPES: BEGIN OF t_street,
+            name TYPE c LENGTH 40,
+            no TYPE c LENGTH 4,
+           END OF t_street.
+    CLASS-METHODS main.
+
+  PRIVATE SECTION.
+
+    CLASS-DATA: BEGIN OF address,
+                    name TYPE c LENGTH 30,
+                    street TYPE t_street,
+                    BEGIN OF city,
+                      zipcode TYPE n LENGTH 5,
+                      name TYPE c LENGTH 40,
+                    END OF city,
+                    country TYPE c LENGTH 3 VALUE 'SOL',
+                  END OF address.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    address-name = 'Luke Skywalker'.
+    address-street-name = 'Milky Way'.
+    address-street-no = '123d'.
+    address-city-zipcode = '64283'.
+    address-city-name = 'Tatooine'.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

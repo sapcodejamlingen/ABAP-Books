@@ -1,0 +1,63 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_STRLEN_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_strlen_ao.
+
+************************************************************************
+* Report Name  : Z_STRLEN_AO                                                 *
+* Report Title : Verwendung von strln                                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01.04.2019  (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects Buch S. 343               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:99.99.99 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS input TYPE c LENGTH 30 LOWER CASE.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: len TYPE i,
+          itab TYPE TABLE OF string,
+          idx TYPE sy-index,
+          result TYPE string.
+    len = STRLEN( input ).
+    DO len TIMES.
+      idx = sy-index - 1.
+      APPEND input+idx(1) TO itab.
+    ENDDO.
+    CONCATENATE LINES OF itab INTO result separated by '+'.
+    MESSAGE result TYPE 'I'.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

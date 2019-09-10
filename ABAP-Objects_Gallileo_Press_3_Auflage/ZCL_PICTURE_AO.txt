@@ -1,0 +1,106 @@
+class ZCL_PICTURE_AO definition
+  public
+  final
+  create public .
+*ABAP ObJEcTs S. 668
+*"* public components of class ZCL_PICTURE_AO
+*"* do not include other source files here!!!
+public section.
+
+types: tpict_line type x length 1022,
+tpict_tab type table of tpict_line.
+methods constructor
+importing
+  mime_file type csequence
+  pict_type type c
+  raising
+  zcx_no_picture.
+class-methods factory
+importing
+  mime_file type csequence
+  pict_type type c
+  returning
+  value(picture) type ref to zcl_picture_ao
+  raising
+  zcx_no_picture.
+methods display
+importing
+  picture_control type ref to cl_gui_picture.
+
+
+private section.
+data pict_tab type tpict_tab.
+data url type char255.
+
+METHOD constructor.
+*ABAP Objects S. 668
+  DATA mime_api TYPE REF TO if_mr_api.
+  DATA pict_wa TYPE xstring.
+  DATA strl TYPE i.
+
+  mime_api = cl_mime_repository_api=>get_api( ).
+  mime_api->get(
+      EXPORTING i_url = mime_file
+        IMPORTING e_content = pict_wa
+          EXCEPTIONS OTHERS = 4 ).
+  IF sy-subrc <> 0.
+    RAISE EXCEPTION TYPE zcx_no_picture.
+  ENDIF.
+
+  strl = XSTRLEN( pict_wa ).
+  WHILE strl >= 1022.
+    APPEND pict_wa(1022) TO pict_tab.
+    SHIFT pict_wa BY 1022 PLACES LEFT IN BYTE MODE.
+    strl = XSTRLEN( pict_wa ).
+  ENDWHILE.
+  IF strl > 0.
+    APPEND pict_wa TO pict_tab.
+  ENDIF.
+
+  CALL FUNCTION 'DP_CREATE_URL'
+    EXPORTING
+      type                       = 'IMAGE'
+      subtype                    = pict_type
+*         SIZE                       =
+*         DATE                       =
+*         TIME                       =
+*         DESCRIPTION                =
+*         LIFETIME                   =
+*         CACHEABLE                  =
+*         SEND_DATA_AS_STRING        =
+*         FIELDS_FROM_APP            =
+    TABLES
+      data                       = pict_tab
+*         FIELDS                     =
+*         PROPERTIES                 =
+*         COLUMNS_TO_STRETCH         =
+    CHANGING
+      url                        = url
+*       EXCEPTIONS
+*         DP_INVALID_PARAMETER       = 1
+*         DP_ERROR_PUT_TABLE         = 2
+*         DP_ERROR_GENERAL           = 3
+*         OTHERS                     = 4
+            .
+
+ENDMETHOD.
+
+
+
+METHOD factory.
+*abap objects S. 668
+  CREATE OBJECT picture
+  EXPORTING mime_file = mime_file
+    pict_type = pict_type.
+ENDMETHOD.
+
+
+
+METHOD display.
+*ABAP Objects S. 668
+  picture_control->load_picture_from_url( url = url ).
+  picture_control->set_display_mode(
+  display_mode = picture_control->display_mode_stretch ).
+ENDMETHOD.
+
+

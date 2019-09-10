@@ -1,0 +1,69 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SELECT_SINGLE_SOME_COL_2_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_select_single_some_col_2_ao.
+
+
+
+************************************************************************
+* Report Name  : z_select_single_some_col_2_ao.                      *
+* Report Title : Lesen bestimmter Spalten einer Zeile in elem. Felder  *
+* SAP Release 6.0                                                      *
+* Author�s Name: BUESCHERM                                         *
+* Create Date  : 01/17/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP ObJEcTs S. 785               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.17.19 | Author: M.B�scher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS: p_carrid TYPE spfli-carrid,
+            p_connid TYPE spfli-connid.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main
+    IMPORTING  i_carrid TYPE spfli-carrid
+               i_connid TYPE spfli-connid.
+
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: cityfrom TYPE spfli-cityfrom,
+          cityto TYPE spfli-cityto,
+          msg TYPE string.
+    SELECT SINGLE cityfrom cityto
+      FROM spfli
+      INTO (cityfrom,cityto)
+      WHERE carrid = i_carrid AND
+      connid = i_connid.
+    CONCATENATE `From ` cityfrom ` to ` cityto INTO msg.
+    MESSAGE msg TYPE 'I'.
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( i_carrid = p_carrid
+              i_connid = p_connid ).

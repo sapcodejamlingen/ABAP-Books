@@ -1,0 +1,56 @@
+ZCL_HTTP_REPORT_AO  
+interfaces IF_HTTP_EXTENSION .
+
+  TYPES:
+    BEGIN OF tline,
+      datestr      TYPE c LENGTH 10,
+      planetypestr TYPE string,
+      seatsfreestr TYPE string,
+    END OF tline,
+    BEGIN OF tflight,
+      carrid   TYPE spfli-carrid,
+      connid   TYPE spfli-connid,
+      cityfrom TYPE spfli-cityfrom,
+      cityto   TYPE spfli-cityto,
+      table    TYPE STANDARD TABLE OF tline
+                    WITH NON-UNIQUE DEFAULT KEY,
+    END OF tflight.
+
+
+*ABAP Objects S. 962
+METHOD if_http_extension~handle_request.
+  DATA: header_data   TYPE string,
+        html_body     TYPE string,
+        fldate        TYPE sflight-fldate,
+        planetype     TYPE sflight-planetype,
+        seatsocc      TYPE sflight-seatsocc,
+        seatsmax      TYPE sflight-seatsmax,
+        line          TYPE tline,
+        flight        TYPE tflight.
+  header_data = server->request->get_header_field(
+  if_http_header_fields_sap=>query_string ).
+  FIND REGEX '(\D+)(\d+)' IN header_data
+  SUBMATCHES flight-carrid flight-connid.
+  SELECT SINGLE cityfrom cityto
+    FROM spfli
+    INTO (flight-cityfrom, flight-cityto)
+    WHERE carrid = flight-carrid AND
+          connid = flight-connid.
+  SELECT fldate planetype seatsocc seatsmax
+    FROM sflight
+    INTO (fldate,planetype,seatsocc,seatsmax)
+    WHERE carrid = flight-carrid AND
+          connid = flight-connid.
+    WRITE fldate TO line-datestr.
+    line-planetypestr = planetype.
+    line-seatsfreestr = seatsmax - SEATSOCC.
+    APPEND line TO flight-table.
+  ENDSELECT.
+  CALL TRANSFORMATION z_flight_to_html
+              SOURCE flight = flight
+              RESULT XML html_body.
+  server->response->set_header_field(
+          name = if_http_header_fields=>content_type
+          value = 'text/html' ).
+  server->response->set_cdata( data = html_body ).
+ENDMETHOD.                    "IF_HTTP_EXTENSION~HANDLE_REQUEST

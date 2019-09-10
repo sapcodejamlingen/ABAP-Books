@@ -1,0 +1,203 @@
+FUNCTION-POOL z_table_control_ao.           "MESSAGE-ID ..
+*AObJEcTs S. 627
+
+DATA conn_tab TYPE TABLE OF demo_conn.
+DATA wa TYPE demo_conn.
+
+*&SPWIZARD: DECLARATION OF TABLECONTROL 'FLIGHTS' ITSELF
+CONTROLS: FLIGHTS TYPE TABLEVIEW USING SCREEN 0100.
+
+*&SPWIZARD: LINES OF TABLECONTROL 'FLIGHTS'
+DATA:     G_FLIGHTS_LINES  LIKE SY-LOOPC.
+
+DATA:     OK_CODE LIKE SY-UCOMM.
+
+
+
+
+FUNCTION z_show_table_control_ao.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(FLIGHT_LIST) TYPE  SPFLI_TAB
+*"----------------------------------------------------------------------
+
+  DATA: flight LIKE LINE OF flight_list,
+        conn LIKE LINE OF conn_tab.
+
+  LOOP AT flight_list INTO flight.
+    MOVE-CORRESPONDING flight TO conn.
+    APPEND conn TO conn_tab.
+  ENDLOOP.
+
+  CALL SCREEN 100.
+
+
+
+ENDFUNCTION.
+
+
+
+*&---------------------------------------------------------------------*
+*&  Include           LZ_TABLE_CONTROL_AOO01
+*&---------------------------------------------------------------------*
+* AO S. 628
+
+MODULE status_0100 output.
+  set pf-Status 'SCREEN_100'.
+  set titlebar 'TITLE_100'.
+  endmodule.
+
+*&SPWIZARD: OUTPUT MODULE FOR TC 'FLIGHTS'. DO NOT CHANGE THIS LINE!
+*&SPWIZARD: UPDATE LINES FOR EQUIVALENT SCROLLBAR
+MODULE FLIGHTS_CHANGE_TC_ATTR OUTPUT.
+  DESCRIBE TABLE CONN_TAB LINES FLIGHTS-lines.
+ENDMODULE.
+
+*&SPWIZARD: OUTPUT MODULE FOR TC 'FLIGHTS'. DO NOT CHANGE THIS LINE!
+*&SPWIZARD: GET LINES OF TABLECONTROL
+MODULE FLIGHTS_GET_LINES OUTPUT.
+  G_FLIGHTS_LINES = SY-LOOPC.
+ENDMODULE.
+
+
+*&---------------------------------------------------------------------*
+*&  Include           LZ_TABLE_CONTROL_AOI01
+*&---------------------------------------------------------------------*
+*AO S. 628
+
+MODULE leave_program INPUT.
+  LEAVE TO SCREEN 0.
+ENDMODULE.                    "leave_program INPUT
+
+*&SPWIZARD: INPUT MODULE FOR TC 'FLIGHTS'. DO NOT CHANGE THIS LINE!
+*&SPWIZARD: MODIFY TABLE
+MODULE FLIGHTS_MODIFY INPUT.
+  MODIFY CONN_TAB
+    FROM WA
+    INDEX FLIGHTS-CURRENT_LINE.
+ENDMODULE.
+
+*&SPWIZARD: INPUT MODUL FOR TC 'FLIGHTS'. DO NOT CHANGE THIS LINE!
+*&SPWIZARD: MARK TABLE
+MODULE FLIGHTS_MARK INPUT.
+  DATA: g_FLIGHTS_wa2 like line of CONN_TAB.
+    if FLIGHTS-line_sel_mode = 1
+    and WA-MARK = 'X'.
+     loop at CONN_TAB into g_FLIGHTS_wa2
+       where MARK = 'X'.
+       g_FLIGHTS_wa2-MARK = ''.
+       modify CONN_TAB
+         from g_FLIGHTS_wa2
+         transporting MARK.
+     endloop.
+  endif.
+  MODIFY CONN_TAB
+    FROM WA
+    INDEX FLIGHTS-CURRENT_LINE
+    TRANSPORTING MARK.
+ENDMODULE.
+
+*&SPWIZARD: INPUT MODULE FOR TC 'FLIGHTS'. DO NOT CHANGE THIS LINE!
+*&SPWIZARD: PROCESS USER COMMAND
+MODULE FLIGHTS_USER_COMMAND INPUT.
+  OK_CODE = SY-UCOMM.
+  PERFORM USER_OK_TC USING    'FLIGHTS'
+                              'CONN_TAB'
+                              'MARK'
+                     CHANGING OK_CODE.
+  SY-UCOMM = OK_CODE.
+ENDMODULE.
+
+
+*AObJEcTs S. 631
+PROCESS BEFORE OUTPUT.
+*&SPWIZARD: PBO FLOW LOGIC FOR TABLECONTROL 'FLIGHTS'
+  MODULE FLIGHTS_CHANGE_TC_ATTR.
+*&SPWIZARD: MODULE FLIGHTS_CHANGE_COL_ATTR.
+  LOOP AT   CONN_TAB
+       INTO WA
+       WITH CONTROL FLIGHTS
+       CURSOR FLIGHTS-CURRENT_LINE.
+    MODULE FLIGHTS_GET_LINES.
+*&SPWIZARD:   MODULE FLIGHTS_CHANGE_FIELD_ATTR
+  ENDLOOP.
+
+  MODULE status_0100.
+
+
+PROCESS AFTER INPUT.
+*&SPWIZARD: PAI FLOW LOGIC FOR TABLECONTROL 'FLIGHTS'
+  LOOP AT CONN_TAB.
+    CHAIN.
+      FIELD WA-CARRID.
+      FIELD WA-CONNID.
+      FIELD WA-CITYFROM.
+      FIELD WA-CITYTO.
+      MODULE FLIGHTS_MODIFY ON CHAIN-REQUEST.
+    endchain.
+    FIELD WA-MARK
+      MODULE FLIGHTS_MARK ON REQUEST.
+  ENDLOOP.
+  MODULE FLIGHTS_USER_COMMAND.
+*&SPWIZARD: MODULE FLIGHTS_CHANGE_TC_ATTR.
+*&SPWIZARD: MODULE FLIGHTS_CHANGE_COL_ATTR.
+
+  MODULE leave_program AT EXIT-COMMAND.
+
+*&---------------------------------------------------------------------*
+*& Report  Z_TABLE_CONTROL_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_table_control_ao.
+
+************************************************************************
+* Report Name  : Z_TABLE_CONTROL_AO                                  *
+* Report Title : Functionsgruppe für Table Control                     *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/14/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP ObJEcTs Buch S. 627                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.14.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA spfli_tab TYPE TABLE OF spfli.
+    SELECT *
+      FROM spfli
+      INTO CORRESPONDING FIELDS OF TABLE spfli_tab.
+    CALL FUNCTION 'Z_SHOW_TABLE_CONTROL_AO'
+      EXPORTING
+        flight_list = spfli_tab.
+  ENDMETHOD.                    "demo
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).
+  .
+
+

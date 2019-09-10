@@ -1,0 +1,186 @@
+
+class ZCL_TEXT_AO definition
+  public
+  final
+  create public .
+
+*"* public components of class ZCL_TEXT_AO
+*"* do not include other source files here!!!
+public section.
+
+types: t_line type char80,
+t_text type STANDARD TABLE OF t_line.
+class-methods get_handle
+returning
+value(text) type ref to zcl_text_ao.
+methods add_table
+importing
+  text_table type t_text.
+methods add_line
+importing
+
+  text_line type t_line.
+methods display.
+methods delete.
+PRIVATE SECTION.
+
+DATA text TYPE t_text.
+
+METHOD get_handle.
+*ABAP ObJEcTs S. 1096-1099
+  CREATE OBJECT text.
+ENDMETHOD.
+
+METHOD add_table.
+*ABAP ObJEcTs S. 1096-1099
+  APPEND LINES OF text_table TO me->text.
+ENDMETHOD.
+
+METHOD add_line.
+*ABAP ObJEcTs S. 1096-1099
+  APPEND text_line TO me->text.
+ENDMETHOD.
+METHOD display.
+*ABAP ObJEcTs S. 1096-1099
+  CALL FUNCTION 'Z_SHOW_TEXT_AO'
+    EXPORTING
+      text = me->text.
+ENDMETHOD.
+
+
+METHOD delete.
+*ABAP ObJEcTs S. 1096-1099
+  CLEAR me->text.
+ENDMETHOD.
+
+FUNCTION-POOL z_text_output_ao.             "MESSAGE-ID ..
+*ABAP ObJEcTs S. 1096
+
+DATA: container TYPE REF TO cl_gui_custom_container,
+      textedit  TYPE REF TO cl_gui_textedit,
+      g_text    TYPE zcl_text=>t_text.
+
+
+FUNCTION Z_SHOW_TEXT_AO.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(TEXT) TYPE  ZCL_TEXT=>T_TEXT
+*"----------------------------------------------------------------------
+*ABAP ObJEcTs S. 1097
+
+g_text = text.
+call screen 100 STARTING AT 10 5.
+
+
+ENDFUNCTION.
+
+
+
+PROCESS BEFORE OUTPUT.
+  MODULE status_0100.
+*
+PROCESS AFTER INPUT.
+  MODULE cancel AT EXIT-COMMAND.
+
+
+*&---------------------------------------------------------------------*
+*&  Include           LZ_TEXT_OUTPUT_AOO01
+*&---------------------------------------------------------------------*
+*ABAP ObJEcTs S. 1096
+MODULE status_0100 OUTPUT.
+  SET PF-STATUS 'STATUS_100'.
+  SET TITLEBAR 'TITLE_100'.
+  IF container IS INITIAL.
+    CREATE OBJECT:
+    container
+    EXPORTING container_name = 'CUSTOM_CONTAINER',
+    textedit
+    EXPORTING parent = container.
+  ENDIF.
+  textedit->set_readonly_mode( 1 ).
+  textedit->set_toolbar_mode( 0 ).
+  textedit->set_font_fixed( 1 ).
+  textedit->set_text_as_r3table( table = g_text ).
+ENDMODULE.                    "status_0100 OUTPUT
+
+
+*&---------------------------------------------------------------------*
+*&  Include           LZ_TEXT_OUTPUT_AOI01
+*&---------------------------------------------------------------------*
+*ABAP ObJEcTs S. 1096-1099
+MODULE cancel INPUT.
+  LEAVE SCREEN.
+ENDMODULE.                    "cancel INPUT
+
+*&---------------------------------------------------------------------*
+*& Report  Z_TEXT_OUTPUT_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_text_output_ao.
+
+************************************************************************
+* Report Name  : Z_TEXT_OUTPUT_AO                                                 *
+* Report Title : Verwendung von ZCL_TEXT_AO                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/14/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP ObJEcTs S. 1098                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.14.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+PUBLIC SECTION.
+  CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: text        TYPE REF TO zcl_text_ao,
+          text_table  TYPE zcl_text_ao=>t_text,
+          text_line   TYPE zcl_text_ao=>t_line.
+
+    text = zcl_text_ao=>get_handle( ).
+
+    text_line = 'First line of text'.
+    text->add_line( text_line ).
+    text->add_line( ' ' ).
+    DO 10 TIMES.
+      CLEAR text_line.
+      text_line(3) = sy-index.
+      CONCATENATE 'Table line' text_line
+      INTO text_line SEPARATED BY space.
+      APPEND text_line TO text_table.
+    ENDDO.
+    text->add_table( text_table ).
+    text->add_line( ' ' ).
+    text_line = 'Last line of Text'.
+    text->add_line( text_line ).
+    text->display( ).
+
+    text->delete( ).
+    text->add_line( 'New text' ).
+    text->display( ).
+
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

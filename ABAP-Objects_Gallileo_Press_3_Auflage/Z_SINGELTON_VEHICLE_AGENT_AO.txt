@@ -1,0 +1,124 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SINGELTON_VEHICLE_AGENT_AO
+*& S. 235
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  Z_SINGELTON_VEHICLE_AGENT_AO.
+************************************************************************
+* Report Name  : Z_SINGELTON_VEHICLE_AGENT_AO                          *
+* Report Title : Listnings ABAP Objects Buch                           *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/03/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Übungen aus dem Buch SAP Objects                      *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01/03/19 | Author: M.Buescher| Destrcription/Transport  *
+************************************************************************
+
+CLASS vehicle_agent DEFINITION DEFERRED.
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle DEFINITION CREATE PRIVATE
+          FRIENDS vehicle_agent.
+  PUBLIC SECTION.
+    METHODS: accelerate IMPORTING delta TYPE i,
+            show_speed.
+  PRIVATE SECTION.
+    DATA speed TYPE i.
+ENDCLASS.                    "vehicle DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle_agent DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle_agent DEFINITION create private.
+  PUBLIC SECTION.
+  class-data agent type ref to vehicle_agent read-only.
+  CLASS-METHODS class_constructor.
+
+  METHODS create RETURNING value(ref)
+                      TYPE REF TO vehicle.
+ENDCLASS.                    "vehicle_agent DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle IMPLEMENTATION.
+  METHOD accelerate.
+    me->speed = me->speed + delta.
+  ENDMETHOD.                    "ACCELERATE
+
+  METHOD show_speed.
+
+    DATA output TYPE string.
+    output = me->speed.
+    MESSAGE output TYPE 'I'.
+  ENDMETHOD.                    "show_speed
+ENDCLASS.                    "vehicle IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle_agent IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle_agent IMPLEMENTATION.
+  METHOD class_constructor.
+    CREATE OBJECT vehicle_agent=>agent.
+    endmethod.
+    method create.
+      create OBJECT ref.
+  ENDMETHOD.                    "create
+ENDCLASS. "vehicle_agent IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+data: agent type ref to vehicle_agent,
+      vehicle type ref to vehicle.
+
+    agent = vehicle_agent=>agent.
+    vehicle = agent->create( ).
+
+
+
+
+    vehicle->accelerate( 100 ).
+    vehicle->show_speed( ).
+
+
+  ENDMETHOD.                    "main
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

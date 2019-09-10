@@ -1,0 +1,32 @@
+*----------------------------------------------------------------------*
+*       CLASS ZCL_FLIGHT_ATTENDANT_AO  DEFINITIO
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS zcl_flight_attendant_ao DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+*"* public components of class ZCL_FLIGHT_ATTENDANT_AO
+*"* do not include other source files here!!!
+PUBLIC SECTION.
+  METHODS constructor
+  IMPORTING
+    !title TYPE string.
+  METHODS help_the_pilot
+  FOR EVENT call_button_pressed OF zcl_pilot_ao.
+  methods help_a_passenger
+  for event call_button_pressed of zcl_passenger_ao
+  IMPORTING
+    !seat_number
+    !sender.
+
+*"* protected components of class ZCL_FLIGHT_ATTENDANT_AO
+*"* do not include other source files here!!!
+protected section.
+
+*"* private components of class ZCL_FLIGHT_ATTENDANT_AO
+*"* do not include other source files here!!!
+PRIVATE SECTION.
+  DATA title TYPE string.

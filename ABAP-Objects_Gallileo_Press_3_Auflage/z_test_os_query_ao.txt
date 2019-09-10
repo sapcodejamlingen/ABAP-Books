@@ -1,0 +1,127 @@
+METHOD select_by_category.
+  DATA: query_manager TYPE REF TO if_os_query_manager,
+        query TYPE REF TO if_os_query,
+        agent TYPE REF TO if_os_ca_persistency.
+  query_manager = cl_os_system=>get_query_manager( ).
+  agent = zca_car_entity_ao=>agent.
+  query = query_manager->create_query(
+            i_filter = `CATEGORY = PAR1` ).
+  result =  agent->get_persistent_by_query(
+            i_query = query
+            i_par1 = category ).
+ENDMETHOD.
+
+
+METHOD check_availability.
+*ABAP Objects S.832
+  DATA: query_manager TYPE REF TO if_os_query_manager,
+        query         TYPE REF TO if_os_query,
+        agent         TYPE REF TO if_os_ca_persistency,
+        filter        TYPE string,
+        license_plate TYPE zlicense_plate_ab,
+        reservations  TYPE osreftab.
+  query_manager = cl_os_system=>get_query_manager( ).
+  agent = zca_resevation_entity_ao=>agent.
+  filter = `LICENSE_PLATE = PAR1 ` &
+  `AND NOT ( DATE FROM > PAR3  OR DATE_TO < PAR2 )`.
+  query = query_manager->create_query(
+  i_filter = filter ).
+  license_plate = me->get_license_plate( ).
+  reservations = agent->get_persistent_by_query(
+                  i_query = query
+                  i_par1 = license_plate
+                  i_par2 = from
+                  i_par3 = to
+                  i_upto = 1 ).
+  IF LINES( reservations ) = 0.
+            result = abap_true.
+  ELSE.
+            result = abap_false.
+  ENDIF.
+ENDMETHOD.                    "CHECK_AVAILABILITY
+
+*&---------------------------------------------------------------------*
+*& Report  Z_TEST_OS_QUERY_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_test_os_query_ao.
+
+************************************************************************
+* Report Name  : Z_TEST_OS_QUERRY_AO                                                 *
+* Report Title : Querry Testen                                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/18/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP ObJEcTs S. 832                 *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.18.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS category TYPE zcars_ab-category.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS: main,
+    display.
+
+  PRIVATE SECTION.
+    CLASS-DATA:
+    BEGIN OF license_plate_line,
+      license_plate TYPE zcars_ab-license_plate,
+      END OF license_plate_line,
+      license_plate_tab LIKE TABLE OF license_plate_line.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: reftab  TYPE osreftab,
+          oref    TYPE REF TO object,
+          car     TYPE REF TO zcl_car_entity_ao.
+    reftab = zcl_car_entity=>select_by_category( category ).
+    LOOP AT reftab INTO oref.
+      car ?= oref.
+      license_plate_line-license_plate =
+      car->get_license_plate( ).
+      APPEND license_plate_line TO license_plate_tab.
+    ENDLOOP.
+    display( ).
+  ENDMETHOD.                    "main
+
+
+  METHOD display.
+    DATA alv TYPE REF TO cl_salv_table.
+    TRY.
+        cl_salv_table=>factory(
+        IMPORTING r_salv_table = alv
+          CHANGING t_table = license_plate_tab ).
+        alv->display( ).
+      CATCH cx_salv_msg.
+        MESSAGE 'ALV display not possible' TYPE 'I'
+        DISPLAY LIKE 'E'.
+    ENDTRY.
+  ENDMETHOD.                    "display
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

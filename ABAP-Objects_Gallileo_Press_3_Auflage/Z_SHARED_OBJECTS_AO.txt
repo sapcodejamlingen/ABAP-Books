@@ -1,0 +1,72 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SHARED_OBJECTS_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_shared_objects_ao.
+
+************************************************************************
+* Report Name  : Z_SHARED_OBJECTS_AO                                   *
+* Report Title : Verwendung von Shared Objects                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                             *
+* Create Date  : 01/09/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects S 484               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.07.18 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+  PRIVATE SECTION.
+    CLASS-METHODS display IMPORTING value(table) TYPE ANY TABLE.
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DATA: flight_list_handler
+          TYPE REF TO zcl_flight_list_handler_ao,
+          flight_list TYPE REF TO spfli_tab.
+    flight_list_handler =
+    zcl_flight_list_handler_ao=>flight_list_handler.
+    TRY.
+        flight_list = flight_list_handler->get_flight_list( ).
+      CATCH zcx_no_flights.
+        MESSAGE `No flight list available` TYPE 'I'
+        DISPLAY LIKE 'E'.
+        RETURN.
+    ENDTRY.
+    demo=>display( flight_list->* ).
+  ENDMETHOD.                    "main
+  METHOD display.
+    DATA alv TYPE REF TO cl_salv_table.
+    TRY.
+        cl_salv_table=>factory(
+        IMPORTING r_salv_table = alv
+          CHANGING t_table = table ).
+        alv->display( ).
+      CATCH cx_salv_msg.
+        MESSAGE 'ALV display not possible' TYPE 'I'
+        DISPLAY LIKE 'E'.
+    ENDTRY.
+  ENDMETHOD.                    "display
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

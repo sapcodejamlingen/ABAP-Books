@@ -1,0 +1,80 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_SELECT_GROUP_BY_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_select_group_by_ao.
+
+
+************************************************************************
+* Report Name  : z_select_group_by_ao.                      *
+* Report Title : Geschachtelte SELECT-Schleifen*
+* SAP Release 6.0                                                      *
+* Author�s Name: BUESCHERM                                         *
+* Create Date  : 01/18/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP ObJEcTs S. 800             *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.18.19 | Author: M.B�scher | Destrcription/Transport  *
+************************************************************************
+
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+  PRIVATE SECTION.
+    TYPES: BEGIN OF flight,
+      carrid TYPE sflight-carrid,
+      minimum TYPE sflight-price,
+      maximum TYPE sflight-price,
+      avg TYPE f,
+      END OF flight.
+    CLASS-DATA flight_tab TYPE TABLE OF flight.
+    CLASS-METHODS display.
+ENDCLASS.                    "demo DEFINITION
+
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    SELECT carrid MIN( price ) AS minimum
+      MAX( price ) AS maximum
+      AVG( price ) AS avg
+      FROM sflight AS s
+      INTO CORRESPONDING FIELDS OF TABLE flight_tab
+      GROUP BY carrid
+      HAVING carrid LIKE '%L%'
+      AND MIN( s~price ) <> MAX( s~price ).
+    display( ).
+  ENDMETHOD.                    "main
+
+
+  METHOD display.
+    DATA alv TYPE REF TO cl_salv_table.
+    TRY.
+        cl_salv_table=>factory(
+        IMPORTING r_salv_table = alv
+          CHANGING t_table = flight_tab ).
+        alv->display( ).
+      CATCH cx_salv_msg.
+        MESSAGE 'ALV display not possible' TYPE 'I'
+        DISPLAY LIKE 'E'.
+    ENDTRY.
+  ENDMETHOD.                    "display
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

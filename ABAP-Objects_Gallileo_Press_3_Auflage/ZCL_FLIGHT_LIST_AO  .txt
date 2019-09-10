@@ -1,0 +1,25 @@
+*----------------------------------------------------------------------*
+*       CLASS ZCL_FLIGHT_LIST_AO  DEFINITIO
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS zcl_flight_list_ao DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC
+  SHARED MEMORY ENABLED .
+
+*"* public components of class ZCL_FLIGHT_LIST_AO
+*"* do not include other source files here!!!
+PUBLIC SECTION.
+  DATA flight_list TYPE spfli_tab READ-ONLY.
+  METHODS set_flight_list
+  RAISING zcx_no_flights.
+
+*"* protected components of class ZCL_FLIGHT_LIST_AO
+*"* do not include other source files here!!!
+protected section.
+
+*"* private components of class ZCL_FLIGHT_LIST_AO
+*"* do not include other source files here!!!
+private section.

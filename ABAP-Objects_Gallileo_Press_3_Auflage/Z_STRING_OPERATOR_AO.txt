@@ -1,0 +1,125 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_STRING_OPERATOR_AO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_string_operator_ao.
+
+************************************************************************
+* Report Name  : Z_STRING_OPERATOR_AO                                  *
+* Report Title : Zeichenkettenvergleich                                *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01.04.2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects Übung S 344               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:99.99.99 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS subject TYPE abdocusubjects-text.
+
+*----------------------------------------------------------------------*
+*       CLASS demo DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+  PRIVATE SECTION.
+    TYPES: BEGIN OF subject_line,
+      text TYPE abdocusubjects-text,
+      object TYPE abdocusubjects-object,
+      END OF subject_line.
+    CLASS-DATA: subject_list TYPE TABLE OF subject_line,
+    langu TYPE sy-langu.
+    CLASS-METHODS:  get_subject_list,
+                    display_subject_list,
+                    handle_double_click FOR EVENT double_click of
+                    cl_salv_events_table importing row.
+
+ENDCLASS.                    "demo DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS demo IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    get_subject_list( ).
+    CONCATENATE '*' subject '*' INTO subject.
+    DELETE subject_list WHERE text NP subject.
+    display_subject_list( ).
+  ENDMETHOD.                    "main
+METHOD get_subject_list.
+    IF sy-langu <> 'D'.
+      langu = 'E'.
+    ELSE.
+      langu = 'D'.
+    ENDIF.
+    SELECT text object
+           FROM abdocusubjects
+           INTO CORRESPONDING FIELDS OF TABLE subject_list
+           WHERE spras = langu.
+  ENDMETHOD.
+  METHOD display_subject_list.
+    DATA: alv TYPE REF TO cl_salv_table,
+          events  TYPE REF TO cl_salv_events_table,
+          columns TYPE REF TO cl_salv_columns,
+          col_tab TYPE salv_t_column_ref.
+    FIELD-SYMBOLS <column> LIKE LINE OF col_tab.
+    IF LINES( subject_list ) = 0.
+      MESSAGE 'No hits' TYPE 'I' DISPLAY LIKE 'E'.
+      RETURN.
+    ENDIF.
+    SORT subject_list BY text AS TEXT.
+    TRY.
+      cl_salv_table=>factory(
+        IMPORTING r_salv_table = alv
+        CHANGING  t_table      = subject_list ).
+      events = alv->get_event( ).
+      SET HANDLER handle_double_click FOR events.
+      columns = alv->get_columns( ).
+      col_tab = columns->get( ).
+      LOOP AT col_tab ASSIGNING <column>.
+        IF <column>-columnname = 'TEXT'.
+           <column>-r_column->set_visible( 'X' ).
+        ELSE.
+          <column>-r_column->set_visible( ' ' ).
+        ENDIF.
+      ENDLOOP.
+      alv->display( ).
+    CATCH cx_salv_msg.
+      MESSAGE 'ALV display not possible' TYPE 'I'
+              DISPLAY LIKE 'E'.
+     ENDTRY.
+  ENDMETHOD.
+  METHOD handle_double_click.
+    DATA: subject_line LIKE LINE OF subject_list,
+          docu_control TYPE REF TO cl_gui_control.
+    READ TABLE subject_list INTO subject_line INDEX row.
+    CALL FUNCTION 'ABAP_DOCU_SHOW'
+      EXPORTING
+        area  = subject_line-object(4)
+        name  = subject_line-object+4
+        langu = langu
+      IMPORTING docu_container = docu_control.
+    IF NOT docu_control IS INITIAL.
+      cl_gui_control=>set_focus( docu_control ).
+    ENDIF.
+  ENDMETHOD.
+ENDCLASS.                    "demo IMPLEMENTATION
+
+START-OF-SELECTION.
+  demo=>main( ).

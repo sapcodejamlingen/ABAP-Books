@@ -1,0 +1,22 @@
+*"* components of interface ZIF_ACCOUNT_AO
+interface ZIF_ACCOUNT_AO
+  public .
+
+
+  data ID type ZACCOUNTS-ID read-only .
+
+  methods DEPOSIT
+    importing
+      !AMOUNT type ZACCOUNTS-AMOUNT .
+  methods WITHDRAW
+    importing
+      !AMOUNT type ZACCOUNTS-AMOUNT
+    raising
+      ZCX_NEGATIVE_AMOUNT .
+  methods TRANSFER
+    importing
+      !AMOUNT type ZACCOUNTS-AMOUNT
+      !TARGET type ref to ZIF_ACCOUNT_AO
+    raising
+      ZCX_NEGATIVE_AMOUNT .
+endinterface.
