@@ -1,0 +1,78 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_WS_DOWNLOAD_UPLOAD
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  Z_WS_DOWNLOAD_UPLOAD.
+
+************************************************************************
+* Report Name  : Z_WS_DOWNLOAD_UPLOAD                                 *
+* Report Title : Daten auf dem Präsentationsserver Speichern           *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/26/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S. 611               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.26.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS: fname type rlgrap-filename
+              default 'C:\TEMP\myfile.dat',
+            ftype type lgrap-filetype default 'BIN'.
+data: sflight_tab like table of sflight,
+      tab_line LIKE LINE OF sflight_tab,
+      leg TYPE i,
+      lins TYPE i,
+      size TYPE i.
+
+SELECT * from sflight INTO TABLE sflight_tab.
+  DESCRIBE FIELD tab_line LENGTH.
+  DESCRIBE TABLE sflight_tab LINES lins.
+  size = leng * lins.
+
+  CALL FUNCTION 'WS_DOWNLOAD'
+   EXPORTING
+*     CODEPAGE                      = ' '
+     FILENAME                      = fname
+     FILETYPE                      = ftype
+     BIN_FILESIZE                  = size
+*     MODE                          = ' '
+*     WK1_N_FORMAT                  = ' '
+*     WK1_N_SIZE                    = ' '
+*     WK1_T_FORMAT                  = ' '
+*     WK1_T_SIZE                    = ' '
+*     COL_SELECT                    = ' '
+*     COL_SELECTMASK                = ' '
+*     NO_AUTH_CHECK                 = ' '
+*   IMPORTING
+*     FILELENGTH                    =
+    TABLES
+      data_tab                      = sflight_tab
+*     FIELDNAMES                    =
+   EXCEPTIONS
+     FILE_OPEN_ERROR               = 1
+     FILE_WRITE_ERROR              = 2
+     INVALID_FILESIZE              = 3
+     INVALID_TYPE                  = 4
+     NO_BATCH                      = 5
+     UNKNOWN_ERROR                 = 6
+*     INVALID_TABLE_WIDTH           = 7
+*     GUI_REFUSE_FILETRANSFER       = 8
+*     CUSTOMER_ERROR                = 9
+*     NO_AUTHORITY                  = 10
+*     OTHERS                        = 11
+            .
+  IF sy-subrc <> 0.
+* MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+*         WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+  ENDIF.

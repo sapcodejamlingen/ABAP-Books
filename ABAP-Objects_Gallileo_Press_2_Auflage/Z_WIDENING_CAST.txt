@@ -1,0 +1,109 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_WIDENING_CAST
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_widening_cast.
+
+************************************************************************
+* Report Name  : Z_WIDENING_CAST                                                 *
+* Report Title : Widening Cast                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/25/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.348              *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.25.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS vehicle DEFINITION.
+
+ENDCLASS.                    "vehicle DEFINITION
+*----------------------------------------------------------------------*
+*       CLASS plane DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS plane DEFINITION INHERITING FROM vehicle.
+
+ENDCLASS.                    "plane DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS ship DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS ship DEFINITION INHERITING FROM vehicle.
+
+ENDCLASS.                    "ship DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle_handler DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle_handler DEFINITION.
+  PUBLIC SECTION.
+    METHODS handle_vehicle
+            IMPORTING i_ref TYPE REF TO object.
+ENDCLASS.                    "vehicle_handler DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS vehicle_handler IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS vehicle_handler IMPLEMENTATION.
+  METHOD handle_vehicle.
+    DATA: vehicle_ref TYPE REF TO vehicle,
+          plane_ref TYPE REF TO plane,
+          ship_ref TYPE REF TO ship.
+    CATCH SYSTEM-EXCEPTIONS move_cast_error = 4.
+      vehicle_ref ?= i_ref.
+    ENDCATCH.
+    IF sy-subrc = 0.
+      WRITE / 'Working with vehicle'.
+    ELSE.
+      WRITE / 'This is not a vehicle'.
+      EXIT.
+    ENDIF.
+    CATCH SYSTEM-EXCEPTIONS move_cast_error = 4.
+      plane_ref ?= i_ref.
+    ENDCATCH.
+    IF sy-subrc = 0.
+      WRITE: / 'Working with Plane'.
+    ENDIF.
+    CATCH SYSTEM-EXCEPTIONS move_cast_error = 4.
+      ship_ref ?= i_ref.
+    ENDCATCH.
+    IF sy-subrc = 0.
+      WRITE / 'Working with ship'.
+    ENDIF.
+  ENDMETHOD.                    "handle_vehicle
+ENDCLASS. "vehicle_handler IMPLEMENTATION
+
+DATA: handler TYPE REF TO vehicle_handler,
+      vehicle_1 TYPE REF TO vehicle,
+      vehicle_2 LIKE vehicle_1.
+
+START-OF-SELECTION.
+
+  CREATE OBJECT: handler,
+                 vehicle_1 TYPE plane,
+                 vehicle_2  TYPE ship.
+  CALL METHOD: handler->handle_vehicle
+            EXPORTING i_ref = handler,
+              handler->handle_vehicle
+            EXPORTING i_ref = vehicle_1,
+              handler->handle_vehicle
+            EXPORTING i_ref = vehicle_2.

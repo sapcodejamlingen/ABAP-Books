@@ -1,0 +1,47 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_WHILE_ENDWHILE
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_while_endwhile.
+
+************************************************************************
+* Report Name  : Z_WHILE_ENDWHILE                                      *
+* Report Title : Geschachtelte  While Schlifen                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/23/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  :  ABAP Objects 2. Aufl. S. 183                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+DATA: inner_limit TYPE i VALUE 5,
+      outer_limit TYPE i VALUE 5,
+      inner_index TYPE i,
+      outer_index TYPE i.
+
+WHILE outer_limit > 0.
+  outer_index = sy-index.
+
+  WRITE: /  'Äußerer Schleifendurchgang:', sy-index,
+            'Limit:', outer_limit.
+  inner_limit = 5.
+  WHILE inner_limit > 0.
+    inner_index = sy-index.
+    WRITE: /  ' Innerer Schleifendurchgang:', sy-index,
+              ' Limit:', inner_limit.
+    inner_limit = inner_limit - 1.
+  ENDWHILE.
+  outer_limit = outer_limit - 1.
+ENDWHILE.

@@ -1,0 +1,33 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_FIRST_PROGRAM
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_first_program.
+
+************************************************************************
+* Report Name  : Z_FIRST_PROGRAM                                       *
+* Report Title : Das Hello World Program                               *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/24/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Objects 2. AUfl. S.45               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:01.24.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS input(16) TYPE c DEFAULT 'Hello World!'.
+
+START-OF-SELECTION.
+  WRITE ' The input was:'.
+  WRITE input.
