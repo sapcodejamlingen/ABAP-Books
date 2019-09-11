@@ -1,0 +1,183 @@
+REPORT  zmb_alv_fm NO STANDARD PAGE HEADING.
+*Espresso Tutorials - SAP ABAP List Viewer (ALV)
+
+TABLES: sbook,
+        stravelag.
+TYPE-POOLS slis.
+
+TYPES: BEGIN OF lty_output,
+        agencynum TYPE stravelag-agencynum, "agency number
+        name  TYPE stravelag-name,          "agency name
+        currency TYPE stravelag-currency,   "agency currency
+        carrid TYPE sbook-carrid,           "booked carrier
+        connid TYPE sbook-connid,           "booked connection
+        fldate TYPE sbook-fldate,           "booked date
+        bookid TYPE sbook-bookid,           "booking ID
+        forcuram TYPE sbook-forcuram,       "price in foreign currency
+        forcurkey TYPE sbook-forcurkey,     "foreign currency key
+        carrname TYPE scarr-carrname,        "carrier name
+        loccuram TYPE sbook-loccuram,       "price in airline curr
+        loccurkey TYPE sbook-loccurkey,     "local currency of airline
+       END OF lty_output.
+
+DATA: gs_output   TYPE lty_output.            "local structure (line)
+DATA: gt_output   TYPE STANDARD TABLE OF lty_output.
+DATA: gt_fieldcat TYPE slis_t_fieldcat_alv.
+
+DATA: gv_lines TYPE i.
+
+SELECT-OPTIONS: s_agnum FOR stravelag-agencynum DEFAULT '123',
+                s_carid FOR sbook-carrid,
+                s_fldat FOR sbook-fldate.
+
+INITIALIZATION.
+
+AT SELECTION-SCREEN.
+
+START-OF-SELECTION.
+
+  SELECT stravelag~agencynum stravelag~name stravelag~currency
+         sbook~carrid sbook~connid sbook~fldate sbook~bookid
+         sbook~forcuram sbook~forcurkey
+         scarr~carrname
+         sbook~loccuram sbook~loccurkey
+    FROM stravelag JOIN sbook
+                   ON stravelag~agencynum = sbook~agencynum
+    JOIN  scarr
+    ON    sbook~carrid = scarr~carrid
+    INTO TABLE gt_output
+    WHERE stravelag~agencynum IN s_agnum
+    AND   sbook~carrid        IN s_carid
+    AND   sbook~fldate        IN s_fldat.
+
+  DESCRIBE TABLE gt_output LINES gv_lines.
+  IF gv_lines NE 0.
+    SORT gt_output BY agencynum
+                      carrid
+                      connid
+                      fldate
+                      bookid.
+  ELSE.
+    MESSAGE ID '00' TYPE 'I' NUMBER 001 WITH 'No data retrieved'.
+    RETURN.
+  ENDIF.
+
+END-OF-SELECTION.
+
+
+  PERFORM zf_build_fieldcatalog USING gt_fieldcat[].
+  PERFORM zf_display_alv.
+
+*&---------------------------------------------------------------------*
+*&      Form  zf_build_fieldcatalog
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->LT_FIELDCAT  text
+*----------------------------------------------------------------------*
+FORM zf_build_fieldcatalog USING lt_fieldcat TYPE slis_t_fieldcat_alv.
+
+  DATA: ls_fieldcat TYPE slis_fieldcat_alv.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'AGENCYNUM'.
+  ls_fieldcat-ref_fieldname = 'AGENCYNUM'.
+  ls_fieldcat-ref_tabname   = 'STRAVELAG'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'NAME'.
+  ls_fieldcat-ref_fieldname = 'NAME'.
+  ls_fieldcat-ref_tabname   = 'STRAVELAG'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'CURRENCY'.
+  ls_fieldcat-ref_fieldname = 'CURRENCY'.
+  ls_fieldcat-ref_tabname   = 'STRAVELAG'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'CARRID'.
+  ls_fieldcat-ref_fieldname = 'CARRID'.
+  ls_fieldcat-ref_tabname   = 'SBOOK'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'CONNID'.
+  ls_fieldcat-ref_fieldname = 'CONNID'.
+  ls_fieldcat-ref_tabname   = 'SBOOK'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'FLDATE'.
+  ls_fieldcat-ref_fieldname = 'FLDATE'.
+  ls_fieldcat-ref_tabname   = 'SBOOK'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'BOOKID'.
+  ls_fieldcat-ref_fieldname = 'BOOKID'.
+  ls_fieldcat-ref_tabname   = 'SBOOK'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'FORCURAM'.
+  ls_fieldcat-cfieldname    = 'FORCURKEY'.
+  ls_fieldcat-ctabname      = 'SBOOK'.
+  ls_fieldcat-ref_fieldname = 'FORCURAM'.
+  ls_fieldcat-ref_tabname   = 'SBOOK'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'FORCURKEY'.
+  ls_fieldcat-ref_fieldname = 'FORKURKEY'.
+  ls_fieldcat-ref_tabname   = 'SBOOK'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'CARRNAME'.
+  ls_fieldcat-ref_fieldname = 'CARRNAME'.
+  ls_fieldcat-ref_tabname   = 'SCARR'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'LOCCURAM'.
+  ls_fieldcat-cfieldname    = 'LOCCURKEY'.
+  ls_fieldcat-ctabname      = 'SBOOK'.
+  ls_fieldcat-ref_fieldname = 'LOCCURAM'.
+  ls_fieldcat-ref_tabname   = 'SBOOK'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'LOCCURKEY'.
+  ls_fieldcat-ref_fieldname = 'LOCCURKEY'.
+  ls_fieldcat-ref_tabname   = 'SBOOK'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+ENDFORM.                    "zf_build_fieldcatalog
+
+*&---------------------------------------------------------------------*
+*&      Form  zf_display_alv
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM zf_display_alv.
+
+  CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+    EXPORTING
+      i_callback_program = sy-repid
+      it_fieldcat        = gt_fieldcat[]
+    TABLES
+      t_outtab           = gt_output
+    EXCEPTIONS
+      program_error      = 1
+      OTHERS             = 2.
+  IF sy-subrc <> 0.
+    MESSAGE ID '00' TYPE 'I' NUMBER 001
+    WITH 'REUSE_ALV_GRID_DISPLAY call error: ' sy-subrc.
+    RETURN.
+  ENDIF.
+
+
+ENDFORM.                    "zf_display_alv

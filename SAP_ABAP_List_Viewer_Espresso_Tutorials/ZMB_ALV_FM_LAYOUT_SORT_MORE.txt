@@ -1,0 +1,602 @@
+REPORT  ZMB_ALV_FM_LAYOUT_SORT_MORE NO STANDARD PAGE HEADING.
+*Espresso Tutorials - SAP ABAP List Viewer (ALV)
+
+TABLES: sbook,
+        stravelag.
+TYPE-POOLS slis.
+
+TYPES: BEGIN OF lty_output,
+        agencynum TYPE stravelag-agencynum, "agency number
+        name      TYPE stravelag-name,          "agency name
+        currency  TYPE stravelag-currency,   "agency currency
+        carrid    TYPE sbook-carrid,           "booked carrier
+        connid    TYPE sbook-connid,           "booked connection
+        fldate    TYPE sbook-fldate,           "booked date
+        bookid    TYPE sbook-bookid,           "booking ID
+        forcuram  TYPE sbook-forcuram,       "price in foreign currency
+        forcurkey TYPE sbook-forcurkey,     "foreign currency key
+        carrname  TYPE scarr-carrname,        "carrier name
+        loccuram  TYPE sbook-loccuram,       "price in airline curr
+        loccurkey TYPE sbook-loccurkey,     "local currency of airline
+        count TYPE i,
+       END OF lty_output.
+
+DATA: gs_output   TYPE lty_output.            "local structure (line)
+DATA: gt_output   TYPE STANDARD TABLE OF lty_output.
+DATA: gt_sort     TYPE slis_t_sortinfo_alv,
+      gt_fieldcat TYPE slis_t_fieldcat_alv,
+      gs_layout   TYPE slis_layout_alv,
+      gt_top_text TYPE slis_t_listheader,
+      gt_events   TYPE slis_t_event.
+*      gt_exclude  TYPE slis_t_extab.
+
+CONSTANTS: gc_formname_top TYPE slis_formname VALUE 'ZF_TOP_OF_PAGE',
+           gc_formname_com TYPE slis_formname VALUE 'ZF_USER_COMMAND',
+           gc_formname_pf TYPE slis_formname VALUE 'ZF_SET_PFSTATUS'.
+
+DATA: gv_lines TYPE i,
+      gv_title TYPE syst-title.
+
+SELECT-OPTIONS: s_agnum FOR stravelag-agencynum DEFAULT '123',
+                s_carid FOR sbook-carrid,
+                s_fldat FOR sbook-fldate.
+
+SELECTION-SCREEN: SKIP.
+SELECTION-SCREEN: BEGIN OF BLOCK b1 WITH FRAME TITLE text-003.
+SELECTION-SCREEN: BEGIN OF LINE.
+PARAMETERS: rb_1 RADIOBUTTON GROUP rad1 DEFAULT 'X'.
+SELECTION-SCREEN COMMENT 5(25) text-004 FOR FIELD rb_1.
+SELECTION-SCREEN: END OF LINE.
+
+SELECTION-SCREEN: BEGIN OF LINE.
+PARAMETERS: rb_2 RADIOBUTTON GROUP rad1.
+SELECTION-SCREEN COMMENT 5(25) text-005 FOR FIELD rb_2.
+SELECTION-SCREEN: END OF LINE.
+SELECTION-SCREEN: END OF BLOCK b1.
+SELECTION-SCREEN BEGIN OF BLOCK b2 WITH FRAME TITLE text-006.
+PARAMETERS: p_vari TYPE disvariant-variant.
+SELECTION-SCREEN END OF BLOCK b2.
+
+INITIALIZATION.
+
+AT SELECTION-SCREEN.
+
+START-OF-SELECTION.
+
+  PERFORM zf_start.
+
+  SELECT stravelag~agencynum stravelag~name stravelag~currency
+         sbook~carrid sbook~connid sbook~fldate sbook~bookid
+         sbook~forcuram sbook~forcurkey
+         scarr~carrname
+         sbook~loccuram sbook~loccurkey
+    FROM stravelag JOIN sbook
+                   ON stravelag~agencynum = sbook~agencynum
+    JOIN  scarr
+    ON    sbook~carrid = scarr~carrid
+    INTO TABLE gt_output
+    WHERE stravelag~agencynum IN s_agnum
+    AND   sbook~carrid        IN s_carid
+    AND   sbook~fldate        IN s_fldat.
+
+  DESCRIBE TABLE gt_output LINES gv_lines.
+  IF gv_lines NE 0.
+
+    CLEAR gs_output.
+    gs_output-count = 1.
+
+    MODIFY gt_output FROM gs_output
+    TRANSPORTING count WHERE NOT agencynum IS INITIAL.
+
+    SORT gt_output BY agencynum
+                      carrid
+                      connid
+                      fldate
+                      bookid.
+  ELSE.
+    MESSAGE ID '00' TYPE 'I' NUMBER 001 WITH 'No data retrieved'.
+    RETURN.
+  ENDIF.
+
+END-OF-SELECTION.
+
+  PERFORM zf_build_layout USING gs_layout.
+  PERFORM zf_build_fieldcatalog USING gt_fieldcat[].
+  PERFORM zf_build_sort_table USING gt_sort[].
+  PERFORM zf_build_event_table USING gt_events[].
+  PERFORM zf_build_top_text_table USING gt_top_text[].
+*  PERFORM zf_build_exclude_table USING gt_exclude[].
+  PERFORM zf_display_alv.
+
+*&---------------------------------------------------------------------*
+*&      Form  zf_build_exclude_table
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->LT_EXCLUDE text
+*----------------------------------------------------------------------*
+*FORM zf_build_exclude_table USING lt_exclude TYPE slis_t_extab.
+*  DATA: ls_exclude TYPE slis_extab.
+*  ls_exclude-fcode = '&ABC'.
+*  APPEND ls_exclude TO lt_exclude.
+*  ls_exclude-fcode = '&GRAPH'.
+*  APPEND ls_exclude TO lt_exclude.
+*ENDFORM.                    "zf_build_exclude_table
+*&---------------------------------------------------------------------*
+*&      Form  zf_build_fieldcatalog
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->LT_FIELDCAT  text
+*----------------------------------------------------------------------*
+FORM zf_build_fieldcatalog USING lt_fieldcat TYPE slis_t_fieldcat_alv.
+
+  DATA: ls_fieldcat TYPE slis_fieldcat_alv.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'NAME'.
+  ls_fieldcat-ref_fieldname = 'NAME'.
+  ls_fieldcat-ref_tabname   = 'STRAVELAG'.
+  ls_fieldcat-hotspot       = 'X'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'AGENCYNUM'.
+  ls_fieldcat-ref_fieldname = 'AGENCYNUM'.
+  ls_fieldcat-ref_tabname   = 'STRAVELAG'.
+  ls_fieldcat-hotspot       = 'X'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'CURRENCY'.
+  ls_fieldcat-ref_fieldname = 'CURRENCY'.
+  ls_fieldcat-ref_tabname   = 'STRAVELAG'.
+  ls_fieldcat-no_out        = 'X'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'CARRID'.
+  ls_fieldcat-ref_fieldname = 'CARRID'.
+  ls_fieldcat-ref_tabname   = 'SBOOK'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'CONNID'.
+  ls_fieldcat-ref_fieldname = 'CONNID'.
+  ls_fieldcat-ref_tabname   = 'SBOOK'.
+  ls_fieldcat-hotspot       = 'X'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'FLDATE'.
+  ls_fieldcat-ref_fieldname = 'FLDATE'.
+  ls_fieldcat-ref_tabname   = 'SBOOK'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'BOOKID'.
+  ls_fieldcat-ref_fieldname = 'BOOKID'.
+  ls_fieldcat-ref_tabname   = 'SBOOK'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'FORCURAM'.
+  ls_fieldcat-cfieldname    = 'FORCURKEY'.
+  ls_fieldcat-ctabname      = 'SBOOK'.
+  ls_fieldcat-ref_fieldname = 'FORCURAM'.
+  ls_fieldcat-ref_tabname   = 'SBOOK'.
+*  ls_fieldcat-do_sum        = 'X'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'FORCURKEY'.
+  ls_fieldcat-ref_fieldname = 'FORKURKEY'.
+  ls_fieldcat-ref_tabname   = 'SBOOK'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'CARRNAME'.
+  ls_fieldcat-ref_fieldname = 'CARRNAME'.
+  ls_fieldcat-ref_tabname   = 'SCARR'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'LOCCURAM'.
+  ls_fieldcat-cfieldname    = 'LOCCURKEY'.
+  ls_fieldcat-ctabname      = 'SBOOK'.
+  ls_fieldcat-ref_fieldname = 'LOCCURAM'.
+  ls_fieldcat-ref_tabname   = 'SBOOK'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname     = 'LOCCURKEY'.
+  ls_fieldcat-ref_fieldname = 'LOCCURKEY'.
+  ls_fieldcat-ref_tabname   = 'SBOOK'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname = 'COUNT'.
+  ls_fieldcat-seltext_l = 'RecCount'.
+  ls_fieldcat-seltext_m = 'RecCount'.
+  ls_fieldcat-seltext_s = 'RecCount'.
+  ls_fieldcat-inttype   = 'I'.
+  ls_fieldcat-do_sum    = 'X'.
+  APPEND ls_fieldcat TO lt_fieldcat.
+ENDFORM.                    "zf_build_fieldcatalog
+
+*&---------------------------------------------------------------------*
+*&      Form  zf_display_alv
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM zf_display_alv.
+
+  CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+    EXPORTING
+      i_callback_program = sy-repid
+      i_callback_pf_status_set = gc_formname_pf
+      is_layout          = gs_layout
+      it_fieldcat        = gt_fieldcat[]
+*      it_excluding       = gt_exclude[]
+      it_sort            = gt_sort[]
+*      i_save             = gv_save
+*      is_variant         = gs_variant
+      it_events           = gt_events[]
+    TABLES
+      t_outtab           = gt_output
+    EXCEPTIONS
+      program_error      = 1
+      OTHERS             = 2.
+  IF sy-subrc <> 0.
+    MESSAGE ID '00' TYPE 'I' NUMBER 001
+    WITH 'REUSE_ALV_GRID_DISPLAY call error: ' sy-subrc.
+    RETURN.
+  ENDIF.
+ENDFORM.                    "zf_display_alv
+*&---------------------------------------------------------------------*
+*&      Form  zf_set_pfstatus
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->LT_EXCLUDE text
+*----------------------------------------------------------------------*
+FORM zf_set_pfstatus USING lt_exclude TYPE slis_t_extab.
+  DATA: ls_exclude TYPE slis_extab.
+* add to the exclude table pre-populated by sap on each pass
+  ls_exclude-fcode = '&ABC'.
+  APPEND ls_exclude TO lt_exclude.
+  ls_exclude-fcode = '&GRAPH'.
+  APPEND ls_exclude TO lt_exclude.
+  SET PF-STATUS 'ZCUSTOM1' EXCLUDING lt_exclude.
+ENDFORM.                    "zf_set_pfstatus
+*&---------------------------------------------------------------------*
+*&      Form  zf_build_layout
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->P_GS_LAYOUT  text
+*----------------------------------------------------------------------*
+FORM zf_build_layout  USING ls_layout TYPE slis_layout_alv.
+  ls_layout-zebra               = 'X'.
+  ls_layout-colwidth_optimize   = 'X'.
+  ls_layout-totals_before_items = 'X'. "totals on top
+  ls_layout-window_titlebar     = gv_title.
+* internal table placeholder field for menu-driven counts
+  ls_layout-countfname           = 'COUNT'.
+ENDFORM.                    " zf_build_layout
+*&---------------------------------------------------------------------*
+*&      Form  zf_start
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM zf_start .
+* populate screen title using selection variant name
+  CONCATENATE 'Airline Bookings:'(001)
+              syst-slset
+              INTO gv_title SEPARATED BY space.
+  IF syst-slset CS '_Z'.
+    CONCATENATE gv_title
+    '(previous data view)'(002)
+          INTO gv_title SEPARATED BY space.
+  ENDIF.
+
+ENDFORM.                    " zf_start
+*&---------------------------------------------------------------------*
+*&      Form  zf_build_sort_table
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->P_GT_SORT[]  text
+*----------------------------------------------------------------------*
+FORM zf_build_sort_table USING    lt_sort TYPE slis_t_sortinfo_alv.
+
+  DATA: ls_sort TYPE slis_sortinfo_alv.
+
+  CLEAR lt_sort.
+
+  IF rb_1 = 'X'.
+    CLEAR ls_sort.
+    ls_sort-spos      = '1'.
+    ls_sort-fieldname = 'NAME'.
+    ls_sort-tabname   = 'GT_OUTPUT'.
+    ls_sort-up        = 'X'.
+    APPEND ls_sort TO lt_sort.
+
+    CLEAR ls_sort.
+    ls_sort-spos      = '2'.
+    ls_sort-fieldname = 'AGENCYNUM'.
+    ls_sort-tabname   = 'GT_OUTPUT'.
+    ls_sort-group     = 'UL'.
+    ls_sort-subtot    = 'X'.
+    ls_sort-expa      = 'X'.
+    APPEND ls_sort TO lt_sort.
+  ELSE.
+    CLEAR ls_sort.
+    ls_sort-spos      = '1'.
+    ls_sort-fieldname = 'NAME'.
+    ls_sort-tabname   = 'GT_OUTPUT'.
+    ls_sort-up        = 'X'.
+    APPEND ls_sort TO lt_sort.
+
+    CLEAR ls_sort.
+    ls_sort-spos      = '2'.
+    ls_sort-fieldname = 'AGENCYNUM'.
+    ls_sort-tabname   = 'GT_OUTPUT'.
+    ls_sort-group     = 'UL'.
+    APPEND ls_sort TO lt_sort.
+
+    CLEAR ls_sort.
+    ls_sort-spos      = '3'.
+    ls_sort-fieldname = 'CARRID'.
+    ls_sort-tabname   = 'GT_OUTPUT'.
+    ls_sort-up        = 'X'.
+    ls_sort-group     = 'UL'.
+    ls_sort-subtot    = 'X'.
+    ls_sort-expa      = 'X'.
+    APPEND ls_sort TO lt_sort.
+  ENDIF.
+
+  " first
+*  CLEAR ls_sort.
+*  ls_sort-spos      = '1'.
+*  ls_sort-fieldname = 'AGENCYNUM'.
+*  ls_sort-tabname   = 'GT_OUTPUT'.
+*  ls_sort-up        = 'X'.
+*  APPEND ls_sort TO lt_sort.
+*
+*  CLEAR ls_sort.
+*  ls_sort-spos      = '2'.
+*  ls_sort-fieldname = 'NAME'.
+*  ls_sort-tabname   = 'GT_OUTPUT'.
+*  ls_sort-group     = 'UL'.
+*  ls_sort-subtot    = 'X'.
+*  ls_sort-expa      = 'X'.
+*  APPEND ls_sort TO lt_sort.
+
+  "second
+*  CLEAR ls_sort.
+*  ls_sort-spos      = '1'.
+*  ls_sort-fieldname = 'NAME'.
+*  ls_sort-tabname   = 'GT_OUTPUT'.
+*  ls_sort-up        = 'X'.
+*  APPEND ls_sort TO lt_sort.
+*
+*  CLEAR ls_sort.
+*  ls_sort-spos      = '2'.
+*  ls_sort-fieldname = 'AGENCYNUM'.
+*  ls_sort-tabname   = 'GT_OUTPUT'.
+*  ls_sort-group     = 'UL'.
+*  ls_sort-subtot    = 'X'.
+*  ls_sort-expa      = 'X'.
+*  APPEND ls_sort TO lt_sort.
+*
+*  CLEAR ls_sort.
+*  ls_sort-spos      = '3'.
+*  ls_sort-fieldname = 'NAME'.
+*  ls_sort-tabname   = 'GT_OUTPUT'.
+*  ls_sort-up        = 'X'.
+*  ls_sort-group     = 'UL'.
+*  ls_sort-subtot    = 'X'.
+*  ls_sort-expa      = 'X'.
+*  APPEND ls_sort TO lt_sort.
+
+
+ENDFORM.                    " zf_build_sort_table
+*&---------------------------------------------------------------------*
+*&      Form  zf_top_of_page
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM zf_top_of_page.
+  CALL FUNCTION 'REUSE_ALV_COMMENTARY_WRITE'
+    EXPORTING
+      i_logo             = 'ENJOYSAP_LOGO'
+      it_list_commentary = gt_top_text.
+ENDFORM.                    "zf_top_of_page
+*&---------------------------------------------------------------------*
+*&      Form  zf_build_event_table
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->LT_EVENTS  text
+*----------------------------------------------------------------------*
+FORM zf_build_event_table USING lt_events TYPE slis_t_event.
+
+  DATA: ls_event TYPE slis_alv_event.
+
+  CALL FUNCTION 'REUSE_ALV_EVENTS_GET'
+   EXPORTING
+     i_list_type           = 4
+   IMPORTING
+     et_events             = lt_events
+*   EXCEPTIONS
+*     LIST_TYPE_WRONG       = 1
+*     OTHERS                = 2
+            .
+
+  READ TABLE lt_events WITH KEY name = slis_ev_user_command
+  INTO ls_event.
+  IF sy-subrc = 0.
+    MOVE gc_formname_com TO ls_event-form.
+    MODIFY lt_events FROM ls_event INDEX sy-tabix.
+  ENDIF.
+
+
+  READ TABLE lt_events WITH KEY name = slis_ev_top_of_page
+      INTO ls_event.
+  IF sy-subrc = 0.
+    MOVE gc_formname_top TO ls_event-form.
+    MODIFY lt_events FROM ls_event INDEX sy-tabix.
+
+  ENDIF.
+ENDFORM.                    "zf_build_event_table
+*&---------------------------------------------------------------------*
+*&      Form  zf_build_top_text_table
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM zf_build_top_text_table USING lt_top_text TYPE slis_t_listheader.
+
+  DATA: ls_textline TYPE slis_listheader,
+        lv_date(10) TYPE c.
+
+  CLEAR ls_textline.
+  ls_textline-typ = 'H'.
+  " ls_textline-key (not applicable for h lines)
+  ls_textline-info = 'ET Data Services'(010).
+  APPEND ls_textline TO lt_top_text.
+
+  CLEAR ls_textline.
+  ls_textline-typ = 'S'.
+  ls_textline-key = 'Report:'(011).
+  ls_textline-info = sy-repid.
+  APPEND ls_textline TO lt_top_text.
+
+  CLEAR ls_textline.
+  ls_textline-typ = 'S'.
+  ls_textline-key = 'Title:'(012).
+  ls_textline-info = gv_title.
+  APPEND ls_textline TO lt_top_text.
+
+  CLEAR ls_textline.
+  ls_textline-typ = 'S'.
+  ls_textline-key = 'Variant:'(013).
+  ls_textline-info = sy-slset.
+  APPEND ls_textline TO lt_top_text.
+
+  CLEAR ls_textline.
+  ls_textline-typ = 'S'.
+  ls_textline-key = 'Layout:'(014).
+  ls_textline-info = p_vari.
+  APPEND ls_textline TO lt_top_text.
+
+  CLEAR lv_date.
+  lv_date+0(4) = sy-datum+0(4).
+  lv_date+5(2) = sy-datum+4(2).
+  lv_date+8(2) = sy-datum+6(2).
+
+  CLEAR ls_textline.
+  ls_textline-typ = 'S'.
+  ls_textline-key = 'Date:'(015).
+  ls_textline-info = lv_date.
+  APPEND ls_textline TO lt_top_text.
+
+
+
+ENDFORM.                    "zf_build_top_text_table
+*&---------------------------------------------------------------------*
+*&      Form  zf_user_command
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->LV_UCOMM     text
+*      -->LS_SELFIELD  text
+*----------------------------------------------------------------------*
+FORM zf_user_command USING lv_ucomm LIKE sy-ucomm
+                              ls_selfield TYPE slis_selfield.
+
+  DATA: ls_stravelag TYPE stravelag,
+        lt_stravelag TYPE TABLE OF stravelag,
+        lt_spfli TYPE TABLE OF spfli,
+        lt_output_temp TYPE TABLE OF lty_output.
+
+  "do not return popup if user clicks wwhere no data
+  IF ls_selfield-value IS INITIAL.
+    RETURN.
+  ENDIF.
+
+  CASE lv_ucomm.
+    when 'NOTE'.
+      "Logic will added later
+
+
+    WHEN '&IC1'.
+      CASE ls_selfield-fieldname.
+        WHEN 'AGENCYNUM'
+          OR 'NAME'.
+          CLEAR: ls_stravelag, lt_stravelag.
+          IF ls_selfield-fieldname = 'AGENCYNUM'.
+            SELECT SINGLE * FROM stravelag
+              INTO ls_stravelag
+              WHERE agencynum = ls_selfield-value.
+          ELSE.
+            SELECT * FROM stravelag UP TO 1 ROWS
+              INTO ls_stravelag
+              WHERE name = ls_selfield-value.
+            ENDSELECT.
+          ENDIF.
+          APPEND ls_stravelag TO lt_stravelag.
+          CALL FUNCTION 'REUSE_ALV_POPUP_TO_SELECT'
+            EXPORTING
+              i_title          = 'TRAVEL AGENCY Details'(017)
+              i_selection      = ' '
+              i_tabname        = '1'
+              i_structure_name = 'STRAVELAG'
+            TABLES
+              t_outtab         = lt_stravelag
+            EXCEPTIONS
+              program_error    = 1
+              OTHERS           = 2.
+          IF sy-subrc <> 0.
+            MESSAGE ID '00' TYPE 'I' NUMBER 001 WITH 'Popup error'(018).
+            RETURN.
+          ENDIF.
+
+        WHEN 'CONNID'.
+          CLEAR: lt_spfli.
+*will display all selectet carriers that use connection ID cl.
+          lt_output_temp[] = gt_output[].
+          DELETE lt_output_temp WHERE connid <> ls_selfield-value.
+          IF lt_output_temp[] IS INITIAL.
+            RETURN.
+          ENDIF.
+          SORT lt_output_temp BY carrid connid.
+          DELETE ADJACENT DUPLICATES FROM lt_output_temp
+          COMPARING carrid connid.
+          SELECT * FROM spfli
+            INTO TABLE lt_spfli
+            FOR ALL ENTRIES IN lt_output_temp
+            WHERE carrid = lt_output_temp-carrid
+            AND connid = lt_output_temp-connid.
+          CALL FUNCTION 'REUSE_ALV_POPUP_TO_SELECT'
+            EXPORTING
+               i_title  = 'Connection Details (All Airlines)'(019)
+             i_selection                   = ' '
+              i_tabname                     = '1'
+             i_structure_name              = 'SPFLI'
+            TABLES
+              t_outtab                      = lt_spfli
+           EXCEPTIONS
+             program_error                 = 1
+             OTHERS                        = 2
+                    .
+          IF sy-subrc <> 0.
+            MESSAGE ID '00' TYPE 'I' NUMBER 001 WITH 'Popup error'(018).
+            RETURN.
+          ENDIF.
+      ENDCASE.
+  ENDCASE.
+ENDFORM.                    "zf_user_command
