@@ -1,0 +1,299 @@
+REPORT  z_teilnehmerliste13_b.
+*Einstig in ABAP S. 415
+
+*Deklarationsteil
+INCLUDE z_teilnehmer_deklarationen.
+
+*Selektionsbildschirm
+INCLUDE zteilnehmer13_b_selektionsbild.
+
+*-------------------------------------*
+*initialisation*
+*-------------------------------------+
+*at-selection-screen
+*------------------------------------*
+START-OF-SELECTION.
+
+* In anderen Report über Selektionsbildschirm verzweigen ohne Rückkehr
+  PERFORM absprung_ow.
+
+* In anderen Report über Selektionsbildschirm verzweigen mit Rückkehr
+  PERFORM absprung_mw.
+
+*Unterprogramm eines anderen Reports aufrufen
+  PERFORM itab04_verarbeiten.
+
+* Funktionsbaustein für Download der ITAB04 aufrufen
+  PERFORM download_itab04.
+
+*Funktionsbausteine für Datendownload und Programmstart aufrufen.
+  PERFORM download_and_start_program.
+
+*----------------------------------------*
+END-OF-SELECTION.
+  SKIP.
+  WRITE: / 'Hauptprogramm Zteilnehmerliste13_B beendet'.
+
+*Ende des Hauptprogramms
+*----------------------------------------*
+*Beginn der Unterprogramme
+*----------------------------------------*
+FORM absprung_ow.
+  IF rsow IS NOT INITIAL.
+*Aufruf mit selektionsbildschirm ohne Parameterübergabe
+    SUBMIT z_teilnehmerliste13_a
+    VIA SELECTION-SCREEN.
+  ENDIF.
+  IF rsowas IS NOT INITIAL.
+*Aufruf mit selektionsbildschirm mit Parameterübergabe
+    SUBMIT z_teilnehmerliste13_a
+    WITH par02 = 'X'
+    WITH par03 = 'X'
+    VIA SELECTION-SCREEN.
+  ENDIF.
+  IF rsowih IS NOT INITIAL.
+* Aufruf ohne selektionsbildschirm mit Parameterübergabe
+    SUBMIT z_teilnehmerliste13_a
+    WITH par02 = 'X'.
+  ENDIF.
+ENDFORM.                    "absprung_ow
+
+*&---------------------------------------------------------------------*
+*&      Form
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM absprung_mw.
+  CHECK rsmw IS NOT INITIAL.
+  GET PARAMETER ID 'RID' FIELD progname.
+  SET PARAMETER ID 'Z_TEST' FIELD progname.
+  nvml = 'X'.
+  PERFORM itab04_fuellen(z_teilnehmerliste13_a)
+  TABLES itab04
+    USING zzaehler_itab04 nvml.
+  EXPORT itab04 TO MEMORY ID progname.
+  SUBMIT z_teilnehmerliste13_a AND RETURN.
+ENDFORM.                    "absprung_mw
+
+*&---------------------------------------------------------------------*
+*&      Form  itab04_verarbeiten
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM itab04_verarbeiten.
+  CHECK nvml IS NOT INITIAL.
+*Traditionelle Schreibweise für Perform,nicht zulässig mit ABAP Objects
+  PERFORM itab04_fuellen(z_teilnehmerliste13_a)
+  TABLES itab04
+      USING zzaehler_itab04 nvml.
+*perform itab04_liste(Zteilnehmerliste13_a)
+*  Using nvml zzahler_itab04.
+*moderne Schreibweise für perform.zulässig mit ABAP objects
+  PERFORM itab04_liste IN PROGRAM z_teilnehmerliste13_a
+  USING nvml zzaehler_itab04.
+
+ENDFORM.                    "itab04_verarbeiten
+
+*&---------------------------------------------------------------------*
+*&      Form  download_itab04
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM download_itab04.
+  CHECK dbdlml IS NOT INITIAL.
+  lokale_datei = lokdatei.
+  nvml = 'X'.
+  PERFORM itab04_verarbeiten.
+
+  CALL FUNCTION 'GUI_DOWNLOAD'
+    EXPORTING
+*     BIN_FILESIZE                    =
+      filename                        = lokale_datei
+     filetype                        = 'ASC'
+     append                          = ' '
+     write_field_separator           = 'X'
+*     HEADER                          = '00'
+*     TRUNC_TRAILING_BLANKS           = ' '
+*     WRITE_LF                        = 'X'
+*     COL_SELECT                      = ' '
+*     COL_SELECT_MASK                 = ' '
+*     DAT_MODE                        = ' '
+*     CONFIRM_OVERWRITE               = ' '
+*     NO_AUTH_CHECK                   = ' '
+*     CODEPAGE                        = ' '
+*     IGNORE_CERR                     = ABAP_TRUE
+*     REPLACEMENT                     = '#'
+*     WRITE_BOM                       = ' '
+*     TRUNC_TRAILING_BLANKS_EOL       = 'X'
+*     WK1_N_FORMAT                    = ' '
+*     WK1_N_SIZE                      = ' '
+*     WK1_T_FORMAT                    = ' '
+*     WK1_T_SIZE                      = ' '
+*   IMPORTING
+*     FILELENGTH                      =
+    TABLES
+      data_tab                        = itab04
+*     FIELDNAMES                      =
+   EXCEPTIONS
+     file_write_error                = 1
+     no_batch                        = 2
+     gui_refuse_filetransfer         = 3
+     invalid_type                    = 4
+     no_authority                    = 5
+     unknown_error                   = 6
+     header_not_allowed              = 7
+     separator_not_allowed           = 8
+     filesize_not_allowed            = 9
+     header_too_long                 = 10
+     dp_error_create                 = 11
+     dp_error_send                   = 12
+     dp_error_write                  = 13
+     unknown_dp_error                = 14
+     access_denied                   = 15
+     dp_out_of_memory                = 16
+     disk_full                       = 17
+     dp_timeout                      = 18
+     file_not_found                  = 19
+     dataprovider_exception          = 20
+     control_flush_error             = 21
+     OTHERS                          = 22
+            .
+  IF sy-subrc <> 0.
+    SKIP.
+    WRITE: / 'Download abgebrochen', sy-subrc.
+  ELSE.
+    SKIP.
+   WRITE: / 'Download erfolgreich, Tabelle gespeichert in', lokdatei(8).
+  ENDIF.
+
+
+ENDFORM.                    "download_itab04
+
+*&---------------------------------------------------------------------*
+*&      Form  download_and_start_program
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM download_and_start_program.
+  CHECK dbdlmlp IS NOT INITIAL.
+  dbdlml = 'X'.
+  PERFORM download_itab04.
+  PERFORM start_program.
+ENDFORM.                    "download_and_start_program
+
+*&---------------------------------------------------------------------*
+*&      Form  start_program
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM start_program.
+  CALL FUNCTION 'G_RW_WS_EXECUTE'
+    EXPORTING
+      commandline = ' '
+      program     = lokale_datei
+      out_file    = ' '.
+  IF sy-subrc <> 0.
+    SKIP.
+    WRITE: / 'Programmstart abgebrochen',
+              sy-subrc.
+  ELSE.
+    SKIP.
+    WRITE: / 'Programm gestartet'.
+  ENDIF.
+
+ENDFORM.                    "start_program
+
+
+
+
+
+
+
+
+
+
+
+
+
+*&---------------------------------------------------------------------*
+*&  Include           Z_TEILNEHMER_DEKLARATIONEN
+*&---------------------------------------------------------------------*
+
+*Tabellenarbeitsbereiche deklarieren
+DATA wa_zteilnehmer2 TYPE zteilnehmer2.
+
+*Felder Deklarieren
+DATA: zeilen_itab01 TYPE i,
+      glob_tmax type i value 12,
+      lokale_datei type string,
+      progname(25),
+      repname like progname,
+      zzaehler_itab04.
+.
+
+*Datentypen für Zeilen deklarieren
+TYPES: BEGIN OF zeile01_typ,
+        zzkurstitel LIKE
+        zteilnehmer2-zzkurstitel,
+        tkurspreis LIKE
+        zteilnehmer2-tkurspreis,
+  END OF zeile01_typ.
+
+TYPES BEGIN OF zeile02_typ.
+INCLUDE TYPE zeile01_typ.
+TYPES minteiln TYPE i.
+TYPES END OF zeile02_typ.
+
+TYPES: BEGIN OF zeile03_typ,
+        bezeichnung LIKE zteilnehmer2-zzkurstitel,
+        preis LIKE zteilnehmer2-tkurspreis,
+        maxteil TYPE i,
+  END OF zeile03_typ.
+
+TYPES zeile04_typ TYPE zteilnehmer2.
+
+*Datentypen für interne Tabellen deklarieren
+TYPES itab01_typ TYPE STANDARD TABLE OF zeile01_typ.
+TYPES itab02_typ TYPE STANDARD TABLE OF zeile02_typ.
+TYPES itab03_typ TYPE STANDARD TABLE OF zeile03_typ.
+TYPES itab04_typ TYPE STANDARD TABLE OF zeile04_typ.
+
+*Interne Tabellen deklarieren ohne Kopfzeile
+DATA itab01 TYPE itab01_typ.
+DATA itab02 TYPE itab02_typ.
+DATA itab03 TYPE itab03_typ.
+DATA itab04 TYPE itab04_typ.
+data itab05 type itab04_typ.
+
+*Workarea für interne Tabelle deklarieren
+DATA wa_itab01 TYPE zeile01_typ.
+DATA wa_itab02 TYPE zeile02_typ.
+DATA wa_itab03 TYPE zeile03_typ.
+DATA wa_itab04 TYPE zeile04_typ.
+DATA wa_itab05 TYPE zeile04_typ.
+
+
+
+
+*&---------------------------------------------------------------------*
+*&  Include           ZTEILNEHMER13_B_SELEKTIONSBILD
+*&---------------------------------------------------------------------*
+
+SELECTION-SCREEN BEGIN OF BLOCK v13b WITH FRAME TITLE text-001.
+PARAMETERS: dbdlml AS CHECKBOX,
+    " Interne Tabelle lokal speichern mit Liste
+  dbdlmlp AS CHECKBOX,
+    " Interne Tabelle lokal speichern und lokales Programm starten
+  nvml AS CHECKBOX,
+    " Verarbeitung itab04 mit liste mit externen Unterprogrammaufruf
+  rsmw AS CHECKBOX,
+    "Report starten mit wiederkehr
+  rsow AS CHECKBOX,
+    "Report starten ohne Wiederkehr, mit leerem Selektionsbildschirm
+  rsowas AS CHECKBOX,
+    "Report starten ohne Wiederkehr, mit ausgef. Selektionsbildsch.
+  rsowih AS CHECKBOX,
+    "Report starten ohne Wiederkehr im Hintergrund
+  lokdatei(20) DEFAULT  'c:\temp\test.xls'.
+    "Vorschlag für lokalen Dateinamen
+SELECTION-SCREEN END OF BLOCK v13b.
