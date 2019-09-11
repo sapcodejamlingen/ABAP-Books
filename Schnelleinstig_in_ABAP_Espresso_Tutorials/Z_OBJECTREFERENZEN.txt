@@ -1,0 +1,69 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_OBJECTREFERENZEN
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_objectreferenzen.
+
+************************************************************************
+*Report Name  : Z_objectreferenzen
+* Report Title : Objectreferenzen                                      *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/20/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Espresso Tutorials Schnelleinstieg in ABAP S. 73 - 77 *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.20.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+DATA go_flight_1
+      TYPE REF TO z_cl_flight_intercontinental.
+DATA go_flight_2
+      TYPE REF TO z_cl_flight_intercontinental.
+DATA go_flight_3 TYPE REF TO object.
+data go_flight_4 type ref to z_cl_flight_et.
+data gv_type type string.
+
+
+*go_flight_1 = new #(IV_CARRID = 'LH'
+*                    iv_connid = '0400'
+*                    IV_CONTINENT = 'ASIA'
+*                    ) .
+
+*go_flight_2 = NEW #( iv_carrid = 'LH'
+*                      iv_connid = '0400
+*                      iv_continent = 'ASIA'
+*                      ).
+
+
+go_flight_2 = go_flight_1.
+
+* go_flight_3 = go_flight_1.
+
+*go_flight_3 = new z_cl_flight_intercontinental(
+*                  iv_carrid = 'LH'
+*                  iv_connid = '0400'
+*                  iv_continent = 'ASIA'
+*                  ).
+
+*go_flight_4 = new z_cl_flight_intercontinental(
+*                  iv_carrid = 'LH'
+*                  iv_connid = '0400'
+*                  iv_continent = 'ASIA'
+*                  ).
+
+* go_flight_4 = new #( lv_carrid = 'LH'
+*                    lv_connid = '0400'
+*                    ).
+
+* go_flight_1 ?= go_flight_4.

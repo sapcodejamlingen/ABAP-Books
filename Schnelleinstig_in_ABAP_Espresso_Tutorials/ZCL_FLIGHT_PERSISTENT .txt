@@ -1,0 +1,154 @@
+class ZCL_FLIGHT_PERSISTENT definition
+  public
+  final
+  create protected
+
+  global friends ZCB_FLIGHT_PERSISTENT .
+
+*"* public components of class ZCL_FLIGHT_PERSISTENT
+*"* do not include other source files here!!!
+public section.
+
+  interfaces IF_OS_STATE .
+
+  methods GET_GV_PERIOD
+    returning
+      value(RESULT) type S_PERIOD
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods SET_GV_AIRPFROM
+    importing
+      !I_GV_AIRPFROM type S_FROMAIRP
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods SET_GV_AIRPTO
+    importing
+      !I_GV_AIRPTO type S_TOAIRP
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods SET_GV_ARRTIME
+    importing
+      !I_GV_ARRTIME type S_ARR_TIME
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods SET_GV_CITYFROM
+    importing
+      !I_GV_CITYFROM type S_FROM_CIT
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods SET_GV_CITYTO
+    importing
+      !I_GV_CITYTO type S_TO_CITY
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods SET_GV_COUNTRYFR
+    importing
+      !I_GV_COUNTRYFR type LAND1
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods SET_GV_COUNTRYTO
+    importing
+      !I_GV_COUNTRYTO type LAND1
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods SET_GV_DEPTIME
+    importing
+      !I_GV_DEPTIME type S_DEP_TIME
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods SET_GV_DISTANCE
+    importing
+      !I_GV_DISTANCE type S_DISTANCE
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods SET_GV_DISTID
+    importing
+      !I_GV_DISTID type S_DISTID
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods SET_GV_FLTIME
+    importing
+      !I_GV_FLTIME type S_FLTIME
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods SET_GV_FLTYPE
+    importing
+      !I_GV_FLTYPE type S_FLTYPE
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods SET_GV_PERIOD
+    importing
+      !I_GV_PERIOD type S_PERIOD
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods GET_GV_AIRPFROM
+    returning
+      value(RESULT) type S_FROMAIRP
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods GET_GV_AIRPTO
+    returning
+      value(RESULT) type S_TOAIRP
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods GET_GV_ARRTIME
+    returning
+      value(RESULT) type S_ARR_TIME
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods GET_GV_CARRID
+    returning
+      value(RESULT) type S_CARR_ID
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods GET_GV_CITYFROM
+    returning
+      value(RESULT) type S_FROM_CIT
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods GET_GV_CITYTO
+    returning
+      value(RESULT) type S_TO_CITY
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods GET_GV_CONNID
+    returning
+      value(RESULT) type S_CONN_ID
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods GET_GV_COUNTRYFR
+    returning
+      value(RESULT) type LAND1
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods GET_GV_COUNTRYTO
+    returning
+      value(RESULT) type LAND1
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods GET_GV_DEPTIME
+    returning
+      value(RESULT) type S_DEP_TIME
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods GET_GV_DISTANCE
+    returning
+      value(RESULT) type S_DISTANCE
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods GET_GV_DISTID
+    returning
+      value(RESULT) type S_DISTID
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods GET_GV_FLTIME
+    returning
+      value(RESULT) type S_FLTIME
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods GET_GV_FLTYPE
+    returning
+      value(RESULT) type S_FLTYPE
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  class CL_OS_SYSTEM definition load .

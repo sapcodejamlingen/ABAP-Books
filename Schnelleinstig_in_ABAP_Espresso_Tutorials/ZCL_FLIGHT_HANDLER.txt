@@ -1,0 +1,50 @@
+ZCL_FLIGHT_HANDLER
+
+METHOD get_instance.
+*Schnelleinstieg ABAP Espresso Tutorials S. 193
+  CREATE OBJECT ro_flight_handler.
+ENDMETHOD.
+
+METHOD fill_flight.
+*Espresso Tutorials Schnelleinstieg ABAP S. 195
+  DATA: lo_area TYPE REF TO z_cl_area_flight,
+        lo_flight TYPE REF TO z_cl_flight_model_1.
+
+  TRY.
+      lo_area = z_cl_area_flight=>attach_for_read( ).
+    CATCH cx_shm_attach_error.
+      TRY.
+          create_flight( ).
+          lo_area = z_cl_area_flight=>attach_for_read( ).
+        CATCH cx_shm_attach_error.
+          lo_flight = z_cl_flight_factory=>factory(
+                             iv_carrid = 'LH'
+                             iv_connid = '0400' ).
+      ENDTRY.
+  ENDTRY.
+
+  IF lo_flight IS NOT BOUND.
+    gv_carrid = lo_area->root->get_carrid( ).
+    gv_connid = lo_area->root->gv_connid.
+  ELSE.
+    gv_carrid = lo_flight->get_carrid( ).
+    gv_connid = lo_flight->gv_connid.
+  ENDIF.
+
+
+ENDMETHOD.
+
+
+method CREATE_FLIGHT.
+*Espresso Tutorials Schnelleinstieg ABAP S. 194.
+data: lo_area TYPE REF TO z_cl_area_flight,
+      lo_flight type ref to z_cl_flight_model_1.
+
+lo_area = z_cl_area_flight=>attach_for_write( ).
+lo_flight = Z_CL_FLIGHT_FACTORY=>factory(
+                     iv_carrid = 'LH'
+                     iv_connid = '0400'
+                     io_area = lo_area ).
+lo_area->set_root( lo_flight ).
+lo_area->detach_commit( ).
+endmethod.

@@ -1,0 +1,71 @@
+class ZCL_FLIGHT_MODEL definition
+  public
+  final
+  create public .
+
+*"* public components of class ZCL_FLIGHT_MODEL
+*"* do not include other source files here!!!
+public section.
+
+  data GO_FLIGHT type ref to ZCL_FLIGHT_PERSISTENT read-only .
+
+  methods SELECT_OBJECT_BY_KEY_1
+    raising
+      CX_OS_OBJECT_NOT_FOUND .
+  methods WRITE_FLIGHT .
+  methods SELECT_OBJECT_BY_KEY_2
+    raising
+      CX_OS_OBJECT_NOT_FOUND
+      CX_OS_CLASS_NOT_FOUND .
+
+
+METHOD select_object_by_key_1.
+*Espresso Tutorials Schnelleinstieg ABAP S. 135
+  DATA lo_flight TYPE REF TO zca_flight_persistent.
+  lo_flight = zca_flight_persistent=>agent.
+  go_flight = lo_flight->get_persistent(
+                i_gv_carrid = 'LH'
+                i_gv_connid = '0400' ).
+ENDMETHOD.
+
+
+
+
+
+METHOD write_flight.
+*Espresso Tutorials Schnelleinstieg ABAP 135
+  DATA: lv_carrid TYPE s_carr_id,
+        lv_connid TYPE s_conn_id,
+        lv_cityfrom TYPE s_from_cit,
+        lv_cityto TYPE s_to_city.
+
+  lv_carrid   = go_flight->get_gv_carrid( ).
+  lv_connid   = go_flight->get_gv_connid( ).
+  lv_cityfrom = go_flight->get_gv_cityfrom( ).
+  lv_cityto   = go_flight->get_gv_cityto( ).
+
+  write: lv_carrid,
+  lv_connid,
+  lv_cityfrom,
+  lv_cityto.
+
+ENDMETHOD.
+
+
+
+METHOD select_object_by_key_2.
+* Espresso Tutorials Schnelleinstieg ABAP S., 137
+  TYPES: BEGIN OF typ_business_key,
+    carrid TYPE s_carr_id,
+    connid TYPE s_conn_id,
+    END OF typ_business_key.
+  DATA: lo_flight TYPE REF TO zca_flight_persistent,
+        ls_business_key TYPE typ_business_key.
+  ls_business_key-carrid = 'LH'.
+  ls_business_key-connid = '0400'.
+  lo_flight = zca_flight_persistent=>agent.
+  go_flight ?=
+  lo_flight->if_os_ca_persistency~get_persistent_by_key(
+                                            ls_business_key ).
+
+ENDMETHOD.

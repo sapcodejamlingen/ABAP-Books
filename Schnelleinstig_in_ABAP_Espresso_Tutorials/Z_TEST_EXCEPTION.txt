@@ -1,0 +1,33 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_TEST_EXCEPTION
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  Z_TEST_EXCEPTION.
+
+************************************************************************
+* Report Name  : Z_TEST_EXCEPTION    *
+* Report Title : TEST_EXCEPTION                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/20/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Esperesso Tutorials Schnell. ABAP S. 116               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.20.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+data(go_flight) = New z_cl_flight_intercontinental(
+                  iv_carrid = 'LH'
+                  iv_connid = '))))'
+                  ic_continent = 'ASIA'
+                  ).

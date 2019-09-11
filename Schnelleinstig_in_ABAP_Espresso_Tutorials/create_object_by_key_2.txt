@@ -1,0 +1,69 @@
+METHOD create_object_by_key_2.
+*Espresso Tutorials ABAP Schnelleinstieg S. 165
+
+  TYPES: BEGIN OF typ_business_key,
+          carrid TYPE s_carr_id,
+          connid TYPE s_conn_id,
+    END OF typ_business_key.
+  DATA ls_business_key TYPE typ_business_key.
+
+  ls_business_key-carrid = 'YY'.
+  ls_business_key-connid = '8888'.
+  TRY.
+      zca_flight_persistent=>agent->if_os_ca_persistency
+      ~get_persistency_by_key( ls_business_key ).
+    CATCH cx_os_object_not_found.
+      go_flight ?=
+ zca_flight_persistent=>agent->if_os_factory~create_persistent_by_key(
+ ls_business_key ).
+      go_flight->set_gv_cityfrom( 'FRANKFURT' ).
+      go_flight->set_gv_airpfrom( 'FRA' ).
+      go_flight->set_gv_cityto( 'NEW YORK' ).
+      go_flight->set_gv_airpto( 'JFK' ).
+    CATCH cx_os_class_not_found INTO data(lo_error).
+      data(lv_text) = lo_error->get_text( ).
+      MESSAGE lv_text TYPE 'E'.
+  ENDTRY.
+
+
+ENDMETHOD.
+
+*&---------------------------------------------------------------------*
+*& Report  Z_CREATE_OS_BY_KEY_2
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_create_os_by_key_2.
+
+************************************************************************
+* Report Name  : Z_CREATE_OS_BY_KEY_2                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/21/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Esspresso Tutorials S. 166                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.21.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+data(lo_flight) = new Z_CL_FLIGHT_MODEL( ).
+TRY.
+
+    lo_flight->create_object_by_key_2( ).
+  CATCH cx_os_object_existing INTO data(lo_error).
+    data(lv_text) = lo_error->get_text( ).
+    MESSAGE lv_text TYPE 'E'.
+ENDTRY.
+
+COMMIT WORK.
+

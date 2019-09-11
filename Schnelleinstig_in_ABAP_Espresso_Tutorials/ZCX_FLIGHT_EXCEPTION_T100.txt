@@ -1,0 +1,44 @@
+class ZCX_FLIGHT_EXCEPTION_T100 definition
+  public
+  inheriting from CX_STATIC_CHECK
+  create public .
+
+*"* public components of class ZCX_FLIGHT_EXCEPTION_T100
+*"* do not include other source files here!!!
+public section.
+
+  interfaces IF_T100_MESSAGE .
+
+  constants:
+    begin of ZCX_FLIGHT_EXCEPTION_T100,
+      msgid type symsgid value '00',
+      msgno type symsgno value '007',
+      attr1 type scx_attrname value 'GV_DATA',
+      attr2 type scx_attrname value '',
+      attr3 type scx_attrname value '',
+      attr4 type scx_attrname value '',
+    end of ZCX_FLIGHT_EXCEPTION_T100 .
+  data GV_DATA type STRING .
+
+  methods CONSTRUCTOR
+    importing
+      !TEXTID like IF_T100_MESSAGE=>T100KEY optional
+      !PREVIOUS like PREVIOUS optional
+      !GV_DATA type STRING optional .
+
+ZCX_FLIGHT_EXCEPTION_T100
+&GV_DATA& ist leer
+
+method CONSTRUCTOR.
+CALL METHOD SUPER->CONSTRUCTOR
+EXPORTING
+PREVIOUS = PREVIOUS
+.
+me->GV_DATA = GV_DATA .
+clear me->textid.
+if textid is initial.
+  IF_T100_MESSAGE~T100KEY = ZCX_FLIGHT_EXCEPTION_T100 .
+else.
+  IF_T100_MESSAGE~T100KEY = TEXTID.
+endif.
+endmethod.

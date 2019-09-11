@@ -1,0 +1,59 @@
+METHOD create_object_by_key_1.
+* Espresso Tutorials Schnelleinstieg ABAP S. 162
+  DATA lo_flight TYPE REF TO zca_flight_persistent.
+  lo_flight = zca_flight_persistent=>agent.
+  TRY.
+      lo_flight->get_persistent(
+                i_gv_carrid = 'XX'
+                i_gv_connid = '5555' ).
+    CATCH cx_os_object_not_found.
+      go_flight = lo_flight->create_persistent(
+                  i_gv_carrid = 'XX'
+                  i_gv_connid = '5555' ).
+
+      go_flight->set_gv_cityfrom( 'FRANKFURT' ).
+      go_flight->set_gv_airpfrom( 'FRA' ).
+      go_flight->set_gv_cityto( 'NEW YORK' ).
+      go_flight->set_gv_airpto( 'JFK' ).
+  ENDTRY.
+ENDMETHOD.
+
+
+*&---------------------------------------------------------------------*
+*& Report  Z_CREATE_OS_BY_KEY_1
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_create_os_by_key_1.
+
+************************************************************************
+* Report Name  : Z_CREATE_OS_BY_KEY_1                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/21/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Esspresso Tutorials S. 164                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.21.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+data(lo_flight) = new Z_CL_FLIGHT_MODEL( ).
+TRY.
+
+    lo_flight->create_object_by_key_1( ).
+  CATCH cx_os_object_existing INTO data(lo_error).
+    data(lv_text) = lo_error->get_text( ).
+    MESSAGE lv_text TYPE 'E'.
+ENDTRY.
+
+COMMIT WORK.

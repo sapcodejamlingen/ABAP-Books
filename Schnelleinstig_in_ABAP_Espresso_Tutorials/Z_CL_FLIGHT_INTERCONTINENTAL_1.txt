@@ -1,0 +1,126 @@
+class Z_CL_FLIGHT_INTERCONTINENTAL definition
+  public
+  inheriting from Z_CL_FLIGHT_ET
+  final
+  create public .
+
+*"* public components of class Z_CL_FLIGHT_INTERCONTINENTAL
+*"* do not include other source files here!!!
+public section.
+
+  interfaces Z_IF_FLIGHT .
+
+  aliases GV_ARRIVAL_CITY
+    for Z_IF_FLIGHT~GV_ARRIVAL_CITY .
+  aliases DETERMINE_ARRIVAL_CITY
+    for Z_IF_FLIGHT~DETERMINE_ARRIVAL_CITY .
+  aliases SET_ARRIVAL_CITY
+    for Z_IF_FLIGHT~SET_ARRIVAL_CITY .
+
+  events GE_CONTINENT_CHANGED
+    exporting
+      value(IV_NEW_CONTINENT) type STRING .
+
+  methods CONSTRUCTOR
+    importing
+      !IV_CARRID type S_CARR_ID
+      !IV_CONNID type S_CONN_ID
+      !IV_CONTINENT type STRING .
+  methods CHANGE_CONTINENT
+    importing
+      !IV_NEW_CONTINENT type STRING .
+
+
+METHOD constructor.
+* Esspresso Tutorials - Schnelleinstieg in SAP S. 57 + 115
+  DATA lo_exception TYPE REF TO cx_root.
+
+  CALL METHOD super->constructor
+    EXPORTING
+      iv_carrid = iv_carrid
+      iv_connid = iv_connid.
+
+  TRY.
+      determine_flight( ).
+    CATCH zcx_flight_exception
+          zcx_flight_exception_t100
+          INTO lo_exception.
+* oder catch cx_static_check into lo_exception.
+* oder catch cx_root into lo_exception.
+      data(lv_text) = lo_exception->get_text( ).
+      MESSAGE lv_text TYPE 'E'.
+
+  ENDTRY.
+
+  me->gv_continent = iv_continent.
+
+*  SET HANDLER onaction_continent_changed
+*  FOR ALL INSTANCES.
+
+*  TRY.
+*      determine_flight( ).
+*    CATCH zcx_flight_exception INTO data(lo_exception).
+*      data(lv_text) = lo_exception->get_text( ).
+*      MESSAGE lv_text TYPE 'E'.
+*    CLEANUP.
+*    cleanup activities.
+*  ENDTRY.
+ENDMETHOD.
+
+
+METHOD ONACTION_CONTINENT_CHANGED.
+* Espresso Tutorials Schnelleinstieg ABAP S. 88
+  WRITE iv_new_continent.
+ENDMETHOD.
+
+
+METHOD change_continent.
+*Esspresso Tutorials S. 92
+    me->gv_continent = iv_new_continent.
+
+    RAISE EVENT ge_continent_changed
+    EXPORTING
+      iv_new_continent = iv_new_continent.
+  ENDMETHOD.                    "CHANGE_CONTINENT
+
+METHOD determine_flight.
+*Espresso Tutorials Schnelleinstieg ABAP S. 110-111
+    DATA:lv_data TYPE string,
+          ls_flight TYPE spfli.
+
+    IF me->gv_carrid IS INITIAL.
+      lv_data = me->gv_carrid.
+
+      RAISE EXCEPTION TYPE zcx_flight_exception_t100
+      EXPORTING
+        gv_data = lv_data.
+    ENDIF.
+
+    IF me->gv_connid IS INITIAL.
+      lv_data = me->gv_connid.
+
+      RAISE EXCEPTION TYPE zcx_flight_exception_t100
+      EXPORTING
+        gv_data = lv_data.
+    ENDIF.
+
+    SELECT SINGLE *
+      FROM spfli
+      INTO ls_flight
+      WHERE carrid = me->gv_carrid
+      AND connid = me->gv_connid.
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE zcx_flight_exception
+      EXPORTING
+        gv_carrid = me->gv_carrid
+        gv_connid = me->gv_connid.
+    ENDIF.
+
+    IF ls_flight-distance > 500.
+      RAISE EXCEPTION TYPE zcx_flight_exception
+      EXPORTING
+        textid = zcx_flight_exception=>x_distance_too_much
+        gv_distance = ls_flight-distance.
+    ENDIF.
+
+  ENDMETHOD.                    "determine_flight

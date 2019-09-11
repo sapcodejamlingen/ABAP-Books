@@ -1,0 +1,11 @@
+METHOD constructor.
+*Espresso Tutorial Schnelleinstig ABAP S. 178
+
+  gv_carrid = iv_carrid.
+  gv_connid = iv_connid.
+
+ENDMETHOD.
+
+method GET_CARRID.
+  rv_carrid = gv_carrid.
+endmethod.

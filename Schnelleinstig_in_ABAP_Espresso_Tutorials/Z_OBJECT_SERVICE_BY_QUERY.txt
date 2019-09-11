@@ -1,0 +1,36 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_OBJECT_SERVICE_BY_QUERY
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_object_service_by_query.
+
+************************************************************************
+* Report Name  : Z_OBJECT_SERVICE_BY_QUERY                             *
+* Report Title : Testprogram                                           *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                             *
+* Create Date  : 01/20/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Schnelleinstieg ABAP Espresso tutorials 143           *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.20.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+data(lo_flight) = new Z_CL_FLIGHT_MODEL( ).
+TRY.
+    lo_flight->select_objects_by_query( ).
+  CATCH cx_root INTO data(lo_error).
+    data(lv_text) = lo_error-->get_text( ).
+    MESSAGE lv_text TYPE 'E'.
+    entry.
+    lo_flight->write_flights( ).

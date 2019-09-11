@@ -1,0 +1,35 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_MY_FIRST_EVENT
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  Z_MY_FIRST_EVENT.
+
+************************************************************************
+* Report Name  : Z_MY_FIRST_EVENT    *
+* Report Title : MY_FIRST_EVENT                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/20/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Esperesso Tutorials Schnell. ABAP S. 92               *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.20.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+data(go_flight) = new z_cl_flight_intercontinental(
+                      iv_carrid = 'LH'
+                      iv_connid = '0400'
+                      iv_continent = 'ASIA'
+                      ).
+
+go_flight->change_continent( 'Europe' ).

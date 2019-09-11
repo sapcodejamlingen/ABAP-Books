@@ -1,0 +1,17 @@
+METHOD handle_oo_transaction.
+*Schnelleinstieg ABAP Espresso Tutorials
+  DATA: lo_tc_manager TYPE REF TO if_os_transaction_manager,
+        lo_tc TYPE REF TO if_os_transaction.
+
+  lo_tc_manager = cl_os_system=>get_transaction_manager( ).
+  lo_tc = lo_tc_manager->create_transaction( ).
+
+  TRY.
+      lo_tc->start( ).
+      create_object_by_key_1( ).
+      lo_tc->end( ).
+    CATCH cx_os_error.
+      lo_tc->undo( ).
+  ENDTRY.
+
+ENDMETHOD.

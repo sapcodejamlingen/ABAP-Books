@@ -1,0 +1,43 @@
+*&---------------------------------------------------------------------*
+*& Report  Z_EREIGNISBEHANDLER
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_ereignisbehandler.
+
+************************************************************************
+*Report Name  :  z_ereignisbehandler
+* Report Title : Ereignisbehandler                                     *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/20/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Espresso Tutorials Schnelleinstieg in ABAP S. 83      *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.20.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+* METHODS methode
+* FOR EVENT ereignis OF klasse/interface.
+
+* CLASS-METHODS methode
+* FOR EVENT ereignis OF klasse/interface.
+
+* METHODS methode
+*FOR EVENT ereignis OF klasse/interface
+* IMPORTING parameter1
+*  sender.
+
+* CLASS-METHODS methode
+* FOR EVENT ereignis OF klasse/interface
+* IMPORTING parameter1
+*  sender.

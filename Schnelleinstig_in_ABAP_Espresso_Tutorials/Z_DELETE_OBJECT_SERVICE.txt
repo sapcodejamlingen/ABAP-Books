@@ -1,0 +1,54 @@
+METHOD delete_object.
+* Schnelleinstieb SAP Espresso Tutorials
+
+  DATA lo_flight TYPE REF TO zca_flight_persistent.
+  lo_flight = zca_flight_persistent=>agent.
+  TRY.
+      go_flight = lo_flight->get_persistent(
+                    i_gv_carrid = 'UA'
+                    i_gv_connid = '0941' ).
+    CATCH cx_root INTO data(lo_error).
+      data(lv_text) = lo_error->get_text( ).
+      MESSAGE lv_text TYPE 'E'.
+  ENDTRY.
+
+  lo_flight->if_os_factory~delete_persistent( go_flight ).
+ENDMETHOD.
+
+*&---------------------------------------------------------------------*
+*& Report  Z_DELETE_OBJECT_SERVICE
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  Z_DELETE_OBJECT_SERVICE.
+
+************************************************************************
+* Report Name  : Z_DELETE_OBJECT_SERVICE                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 01/21/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : Esspresso Tutorials S. 169                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:01.21.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+data(lo_flight) = new z_cl_flight_model( ).
+try. lo_flight->delete_object( ).
+catch CX_OS_OBJECT_NOT_existing into data(lo_error).
+  data(lv_text) = lo_error->get_text( ).
+  message lv_text type 'E'.
+  endtry.
+
+  commit work.

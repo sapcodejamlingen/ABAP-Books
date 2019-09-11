@@ -1,0 +1,57 @@
+Z_CL_FLIGHT_FACTORY
+
+METHOD factory.
+*Espresso Tutorials S. 182 Schnelleinstieg ABAP
+  IF io_area IS BOUND.
+    CREATE OBJECT ro_flight AREA HANDLE io_area
+    EXPORTING
+      iv_carrid = iv_carrid
+      iv_connid = iv_connid.
+  ELSE.
+    CREATE OBJECT ro_flight
+    EXPORTING
+      iv_carrid = iv_carrid
+      iv_connid = iv_connid.
+  ENDIF.
+  "ro_flight = new( iv_carrid = iv_carrid
+  "                 iv_connid = iv_connid ).
+
+ENDMETHOD.
+
+
+*&---------------------------------------------------------------------*
+*& Report  Z_FLIGHT_FACTORY
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  z_flight_factory.
+
+************************************************************************
+* Report Name  : Z_FLIGHT_FACTORY                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 99/99/9999 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:99.99.99 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+
+" data(go_flight) = z_cl_flight_factory=>factory(
+"                    iv_carrid = 'LH'
+"                    iv_connid = '0400'
+"                    ).
+" data(gv_carrid) = go_flight->get_carrid( ).
+" WRITE: gv_carrid,
+" go_flight->gv_connid.

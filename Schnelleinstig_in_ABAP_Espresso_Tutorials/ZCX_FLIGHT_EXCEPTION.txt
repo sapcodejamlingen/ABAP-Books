@@ -1,0 +1,44 @@
+class ZCX_FLIGHT_EXCEPTION definition
+  public
+  inheriting from CX_STATIC_CHECK
+  create public .
+
+*"* public components of class ZCX_FLIGHT_EXCEPTION
+*"* do not include other source files here!!!
+public section.
+
+  constants ZCX_FLIGHT_EXCEPTION type SOTR_CONC value 'D4C26BBA9B3E0B4C8DB0BC16C4ECD9D6'. "#EC NOTEXT
+  constants X_DISTANCE_TOO_MUCH type SOTR_CONC value '85DB662403301D438F3A0D73E1060668'. "#EC NOTEXT
+  data GV_CARRID type S_CARR_ID .
+  data GV_CONNID type S_CONN_ID .
+  data GV_DISTANCE type S_DISTANCE .
+
+  methods CONSTRUCTOR
+    importing
+      !TEXTID like TEXTID optional
+      !PREVIOUS like PREVIOUS optional
+      !GV_CARRID type S_CARR_ID optional
+      !GV_CONNID type S_CONN_ID optional
+      !GV_DISTANCE type S_DISTANCE optional .
+
+method CONSTRUCTOR.
+CALL METHOD SUPER->CONSTRUCTOR
+EXPORTING
+TEXTID = TEXTID
+PREVIOUS = PREVIOUS
+.
+ IF textid IS INITIAL.
+   me->textid = ZCX_FLIGHT_EXCEPTION .
+ ENDIF.
+me->GV_CARRID = GV_CARRID .
+me->GV_CONNID = GV_CONNID .
+me->GV_DISTANCE = GV_DISTANCE .
+endmethod.
+
+ZCX_FLIGHT_EXCEPTION
+Daten &GV_CARRID& &GV_CONNID& nicht gefunden.
+
+X_DISTANCE_TOO_MUCH
+Entfernung &GV_DISTANCE& ist zu groﬂ.
+
+

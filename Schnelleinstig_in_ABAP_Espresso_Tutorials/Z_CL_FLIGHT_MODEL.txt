@@ -1,0 +1,54 @@
+class Z_CL_FLIGHT_MODEL definition
+  public
+  final
+  create public .
+
+*"* public components of class Z_CL_FLIGHT_MODEL
+*"* do not include other source files here!!!
+public section.
+
+  data GT_FLIGHTS type OSREFTAB read-only .
+  data GO_FLIGHT type ref to ZCL_FLIGHT_PERSISTENT .
+
+  methods SELECT_OBJECTS_BY_QUERY
+    raising
+      CX_OS_CLASS_NOT_FOUND
+      CX_OS_OBJECT_NOT_FOUND
+      CX_OS_QUERY_ERROR .
+
+method SELECT_OBJECTS_BY_QUERY.
+*Espresso Tutorials Schnelleinstieg ABAP S. 141
+data: lo_query_manager TYPE REF TO if_os_query_manager,
+      lo_query type ref to if_os_query,
+      lo_agent TYPE REF TO if_os_ca_persistency.
+
+lo_query_manager = cl_os_system=>get_query_manager( ).
+lo_query = lo_query_manager->create_query(
+i_filter = 'GV_CITYFROM = PAR1 and GV_AIRPFROM = PAR2' ).
+lo_agent = zca_flight_persistent=>agent.
+gt_flights = lo_agent->get_persistent_by_query(
+                      i_query = lo_query
+                      i_par1 = 'NEW QORK'
+                      i_par2 = 'JFK' ).
+endmethod.
+
+
+
+
+METHOD write_flights.
+*Schnelleinstieg ABAP ET S. 142
+
+  DATA: lo_flight TYPE REF TO zcl_flight_persistent,
+        lv_carrid TYPE s_carr_id,
+        lv_connid TYPE s_conn_id.
+
+loop at gt_flights
+  assigning fields-symbol(<ls_flights>).
+  lo_flight ?= <ls_flights>.
+    lv_carrid = lo_flight->get_gv_carrid( ).
+    lv_connid = lo_flight->get_gv_connid( ).
+
+    WRITE: /  lv_carrid,
+              lv_connid.
+  ENDLOOP.
+ENDMETHOD.
