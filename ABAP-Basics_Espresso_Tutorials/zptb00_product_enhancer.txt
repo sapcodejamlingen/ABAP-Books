@@ -1,0 +1,270 @@
+*&---------------------------------------------------------------------*
+*& Report  ZPTB00_PRODUCT_CONFIGURATOR
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  zptb00_product_enhancer.
+
+************************************************************************
+* Report Name  : ZPTB00_PRODUCT_ENHANCER.                                                 *
+* Report Title :   PRODUCT_Enhancer                                       *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 02/01/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : <ABAP Basics S. 356                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.2 | Date:2.01.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+CLASS lcl_category DEFINITION.
+  PUBLIC SECTION.
+    METHODS:
+    constructor
+    IMPORTING
+      i_rcl_parent TYPE REF TO lcl_category
+      OPTIONAL
+      i_title TYPE string,
+      write_to_screen
+      IMPORTING
+        i_column TYPE i DEFAULT 0.
+    DATA:
+          parent TYPE REF TO lcl_category,
+          childs TYPE STANDARD TABLE OF REF TO object,
+
+          title TYPE string,
+          description TYPE string,
+          vat TYPE f VALUE '0.16'.
+ENDCLASS.                    "lcl_category DEFINITION
+
+
+
+*----------------------------------------------------------------------*
+*       CLASS lcl_product DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS lcl_product DEFINITION.
+  PUBLIC SECTION.
+    METHODS:
+    constructor
+    IMPORTING
+      i_rcl_parent TYPE REF TO lcl_category
+      i_title TYPE string
+      i_net_price TYPE f,
+      write_to_screen
+      IMPORTING
+        i_column TYPE i DEFAULT 0,
+        get_gross_price
+        RETURNING
+        value(r_price) TYPE f.
+    DATA:
+          title TYPE string,
+          description TYPE string,
+          parent TYPE REF TO lcl_category,
+          net_price TYPE f.
+ENDCLASS.                    "lcl_product DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS lcl_salesproduct DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS lcl_salesproduct DEFINITION INHERITING FROM lcl_product.
+  PUBLIC SECTION.
+    METHODS:
+    get_gross_price REDEFINITION.
+  PROTECTED SECTION.
+    DATA:
+          margin TYPE f VALUE '0.2'.
+
+ENDCLASS.                    "lcl_salesproduct DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS lcl_purchaseproduct DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS lcl_purchaseproduct DEFINITION INHERITING FROM lcl_product.
+  PUBLIC SECTION.
+    METHODS:
+    get_gross_price REDEFINITION.
+  PROTECTED SECTION.
+    DATA:
+          discount TYPE f VALUE '0.3'.
+ENDCLASS.                    "lcl_purchaseproduct DEFINITION
+
+
+
+*Main Program start
+DATA: l_category_root TYPE REF TO lcl_category,
+      l_category TYPE REF TO lcl_category,
+      l_salesproduct TYPE REF TO lcl_salesproduct,
+      l_purchaseproduct TYPE REF TO lcl_purchaseproduct.
+
+
+CREATE OBJECT l_category_root
+EXPORTING
+  i_title = 'Products'.
+
+CREATE OBJECT l_category
+  EXPORTING
+    i_rcl_parent = l_category_root
+    i_title = 'Hardware'.
+
+CREATE OBJECT l_purchaseproduct
+EXPORTING
+  i_rcl_parent = l_category
+  i_title = 'Toshiba Satelite 430s'
+  i_net_price = '1500'.
+
+CREATE OBJECT l_salesproduct
+EXPORTING
+  i_rcl_parent = l_category
+  i_title = 'Toshiba Satelite 430s'
+  i_net_price = '1500'.
+
+CREATE OBJECT l_purchaseproduct
+EXPORTING
+i_rcl_parent = l_category
+i_title = 'IBM Thinkpad 30p'
+i_net_price = '1650'.
+
+CREATE OBJECT l_salesproduct
+EXPORTING
+i_rcl_parent = l_category
+i_title = 'IBM Thinkpad 30p'
+i_net_price = '1650'.
+
+CREATE OBJECT l_category
+EXPORTING
+i_rcl_parent = l_category_root
+i_title = 'Software'.
+
+CREATE OBJECT l_purchaseproduct
+EXPORTING
+i_rcl_parent = l_category
+i_title = 'Microsoft Office SBE'
+i_net_price = '600'.
+
+CREATE OBJECT l_salesproduct
+EXPORTING
+i_rcl_parent = l_category
+i_title = 'Microsoft Office SBE'
+i_net_price = '600'.
+l_category_root->write_to_screen( ).
+*Main Program end
+
+*----------------------------------------------------------------------*
+*       CLASS l_category IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS lcl_category IMPLEMENTATION.
+  METHOD constructor.
+*Super->constructor( ).
+    IF i_rcl_parent IS BOUND.
+* This is my daddy
+      parent = i_rcl_parent.
+*Hi daddy, i am your child
+      APPEND me TO parent->childs.
+    ENDIF.
+    title = i_title.
+  ENDMETHOD.                    "constructor
+
+  METHOD write_to_screen.
+    DATA:
+          l_rcl_category TYPE REF TO lcl_category,
+          l_rcl_product TYPE REF TO lcl_product,
+          l_rcl_descr TYPE REF TO cl_abap_typedescr,
+          l_classname TYPE string,
+          l_column TYPE i.
+    FIELD-SYMBOLS:
+            <l_object> TYPE REF TO object.
+    WRITE: AT /i_column 'Title:', title.
+    l_column = i_column + 2.
+    LOOP AT childs ASSIGNING <l_object>.
+      l_rcl_descr = cl_abap_typedescr=>describe_by_object_ref(
+              <l_object> ).
+      l_classname = l_rcl_descr->absolute_name.
+      FIND 'CL_CATEGORY' IN l_classname.
+      IF sy-subrc = 0.
+        l_rcl_category ?= <l_object>.
+        l_rcl_category->write_to_screen( l_column ).
+      ELSE.
+        l_rcl_product ?= <l_object>.
+        l_rcl_product->write_to_screen( l_column ).
+      ENDIF.
+    ENDLOOP.
+  ENDMETHOD.                    "write_to_screen
+ENDCLASS.                    "l_category IMPLEMENTATION
+
+
+
+* Class Implementation
+CLASS lcl_product IMPLEMENTATION.
+  METHOD constructor.
+*Initialize attributes
+*super->constructor( ).
+    IF i_rcl_parent IS BOUND.
+*This is my daddy.
+      parent = i_rcl_parent.
+*Hi, daddy, i am your child
+      APPEND me TO parent->childs.
+    ENDIF.
+    title = i_title.
+    net_price = i_net_price.
+  ENDMETHOD.                    "constructor
+  METHOD write_to_screen.
+    DATA:
+    l_gross_price TYPE p DECIMALS 2.
+    l_gross_price = me->get_gross_price( ).
+    WRITE: AT /i_column 'Title :', title, '. Gross Price :',
+              (10) l_gross_price.
+  ENDMETHOD.                    "write_to_screen
+  METHOD get_gross_price.
+    r_price = net_price + net_price * parent->vat.
+  ENDMETHOD.                    "get_gross_price
+ENDCLASS.                    "lcl_product IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+*       CLASS lcl_salesproduct IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS lcl_salesproduct IMPLEMENTATION.
+  METHOD get_gross_price.
+    DATA:
+          l_margin_net_price TYPE f.
+    l_margin_net_price = net_price + net_price *
+                            margin.
+    r_price = l_margin_net_price +
+    l_margin_net_price * parent->vat.
+  ENDMETHOD.                    "get_gross_price
+ENDCLASS.                    "lcl_salesproduct IMPLEMENTATION
+*----------------------------------------------------------------------*
+*       CLASS lcl_purchaseproduct IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS lcl_purchaseproduct IMPLEMENTATION.
+  METHOD get_gross_price.
+    DATA:
+          l_gross_price TYPE f.
+    l_gross_price = super->get_gross_price( ).
+    r_price = l_gross_price - l_gross_price * discount.
+  ENDMETHOD.                    "get_gross_price
+ENDCLASS.                    "lcl_purchaseproduct IMPLEMENTATION
+
+
+
+

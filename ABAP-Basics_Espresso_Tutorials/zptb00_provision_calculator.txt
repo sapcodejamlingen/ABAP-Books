@@ -1,0 +1,71 @@
+*&---------------------------------------------------------------------*
+*& Report  ZPTB00_PROVISION_CALCULATOR
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  zptb00_provision_calculator.
+
+************************************************************************
+* Report Name  : ZPTB00_PROVISION_CALCULATOR                                                 *
+* Report Title : <description>                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 99/99/9999 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.# | Date:99.99.99 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+PARAMETERS:
+* Start price and Sales price
+p_astart TYPE p DECIMALS 2,
+p_asales TYPE p DECIMALS 2.
+DATA:
+* Net free, net provision, cost and total cost
+l_fee         TYPE p DECIMALS 2,
+l_provision   TYPE p DECIMALS 2,
+l_net_cost    TYPE p DECIMALS 2,
+l_total_cost  TYPE p DECIMALS 2.
+* Calculate fee by start price
+IF p_astart <= 0.
+  WRITE: / 'Please enter a valid start price.'.
+  RETURN.
+ELSEIF p_astart <= 1.
+  l_fee = '0.25'.
+ELSEIF p_astart <=  '9.99'.
+  l_fee = '0.40'.
+ELSEIF p_astart <= '24.99'.
+  l_fee = '0.60'.
+ELSEIF p_astart <= '99.99'.
+  l_fee = '1.20'.
+ELSE.
+  l_fee = '2.40'.
+ENDIF.
+* Calculate provision by sales price
+IF p_asales < p_astart.
+  WRITE: / 'Please enter a valid sales price.'.
+  RETURN.
+ELSEIF p_asales <= 50.
+  l_provision = p_asales * '0.40'.
+ELSEIF p_asales <= 500.
+  l_provision = 2 + ( p_asales - 50 ) * '0.03'.
+ELSE.
+  l_provision = '15.50' + ( p_asales - 500 ) * '0.015'.
+ENDIF.
+* Calculate total cost and write them to screen
+l_net_cost = l_fee + l_provision.
+l_total_cost = l_net_cost + ( l_net_cost * '0.16' ).
+WRITE: / 'Start price : ', p_astart,
+       / 'Sales price : ', p_asales,
+       / 'Net cost : ', l_net_cost,
+       / 'Total cost : ', l_total_cost.

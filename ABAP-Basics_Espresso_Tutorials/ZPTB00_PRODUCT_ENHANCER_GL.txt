@@ -1,0 +1,156 @@
+*&---------------------------------------------------------------------*
+*& Report  ZPTB00_PRODUCT_ENHANCER_GL
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZPTB00_PRODUCT_ENHANCER_GL.
+
+************************************************************************
+* Report Name  : ZPTB00_PRODUCT_ENHANCER_GL                                                 *
+* Report Title : ZPTB00_PRODUCT_ENHANCER_GL                                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 02/01/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : <ABAP Basics S. 368                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.2 | Date:2.01.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+*Main Program start
+DATA: l_category_root TYPE REF TO zptb00_cl_category,
+      l_category TYPE REF TO zptb00_cl_category,
+      l_salesproduct TYPE REF TO zptb00_cl_salesproduct,
+      l_purchaseproduct TYPE REF TO zptb00_cl_purchaseproduct.
+
+
+CREATE OBJECT l_category_root
+EXPORTING
+  i_title = 'Products'.
+
+CREATE OBJECT l_category
+  EXPORTING
+    i_rcl_parent = l_category_root
+    i_title = 'Hardware'.
+
+CREATE OBJECT l_purchaseproduct
+EXPORTING
+  i_rcl_parent = l_category
+  i_title = 'Toshiba Satelite 430s'
+  i_net_price = '1500'.
+
+CREATE OBJECT l_salesproduct
+EXPORTING
+  i_rcl_parent = l_category
+  i_title = 'Toshiba Satelite 430s'
+  i_net_price = '1500'.
+
+CREATE OBJECT l_purchaseproduct
+EXPORTING
+i_rcl_parent = l_category
+i_title = 'IBM Thinkpad 30p'
+i_net_price = '1650'.
+
+CREATE OBJECT l_salesproduct
+EXPORTING
+i_rcl_parent = l_category
+i_title = 'IBM Thinkpad 30p'
+i_net_price = '1650'.
+
+CREATE OBJECT l_category
+EXPORTING
+i_rcl_parent = l_category_root
+i_title = 'Software'.
+
+CREATE OBJECT l_purchaseproduct
+EXPORTING
+i_rcl_parent = l_category
+i_title = 'Microsoft Office SBE'
+i_net_price = '600'.
+
+CREATE OBJECT l_salesproduct
+EXPORTING
+i_rcl_parent = l_category
+i_title = 'Microsoft Office SBE'
+i_net_price = '600'.
+l_category_root->write_to_screen( ).
+*Main Program end
+
+
+
+
+
+class ZPTB00_CL_SALESPRODUCT definition
+  public
+  inheriting from ZPTB00_CL_PRODUCT
+  final
+  create public .
+
+*"* public components of class ZPTB00_CL_SALESPRODUCT
+*"* do not include other source files here!!!
+public section.
+
+  methods GET_GROSS_PRICE
+    redefinition .
+
+
+
+METHOD get_gross_price.
+*ABAP Basics S. 366
+*CALL METHOD SUPER->GET_GROSS_PRICE
+*  RECEIVING
+*    R_PRICE =
+*    .
+
+  DATA:
+        l_margin_net_price TYPE f.
+  l_margin_net_price = net_price + net_price *
+                          margin.
+  r_price = l_margin_net_price +
+  l_margin_net_price * parent->vat.
+ENDMETHOD.
+
+
+
+
+
+METHOD write_to_screen.
+*CALL METHOD SUPER->WRITE_TO_SCREEN
+**  EXPORTING
+**    I_COLUMN = 0
+*    .
+*ABAP Basics S. 366
+  DATA:
+  l_gross_price TYPE p DECIMALS 2.
+  l_gross_price = me->get_gross_price( ).
+  WRITE: AT /i_column 'Title :', title, '. Gross Price :',
+            (10) l_gross_price.
+
+ENDMETHOD.
+
+
+
+
+METHOD write_to_screen.
+*CALL METHOD SUPER->WRITE_TO_SCREEN
+**  EXPORTING
+**    I_COLUMN = 0
+*    .
+*ABAP Basics S. 366
+  DATA:
+  l_gross_price TYPE p DECIMALS 2.
+  l_gross_price = me->get_gross_price( ).
+  WRITE: AT /i_column 'Title :', title, '. Gross Price :',
+            (10) l_gross_price.
+
+ENDMETHOD.
+

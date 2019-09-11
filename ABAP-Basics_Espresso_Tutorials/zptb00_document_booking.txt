@@ -1,0 +1,38 @@
+&---------------------------------------------------------------------
+& Report  ZPTB00_DOCUMENT_BOOKING
+&
+&---------------------------------------------------------------------
+&
+&
+&---------------------------------------------------------------------
+
+REPORT  zptb00_document_booking.
+
+
+ Report Name   ZPTB00_DOCUMENT_BOOKING                                                 
+ Report Title    DOCUMENT_BOOKING                                      
+ SAP Release 6.0                                                      
+ Author´s Name BUESCHERM                                         
+ Create Date   02012019 (MMDDYYYY)                               
+ Called from   Report where used Information                       
+                                                                      
+ Description   ABAP Basics S. 423                
+               DESCRIPTION EXPLAINING FUNCTIONALITY                
+               DESCRIPTION EXPLAINING FUNCTIONALITY                
+               DESCRIPTION EXPLAINING FUNCTIONALITY                
+
+ Development  Modification History                                   
+
+ Ver.1  Date2.01.19  Author M.Büscher  DestrcriptionTransport  
+
+
+PARAMETERS
+p_book TYPE boolean.
+
+CALL FUNCTION 'ZPTB00_API_DOC_RUN'
+  EXCEPTIONS
+    failed = 1
+    OTHERS = 2.
+IF sy-subrc  0.
+  MESSAGE e000(zptb00_doc).
+ENDIF.

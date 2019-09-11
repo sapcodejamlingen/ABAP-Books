@@ -1,0 +1,63 @@
+*&---------------------------------------------------------------------*
+*& Report  ZPTB00_DOCUMENT_VIEWER
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  zptb00_document_viewer.
+
+************************************************************************
+* Report Name  : ZPTB00_DOCUMENT_VIEWER                      *
+* Report Title : <description>                                         *
+* Report Title :   PRODUCT_CONFIGURATOR                                *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 02/01/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : <ABAP Basics S. 423                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:2.01.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+DATA: l_btdate TYPE zptb00_dte_bta_date,
+      l_tab_btdate TYPE ddtrange,
+      l_str_btdate TYPE ddrange.
+
+FIELD-SYMBOLS:
+               <l_str_btdate> TYPE ANY.
+SELECTION-SCREEN BEGIN OF SCREEN 110.
+SELECTION-SCREEN BEGIN OF BLOCK b110 WITH FRAME TITLE text-005.
+SELECT-OPTIONS:
+p_btdate FOR l_btdate.
+SELECTION-SCREEN END OF BLOCK b110.
+SELECTION-SCREEN END OF SCREEN 110.
+
+* Main Program
+DO.
+  CALL SELECTION-SCREEN 110.
+  IF sy-subrc <> 0.
+    EXIT.
+  ELSE.
+    LOOP AT p_btdate ASSIGNING <l_str_btdate>.
+      MOVE-CORRESPONDING <l_str_btdate> TO l_str_btdate.
+    ENDLOOP.
+    CALL FUNCTION 'ZPTB00_API_REP_DISPLAY'
+      EXPORTING
+        i_tab_booking_date = l_tab_btdate
+      EXCEPTIONS
+        failed             = 1
+        OTHERS             = 2.
+    IF sy-subrc <> 0.
+      MESSAGE e000(zptb00_rep).
+    ENDIF.
+
+  ENDIF.
+ENDDO.

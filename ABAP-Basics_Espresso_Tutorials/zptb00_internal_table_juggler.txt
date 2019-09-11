@@ -1,0 +1,104 @@
+*&---------------------------------------------------------------------*
+*& Report  ZPTB00_INTERNAL_TABLE_JUGGLER
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  zptb00_internal_table_juggler.
+
+************************************************************************
+* Report Name  : ZPTB00_INTERNAL_TABLE_JUGGLER                                                 *
+* Report Title : Interanl Table Juggler                                         *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 02/08/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : ABAP Basics S. 147                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:02.09.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+TYPES: BEGIN OF str_address,
+        street_and_number(40) TYPE c,
+        zipcode_and_city(40)  TYPE c,
+       END OF str_address,
+       BEGIN OF str_customer,
+         name(80) TYPE c,
+         address  TYPE str_address,
+       END OF str_customer.
+
+DATA:
+*customer
+   l_tab_customer TYPE STANDARD TABLE OF str_customer,
+   l_str_customer TYPE str_customer.
+* Fill some Data
+l_str_customer-name                      = 'John Miller'.
+l_str_customer-address-street_and_number = 'Yorkstr. 3'.
+l_str_customer-address-zipcode_and_city  = '69120 Heidelberg'.
+APPEND l_str_customer TO l_tab_customer.
+l_str_customer-name                      = 'Linda Evens'.
+l_str_customer-address-street_and_number = 'Yorkstr. 4'.
+APPEND l_str_customer TO l_tab_customer.
+l_str_customer-name                      = 'Robbie Busch'.
+l_str_customer-address-street_and_number = 'Yorkstr. 5'.
+APPEND l_str_customer TO l_tab_customer.
+
+*Use Loop to write all data to screen
+LOOP AT l_tab_customer INTO l_str_customer.
+  WRITE: l_str_customer-name, l_str_customer-address-street_and_number.
+ENDLOOP.
+
+*Read data of first customer into structure
+READ TABLE l_tab_customer INDEX 1 INTO l_str_customer.
+
+* Modify name
+l_str_customer-name = 'Zeta Jones'.
+
+*Write it back to first line of internal Table
+MODIFY l_tab_customer INDEX 1 FROM l_str_customer.
+
+* Sort the table by the content of name column
+SORT l_tab_customer BY name.
+
+* Just to Train the read statement
+WRITE sy-uline AS LINE.
+READ TABLE l_tab_customer INDEX 1 INTO l_str_customer.
+WRITE:  l_str_customer-name, l_str_customer-address-street_and_number.
+
+READ TABLE l_tab_customer INDEX 2 INTO l_str_customer.
+WRITE:  l_str_customer-name, l_str_customer-address-street_and_number.
+
+READ TABLE l_tab_customer INDEX 3 INTO l_str_customer.
+WRITE:  l_str_customer-name, l_str_customer-address-street_and_number.
+
+*Actualy, clearing l_tab_customer would be better
+DELETE l_tab_customer FROM 1 TO 3.
+
+
+
+FUNCTION ZPTB00_CALCULATE_TRAVEL_EXPENS.
+*"--------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     VALUE(I_KM) TYPE  I
+*"  EXPORTING
+*"     VALUE(E_AMOUNT) TYPE  F
+*"  EXCEPTIONS
+*"      FAILED
+*"--------------------------------------------------------------------
+*ABAP Basics S. 162
+  e_amount = i_km * '0.3'.
+  IF sy-subrc <> 0.
+    RAISE failed.
+  ENDIF.
+
+ENDFUNCTION.
+

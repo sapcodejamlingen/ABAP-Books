@@ -1,0 +1,1086 @@
+*&---------------------------------------------------------------------*
+*& Report  ZPTB00_PRODUCT_EVENT
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  zptb00_product_event_GL.
+
+
+************************************************************************
+* Report Name  : ZPTB00_PRODUCT_EVENT                                               *
+* Report Title :   PRODUCT__EVENT                                        *
+* SAP Release 6.0                                                      *
+* Author´s Name: BUESCHERM                                         *
+* Create Date  : 02/01/2019 (MM/DD/YYYY)                               *
+* Called from  : <Report where used Information>                       *
+*                                                                      *
+* Description  : <ABAP Basics S. 376                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+*              : <DESCRIPTION EXPLAINING FUNCTIONALITY>                *
+************************************************************************
+* Development / Modification History                                   *
+************************************************************************
+* Ver.1 | Date:2.01.19 | Author: M.Büscher | Destrcription/Transport  *
+************************************************************************
+
+*Main Program start ***
+DATA: l_category_root TYPE REF TO zptb00_cl_category,
+      l_category TYPE REF TO zptb00_cl_category,
+      l_salesproduct TYPE REF TO zptb00_cl_salesproduct,
+      l_purchaseproduct TYPE REF TO zptb00_cl_purchaseproduct.
+
+CREATE OBJECT l_category_root
+EXPORTING
+  i_title = 'Products'.
+
+CREATE OBJECT l_category
+  EXPORTING
+    i_rcl_parent = l_category_root
+    i_title = 'Hardware'.
+
+CREATE OBJECT l_purchaseproduct
+
+EXPORTING
+  i_rcl_parent = l_category
+  i_title = 'Toshiba Satelite 430s'
+  i_net_price = '1500'.
+
+CREATE OBJECT l_salesproduct
+EXPORTING
+  i_rcl_parent = l_category
+  i_title = 'Toshiba Satelite 430s'
+  i_net_price = '1500'.
+l_category_root->write_to_screen( ).
+SET HANDLER l_salesproduct->set_title FOR
+                            l_purchaseproduct.
+CALL METHOD l_purchaseproduct->set_title
+  EXPORTING
+    i_title = 'Toschiba Portege 120s'.
+l_category_root->write_to_screen( ).
+
+*End of Main Program *****
+
+
+
+
+class ZPTB00_CL_PRODUCT definition
+  public
+  create public .
+
+*"* public components of class ZPTB00_CL_PRODUCT
+*"* do not include other source files here!!!
+public section.
+
+  data TITLE type STRING .
+  data DESCRIPTION type STRING .
+  data PARENT type ref to ZPTB00_CL_CATEGORY .
+  data NET_PRICE type F .
+
+  events ON_TITLE_CHANGE
+    exporting
+      value(I_TITLE) type STRING .
+
+  methods CONSTRUCTOR
+    importing
+      !I_RCL_PARENT type ref to ZPTB00_CL_CATEGORY optional
+      !I_TITLE type STRING
+      !I_NET_PRICE type STRING
+    preferred parameter I_RCL_PARENT .
+  methods WRITE_TO_SCREEN
+    importing
+      !I_COLUMN type I default 0 .
+  methods GET_GROSS_PRICE
+    returning
+      value(R_PRICE) type I .
+  methods SET_TITLE
+    for event ON_TITLE_CHANGE of ZPTB00_CL_PRODUCT
+    importing
+      !I_TITLE .
+
+method CONSTRUCTOR.
+*ABAP Basics S. 349
+*Initialize attributes
+*super->constructor( ).
+    IF i_rcl_parent IS BOUND.
+*This is my daddy.
+      parent = i_rcl_parent.
+*Hi, daddy, i am your child
+      APPEND me TO parent->childs.
+    ENDIF.
+    title = i_title.
+    net_price = i_net_price.
+endmethod.
+
+
+
+METHOD write_to_screen.
+*ABAP Basics S. 349
+  DATA:
+  l_gross_price TYPE p DECIMALS 2.
+  l_gross_price = me->get_gross_price( ).
+  WRITE: AT /i_column 'Title :', title, '. Gross Price :',
+            (10) l_gross_price.
+ENDMETHOD.,
+
+method GET_GROSS_PRICE.
+*ABAP Basics S. 349
+
+   r_price = net_price + net_price * parent->vat.
+endmethod.
+
+
+
+METHOD set_title.
+*ABAP Basics S. 388
+  RAISE EVENT on_title_change
+  EXPORTING
+    i_title = i_title.
+  title = i_title.
+
+ENDMETHOD.
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------
+FUNCTION zptb00_map_bta_set.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(I_STR_BTA) TYPE  ZPTB00_STR_BTA
+*"  EXCEPTIONS
+*"      FAILED
+*"----------------------------------------------------------------------
+*ABAP Basics S. 431
+
+  CALL FUNCTION 'ZPTB00_API_BTA_SET'
+    EXPORTING
+      i_tab_bta = i_str_bta
+    EXCEPTIONS
+      failed    = 1
+      OTHERS    = 2.
+  IF sy-subrc <> 0.
+    RAISE failed.
+  ENDIF.
+
+ENDFUNCTION.
+
+
+
+
+
+FUNCTION zptb00_map_rep_get.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(I_TAB_BOOKING_DATE) TYPE  DDTRANGE
+*"  EXPORTING
+*"     REFERENCE(E_TAB_DOC) TYPE  ZPTB00_TTY_DOC
+*"  EXCEPTIONS
+*"      FAILED
+*"----------------------------------------------------------------------
+*ABAP Basics S. 432
+
+  CALL FUNCTION 'ZPTB00_API_DOC_LOAD'
+    EXPORTING
+      i_tab_booking_date = i_tab_booking_date
+    IMPORTING
+      e_tab_doc          = e_tab_doc
+    EXCEPTIONS
+      failed             = 1
+      OTHERS             = 2.
+  IF sy-subrc <> 0.
+    RAISE failed.
+  ENDIF.
+ENDFUNCTION.
+
+FUNCTION zptb00_api_bta_load.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(I_BOOKED) TYPE  ZPTB00_DTE_BTA_BOOKED DEFAULT '1'
+*"  EXPORTING
+*"     REFERENCE(E_TAB_BTA) TYPE  ZPTB00_TTY_BTA
+*"  EXCEPTIONS
+*"      FAILED
+*"----------------------------------------------------------------------
+*ABAP Basics S. 425
+
+  CALL FUNCTION 'ZPTB00_OBJ_BTA_LOAD'
+* EXPORTING
+*   I_BOOKED        = '1'
+   IMPORTING
+     e_tab_bta       = e_tab_bta
+  EXCEPTIONS
+    failed = 1
+    OTHERS = 2.
+
+  IF sy-subrc <> 0.
+    RAISE failed.
+  ENDIF.
+
+
+
+ENDFUNCTION.
+
+FUNCTION ZPTB00_API_BTA_MARK_AS_BOOKED.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(I_TAB_BTA) TYPE  ZPTB00_TTY_BTA
+*"  EXCEPTIONS
+*"      FAILED
+*"----------------------------------------------------------------------
+*ABAP Basics S. 426
+
+CALL FUNCTION 'ZPTB00_OBJ_BTA_MARK_AS_BOOKED'
+  EXPORTING
+    i_tab_bta       = i_tab_bta
+ EXCEPTIONS
+   FAILED          = 1
+   OTHERS          = 2
+          .
+IF sy-subrc <> 0.
+raise failed.
+ENDIF.
+
+
+
+
+ENDFUNCTION.
+
+FUNCTION zptb00_api_bta_set.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(I_STR_BTA) TYPE  ZPTB00_STR_BTA
+*"  EXCEPTIONS
+*"      FAILED
+*"----------------------------------------------------------------------
+*ABAP Basics S. 426
+
+
+  DATA: l_str_bta TYPE ZPTB00_STR_BTA.
+
+*assign to local variable, because we want to enrich the structure
+  l_str_bta = i_str_bta.
+
+* Enrich the structure by technical fields
+  CALL FUNCTION 'ZPTB00_OBJ_BTA_ENRICH'
+    CHANGING
+      c_str_bta = l_str_bta
+    EXCEPTIONS
+      failed    = 1
+      OTHERS    = 2.
+  IF sy-subrc <> 0.
+    RAISE failed.
+  ENDIF.
+
+  CALL FUNCTION 'ZPTB00_API_BTC_CHECK'
+    EXPORTING
+      i_str_bta = l_str_bta
+    EXCEPTIONS
+      failed    = 1
+      OTHERS    = 2.
+  IF sy-subrc <> 0.
+    RAISE failed.
+  ENDIF.
+
+  CALL FUNCTION 'ZPTB00_OBJ_BTA_SAVE'
+   EXPORTING
+     i_str_bta       = l_str_bta
+*   I_TAB_BTA       =
+   EXCEPTIONS
+     failed          = 1
+     OTHERS          = 2
+            .
+  IF sy-subrc <> 0.
+    RAISE failed.
+  ENDIF.
+ENDFUNCTION.
+
+FUNCTION zptb00_api_btc_check.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(I_STR_BTA) TYPE  ZPTB00_STR_BTA
+*"  EXCEPTIONS
+*"      FAILED
+*"----------------------------------------------------------------------
+*ABAP Basics S. 427
+
+  CALL FUNCTION 'ZPTB00_API_BTC_CHECK'
+    EXPORTING
+      i_str_bta = i_str_bta
+    EXCEPTIONS
+      failed    = 1
+      OTHERS    = 2.
+  IF sy-subrc <> 0.
+    RAISE failed.
+  ENDIF.
+
+ENDFUNCTION.
+
+FUNCTION zptb00_api_doc_load.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(I_TAB_BOOKING_DATE) TYPE  DDTRANGE
+*"  EXPORTING
+*"     REFERENCE(E_TAB_DOC) TYPE  ZPTB00_TTY_DOC
+*"  EXCEPTIONS
+*"      FAILED
+*"----------------------------------------------------------------------
+*ABAP Basics S. 428
+
+  CALL FUNCTION 'ZPTB00_API_DOC_LOAD'
+    EXPORTING
+      i_tab_booking_date = i_tab_booking_date
+    IMPORTING
+      e_tab_doc          = e_tab_doc
+    EXCEPTIONS
+      failed             = 1
+      OTHERS             = 2.
+  IF sy-subrc <> 0.
+    RAISE failed.
+  ENDIF.
+
+ENDFUNCTION.
+
+
+FUNCTION zptb00_api_doc_run.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  EXCEPTIONS
+*"      FAILED
+*"----------------------------------------------------------------------
+*ABAP Basics S. 429
+
+  DATA: l_tab_bta TYPE zptb00_tty_bta,
+        l_tab_doc TYPE zptb00_tty_doc.
+
+  CALL FUNCTION 'ZPTB00_API_BTA_LOAD'
+* EXPORTING
+*   I_BOOKED        = '1'
+   IMPORTING
+     e_tab_bta       = l_tab_bta
+   EXCEPTIONS
+     failed          = 1
+     OTHERS          = 2
+            .
+  IF sy-subrc <> 0.
+    RAISE failed.
+  ENDIF.
+
+
+  CALL FUNCTION 'ZPTB00_OBJ_DOC_BOOK'
+    EXPORTING
+      i_tab_bta = l_tab_bta
+    IMPORTING
+      e_tab_doc = l_tab_doc
+    EXCEPTIONS
+      failed    = 1
+      OTHERS    = 2.
+  IF sy-subrc <> 0.
+    RAISE failed.
+  ENDIF.
+
+  CALL FUNCTION 'ZPTB00_OBJ_DOC_SAVE'
+   EXPORTING
+*   I_STR_DOC       =
+     i_tab_doc       = l_tab_doc
+   EXCEPTIONS
+     failed          = 1
+     OTHERS          = 2
+            .
+  IF sy-subrc <> 0.
+    RAISE failed.
+  ENDIF.
+
+  CALL FUNCTION 'ZPTB00_API_BTA_MARK_AS_BOOKED'
+    EXPORTING
+      i_tab_bta = l_tab_bta
+    EXCEPTIONS
+      failed    = 1
+      OTHERS    = 2.
+  IF sy-subrc <> 0.
+    RAISE failed.
+  ENDIF.
+
+
+ENDFUNCTION.
+
+
+FUNCTION zptb00_api_rep_display.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(I_TAB_BOOKING_DATE) TYPE  DDTRANGE
+*"  EXCEPTIONS
+*"      FAILED
+*"----------------------------------------------------------------------
+*ABAP Basics S. 430
+
+  DATA: l_tab_doc TYPE zptb00_tty_doc.
+
+  CALL FUNCTION 'ZPTB00_OBJ_DOC_LOAD'
+    EXPORTING
+      i_tab_booking_date = i_tab_booking_date
+    IMPORTING
+      e_tab_doc          = l_tab_doc
+    EXCEPTIONS
+      failed             = 1
+      OTHERS             = 2.
+  IF sy-subrc <> 0.
+    RAISE failed.
+  ENDIF.
+
+
+  CALL FUNCTION 'ZPTB00_OBJ_REP_SHOW'
+    EXPORTING
+      i_tab_doc = l_tab_doc
+    EXCEPTIONS
+      failed    = 1
+      OTHERS    = 2.
+  IF sy-subrc <> 0.
+    RAISE failed.
+  ENDIF.
+
+ENDFUNCTION.
+
+
+FUNCTION zptb00_obj_bta_edit.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  CHANGING
+*"     REFERENCE(C_STR_BTA) TYPE  ZPTB00_STR_BTA OPTIONAL
+*"----------------------------------------------------------------------
+*ABAP Basics S. 431
+
+  DATA: l_str_item TYPE zptb00_btaitem.
+
+  IF c_str_bta IS INITIAL.
+*Just add one line to the position by default.
+    APPEND l_str_item TO c_str_bta-tab_item.
+  ENDIF.
+*Make manual posting global for dynpro.
+  MOVE-CORRESPONDING c_str_bta TO g_str_bta.
+* Call edit screen
+  CALL SCREEN 0100.
+
+  MOVE-CORRESPONDING g_str_bta TO c_str_bta.
+
+ENDFUNCTION.
+
+
+FUNCTION zptb00_obj_bta_enrich.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  CHANGING
+*"     REFERENCE(C_STR_BTA) TYPE  ZPTB00_STR_BTA
+*"  EXCEPTIONS
+*"      FAILED
+*"----------------------------------------------------------------------
+*ABAP Basics S. 433
+
+  FIELD-SYMBOLS:
+                 <l_str_item> TYPE zptb00_btaitem.
+
+  c_str_bta-client = sy-mandt.
+
+  CALL FUNCTION 'GUID_CREATE'
+   IMPORTING
+*   EV_GUID_16       =
+*   EV_GUID_22       =
+     ev_guid_32       = c_str_bta-id.
+  c_str_bta-booked = '1'.
+
+*enrich items.
+
+  LOOP AT c_str_bta-tab_item ASSIGNING <l_str_item>.
+    <l_str_item>-client = sy-mandt.
+
+    CALL FUNCTION 'GUID_CREATE'
+     IMPORTING
+*   EV_GUID_16       =
+*   EV_GUID_22       =
+       ev_guid_32       = <l_str_item>-id.
+    <l_str_item>-header_id = c_str_bta-id.
+    <l_str_item>-mark = ' '.
+  ENDLOOP.
+
+
+ENDFUNCTION.
+
+
+FUNCTION zptb00_obj_bta_load.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(I_BOOKED) TYPE  ZPTB00_DTE_BTA_BOOKED DEFAULT '1'
+*"  EXPORTING
+*"     REFERENCE(E_TAB_BTA) TYPE  ZPTB00_TTY_BTA
+*"----------------------------------------------------------------------
+*ABAP Basics S. 431
+
+  DATA:
+*db
+        l_tab_bta_header TYPE STANDARD TABLE OF zptb00_btaheader,
+        l_tab_bta_item TYPE STANDARD TABLE OF zptb00_btaitem,
+*local
+        l_str_bta TYPE zptb00_str_bta.
+
+  FIELD-SYMBOLS:
+*db
+                 <l_str_bta_header> TYPE zptb00_btaheader,
+                 <l_str_bta_item> TYPE zptb00_btaitem.
+* read the header data
+  SELECT * FROM zptb00_btaheader INTO TABLE
+    l_tab_bta_header
+    WHERE booked = i_booked.
+
+  IF sy-dbcnt = 0.
+    RAISE failed.
+  ENDIF.
+
+*read the item data. APAB statement "For all entries" only works
+* up to ca. 1700 entries so we better loop.
+
+  LOOP AT l_tab_bta_header ASSIGNING <l_str_bta_header>.
+    MOVE-CORRESPONDING <l_str_bta_header> TO l_str_bta.
+    SELECT * FROM zptb00_btaitem INTO TABLE l_tab_bta_item
+      WHERE header_id = <l_str_bta_header>-id.
+    l_str_bta-tab_item = l_tab_bta_item.
+    APPEND l_str_bta TO e_tab_bta.
+  ENDLOOP.
+  IF sy-dbcnt = 0.
+    RAISE failed.
+  ENDIF.
+
+
+ENDFUNCTION.
+
+
+FUNCTION zptb00_obj_bta_mark_as_booked.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(I_TAB_BTA) TYPE  ZPTB00_TTY_BTA
+*"  EXCEPTIONS
+*"      FAILED
+*"----------------------------------------------------------------------
+*ABAP Basics S. 435
+
+  FIELD-SYMBOLS:
+                 <l_str_bta> TYPE zptb00_str_bta.
+
+  LOOP AT i_tab_bta ASSIGNING <l_str_bta>.
+    UPDATE zptb00_btaheader SET booked = '2'
+    WHERE id = <l_str_bta>-id.
+  ENDLOOP.
+
+
+
+
+ENDFUNCTION.
+
+
+
+FUNCTION zptb00_obj_bta_save.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(I_STR_BTA) TYPE  ZPTB00_STR_BTA OPTIONAL
+*"     REFERENCE(I_TAB_BTA) TYPE  ZPTB00_TTY_BTA OPTIONAL
+*"  EXCEPTIONS
+*"      FAILED
+*"----------------------------------------------------------------------
+*ABAP Basics S. 436
+
+  DATA:
+        l_tab_bta TYPE zptb00_tty_bta,
+        l_str_btaheader TYPE zptb00_btaheader.
+  FIELD-SYMBOLS:
+            <l_str_bta> TYPE zptb00_str_bta.
+  l_tab_bta = i_tab_bta.
+  IF NOT i_str_bta IS INITIAL.
+    APPEND i_str_bta TO l_tab_bta.
+  ENDIF.
+  LOOP AT i_tab_bta ASSIGNING <l_str_bta>.
+
+*        l_tab_btaitem TYPE STANDARD TABLE OF
+*        zptb00_btaitem.
+
+    MOVE-CORRESPONDING <l_str_bta> TO l_str_btaheader.
+    MODIFY zptb00_btaheader FROM l_str_btaheader.
+    IF sy-subrc <> 0.
+      RAISE failed.
+    ENDIF.
+
+    DELETE FROM zptb00_btaitem WHERE header_id =
+    l_str_btaheader-id.
+    MODIFY zptb00_btaitem FROM TABLE <l_str_bta>-tab_item.
+    IF sy-subrc <> 0.
+      RAISE failed.
+    ENDIF.
+
+  ENDLOOP.
+
+ENDFUNCTION.
+
+FUNCTION zptb00_obj_btc_check.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(I_STR_BTA) TYPE  ZPTB00_STR_BTA
+*"  EXCEPTIONS
+*"      FAILED
+*"----------------------------------------------------------------------
+*ABAP Basics S. 437
+
+  DATA: l_tab_dd07v LIKE STANDARD TABLE OF dd07v,
+        l_str_currency TYPE tcurc,
+        l_str_quantity TYPE t006.
+  FIELD-SYMBOLS:
+                 <l_str_item> TYPE zptb00_btaitem.
+
+*********** check header
+* check bp_id
+  IF i_str_bta-bp_id IS INITIAL.
+    RAISE failed.
+  ENDIF.
+
+* check bttype
+  CALL FUNCTION 'DD_DOMVALUES_GET'
+    EXPORTING
+      domname              = 'ZPTB00_DOM_BTA_BTTYPE'
+*   TEXT                 = ' '
+*   LANGU                = ' '
+*   BYPASS_BUFFER        = ' '
+* IMPORTING
+*   RC                   =
+    TABLES
+      dd07v_tab            = l_tab_dd07v
+   EXCEPTIONS
+     wrong_textflag       = 1
+     OTHERS               = 2
+            .
+  IF sy-subrc <> 0.
+    RAISE failed.
+  ENDIF.
+
+  READ TABLE l_tab_dd07v WITH KEY domvalue_l =
+  i_str_bta-bttype TRANSPORTING NO FIELDS.
+  IF sy-subrc <> 0.
+    RAISE failed.
+  ENDIF.
+
+
+* check item
+* check tab_item
+  IF i_str_bta-tab_item IS INITIAL.
+    RAISE failed.
+  ENDIF.
+  LOOP AT i_str_bta-tab_item ASSIGNING <l_str_item>.
+
+
+* check pr_id
+
+    CALL FUNCTION 'DD_DOMVALUES_GET'
+      EXPORTING
+        domname              = 'ZPTB00_DOM_BTA_PR_ID'
+*   TEXT                 = ' '
+*   LANGU                = ' '
+*   BYPASS_BUFFER        = ' '
+* IMPORTING
+*   RC                   =
+      TABLES
+        dd07v_tab            = l_tab_dd07v
+     EXCEPTIONS
+       wrong_textflag       = 1
+       OTHERS               = 2
+              .
+    IF sy-subrc <> 0.
+      RAISE failed.
+    ENDIF.
+
+    READ TABLE l_tab_dd07v WITH KEY domvalue_l =
+    <l_str_item>-pr_id TRANSPORTING NO FIELDS.
+    IF sy-subrc <> 0.
+      RAISE failed.
+    ENDIF.
+
+
+*check pstype
+    CALL FUNCTION 'DD_DOMVALUES_GET'
+      EXPORTING
+        domname              = 'ZPTB00_DOM_BTA_PSTYPE'
+*   TEXT                 = ' '
+*   LANGU                = ' '
+*   BYPASS_BUFFER        = ' '
+* IMPORTING
+*   RC                   =
+      TABLES
+        dd07v_tab            = l_tab_dd07v
+     EXCEPTIONS
+       wrong_textflag       = 1
+       OTHERS               = 2
+              .
+    IF sy-subrc <> 0.
+      RAISE failed.
+    ENDIF.
+
+    READ TABLE l_tab_dd07v WITH KEY domvalue_l =
+    <l_str_item>-pstype TRANSPORTING NO FIELDS.
+    IF sy-subrc <> 0.
+      RAISE failed.
+    ENDIF.
+
+
+*check wh_id
+
+    CALL FUNCTION 'DD_DOMVALUES_GET'
+      EXPORTING
+        domname              = 'ZPTB00_DOM_BTA_WH_ID'
+*   TEXT                 = ' '
+*   LANGU                = ' '
+*   BYPASS_BUFFER        = ' '
+* IMPORTING
+*   RC                   =
+      TABLES
+        dd07v_tab            = l_tab_dd07v
+     EXCEPTIONS
+       wrong_textflag       = 1
+       OTHERS               = 2
+              .
+    IF sy-subrc <> 0.
+      RAISE failed.
+    ENDIF.
+
+    READ TABLE l_tab_dd07v WITH KEY domvalue_l =
+    <l_str_item>-pr_id TRANSPORTING NO FIELDS.
+    IF sy-subrc <> 0.
+      RAISE failed.
+    ENDIF.
+
+* check currency
+
+    SELECT SINGLE * FROM tcurc INTO l_str_currency
+      WHERE waers = <l_str_item>-currency.
+    IF sy-subrc <> 0.
+      RAISE failed.
+    ENDIF.
+
+
+* check unit
+  SELECT SINGLE * FROM t006 INTO l_str_quantity WHERE
+    msehi = <l_str_item>-unit.
+  IF sy-subrc <> 0.
+    RAISE failed.
+  ENDIF.
+ENDLOOP.
+
+
+ENDFUNCTION.
+
+
+
+
+
+FUNCTION zptb00_obj_doc_book.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(I_TAB_BTA) TYPE  ZPTB00_TTY_BTA
+*"  EXPORTING
+*"     REFERENCE(E_TAB_DOC) TYPE  ZPTB00_TTY_DOC
+*"  EXCEPTIONS
+*"      FAILED
+*"----------------------------------------------------------------------
+*ABAP Basics S. 440
+
+  DATA:
+*accounting document
+  l_str_doc TYPE  zptb00_str_doc,
+  l_str_doc_item TYPE zptb00_docitem,
+* business transaction
+  l_str_bta TYPE zptb00_btaheader.
+
+  FIELD-SYMBOLS:
+* business transaction
+  <l_str_bta> TYPE zptb00_str_bta,
+  <l_str_bta_item> TYPE zptb00_btaitem.
+
+  CONSTANTS:
+* BUSINESS TRANSACTION field constants
+  con_bta_bttype_purchase TYPE zptb00_dte_bta_bttype
+        VALUE 'PURCHASE',
+  con_bta_bttype_sale TYPE zptb00_dte_bta_bttype
+        VALUE 'SALE',
+  con_bta_pstype_service TYPE zptb00_dte_bta_pstype
+        VALUE 'SERVICE',
+  con_bta_pstype_product TYPE zptb00_dte_bta_pstype
+        VALUE 'PRODUCT',
+*document field constants
+   con_doc_debit TYPE zptb00_dte_doc_debitcredit
+      VALUE 'D',
+   con_doc_credit TYPE zptb00_dte_doc_debitcredit
+   VALUE 'C',
+   con_doc_account_bga  TYPE zptb00_dte_doc_account
+   VALUE '001000',
+   con_doc_account_cash TYPE zptb00_dte_doc_account
+   VALUE '002000'.
+
+*loop through every business transaction
+  LOOP AT i_tab_bta ASSIGNING <l_str_bta>.
+*direct move-corresponding
+    MOVE-CORRESPONDING <l_str_bta> TO l_str_bta.
+    MOVE-CORRESPONDING l_str_bta TO l_str_doc.
+
+*loop through every business transaction position
+    LOOP AT <l_str_bta>-tab_item ASSIGNING
+      <l_str_bta_item>.
+      MOVE-CORRESPONDING <l_str_bta_item> TO
+            l_str_doc_item.
+
+* this is the accounting brain
+*book every business transaction as an accounting
+*document
+      IF <l_str_bta>-bttype = con_bta_bttype_purchase.
+        IF <l_str_bta_item>-pstype =
+          con_bta_pstype_service.
+        ELSEIF <l_str_bta_item>-pstype =
+          con_bta_pstype_product.
+
+*For our project we implement only one example,
+* but more to come
+          l_str_doc_item-debitcredit = con_doc_debit.
+          l_str_doc_item-account = con_doc_account_bga.
+          APPEND l_str_doc_item TO l_str_doc-tab_item.
+
+          CALL FUNCTION 'GUID_CREATE'
+           IMPORTING
+*         EV_GUID_16       =
+*         EV_GUID_22       =
+             ev_guid_32       = l_str_doc_item-id.
+
+          l_str_doc_item-debitcredit = con_doc_credit.
+          l_str_doc_item-account = con_doc_account_cash.
+          APPEND l_str_doc_item TO l_str_doc-tab_item.
+        ENDIF.
+      ENDIF.
+    ENDLOOP.
+    APPEND l_str_doc TO e_tab_doc.
+  ENDLOOP.
+  .
+
+ENDFUNCTION.
+
+
+
+FUNCTION zptb00_obj_doc_load.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(I_TAB_BOOKING_DATE) TYPE  DDTRANGE
+*"  EXPORTING
+*"     REFERENCE(E_TAB_DOC) TYPE  ZPTB00_TTY_DOC
+*"  EXCEPTIONS
+*"      FAILED
+*"----------------------------------------------------------------------
+*ABAP Basics S. 443
+
+
+  DATA:
+*db
+        l_tab_doc_header TYPE STANDARD TABLE OF zptb00_docheader,
+        l_tab_doc_item TYPE STANDARD TABLE OF zptb00_docitem,
+*local
+        l_str_doc TYPE zptb00_str_doc.
+
+  FIELD-SYMBOLS:
+*db
+                 <l_str_doc_header> TYPE zptb00_docheader,
+                 <l_str_doc_item> TYPE zptb00_docitem.
+* read the header data
+  SELECT * FROM zptb00_docheader INTO TABLE
+    l_tab_doc_header
+    WHERE btdate IN i_tab_booking_date.
+
+  IF sy-dbcnt = 0.
+    RAISE failed.
+  ENDIF.
+
+*read the item data. APAB statement "For all entries" only works
+* up to ca. 1700 entries so we better loop.
+
+  LOOP AT l_tab_doc_header ASSIGNING <l_str_doc_header>.
+    MOVE-CORRESPONDING <l_str_doc_header> TO l_str_doc.
+    SELECT * FROM zptb00_docitem INTO TABLE l_tab_doc_item
+      WHERE header_id = <l_str_doc_header>-id.
+    l_str_doc-tab_item = l_tab_doc_item.
+    APPEND l_str_doc TO e_tab_doc.
+  ENDLOOP.
+  IF sy-dbcnt = 0.
+    RAISE failed.
+  ENDIF.
+
+
+
+ENDFUNCTION.
+
+
+FUNCTION zptb00_obj_doc_save.
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(I_STR_DOC) TYPE  ZPTB00_STR_DOC OPTIONAL
+*"     REFERENCE(I_TAB_DOC) TYPE  ZPTB00_TTY_DOC OPTIONAL
+*"  EXCEPTIONS
+*"      FAILED
+*"----------------------------------------------------------------------
+*ABAP Basics S. 444
+
+  DATA:
+        l_tab_doc TYPE zptb00_tty_doc,
+        l_str_docheader TYPE zptb00_docheader.
+  FIELD-SYMBOLS:
+            <l_str_doc> TYPE zptb00_str_doc.
+  l_tab_doc = i_tab_doc.
+  IF NOT i_str_doc IS INITIAL.
+    APPEND i_str_doc TO l_tab_doc.
+  ENDIF.
+
+  LOOP AT i_tab_doc ASSIGNING <l_str_doc>.
+
+*        l_tab_btaitem TYPE STANDARD TABLE OF
+*        zptb00_btaitem.
+
+    MOVE-CORRESPONDING <l_str_doc> TO l_str_docheader.
+    MODIFY zptb00_docheader FROM l_str_docheader.
+    IF sy-subrc <> 0.
+      RAISE failed.
+    ENDIF.
+
+    DELETE FROM zptb00_docitem WHERE header_id =
+    l_str_docheader-id.
+    MODIFY zptb00_docitem FROM TABLE <l_str_doc>-tab_item.
+    IF sy-subrc <> 0.
+      RAISE failed.
+    ENDIF.
+
+  ENDLOOP.
+
+
+
+
+ENDFUNCTION.
+
+FUNCTION zptb00_obj_rep_show .
+*"----------------------------------------------------------------------
+*"*"Lokale Schnittstelle:
+*"  IMPORTING
+*"     REFERENCE(I_TAB_DOC) TYPE  ZPTB00_TTY_DOC
+*"  EXCEPTIONS
+*"      FAILED
+*"----------------------------------------------------------------------
+*ABAP Basics S. 444
+
+* Contains ALV Grid structures needet for variables
+  TYPE-POOLS slis.
+
+  DATA:
+        "for data handling
+              l_str_doc_flat TYPE zptb00_str_doc_flat,
+              l_tab_doc_flat TYPE STANDARD TABLE OF
+              zptb00_str_doc_flat,
+        " for ALV-Grid display
+        l_dis TYPE disvariant,
+        l_rda_table TYPE REF TO data,
+              l_str_layout TYPE slis_layout_alv.
+
+  FIELD-SYMBOLS:
+        "for data Handling
+              <l_str_doc> TYPE zptb00_str_doc,
+              <l_str_doc_item> TYPE zptb00_docitem.
+
+*convert data to flast structure
+  LOOP AT i_tab_doc ASSIGNING <l_str_doc>.
+    MOVE-CORRESPONDING <l_str_doc> TO l_str_doc_flat.
+    LOOP AT <l_str_doc>-tab_item ASSIGNING <l_str_doc_item>.
+      MOVE-CORRESPONDING <l_str_doc_item> TO l_str_doc_flat.
+      APPEND l_str_doc_flat TO l_tab_doc_flat.
+    ENDLOOP.
+  ENDLOOP.
+
+
+*Make column width as small as possible
+  l_str_layout-colwidth_optimize = 'X'.
+*Window title
+  l_str_layout-window_titlebar = text-001.
+  l_dis-report = sy-repid.
+
+  CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+   EXPORTING
+*   I_INTERFACE_CHECK                 = ' '
+*   I_BYPASSING_BUFFER                = ' '
+*   I_BUFFER_ACTIVE                   = ' '
+*   I_CALLBACK_PROGRAM                = ' '
+*   I_CALLBACK_PF_STATUS_SET          = ' '
+*   I_CALLBACK_USER_COMMAND           = ' '
+*   I_CALLBACK_TOP_OF_PAGE            = ' '
+*   I_CALLBACK_HTML_TOP_OF_PAGE       = ' '
+*   I_CALLBACK_HTML_END_OF_LIST       = ' '
+     i_structure_name                  = 'ZPTB00_STR_DOC_FLAT'
+*   I_BACKGROUND_ID                   = ' '
+*   I_GRID_TITLE                      =
+*   I_GRID_SETTINGS                   =
+     is_layout                         = l_str_layout
+*   IT_FIELDCAT                       =
+*   IT_EXCLUDING                      =
+*   IT_SPECIAL_GROUPS                 =
+*   IT_SORT                           =
+*   IT_FILTER                         =
+*   IS_SEL_HIDE                       =
+*   I_DEFAULT                         = 'X'
+     i_save                            = 'A'
+     is_variant                        = l_dis
+*   IT_EVENTS                         =
+*   IT_EVENT_EXIT                     =
+*   IS_PRINT                          =
+*   IS_REPREP_ID                      =
+*   I_SCREEN_START_COLUMN             = 0
+*   I_SCREEN_START_LINE               = 0
+*   I_SCREEN_END_COLUMN               = 0
+*   I_SCREEN_END_LINE                 = 0
+*   I_HTML_HEIGHT_TOP                 = 0
+*   I_HTML_HEIGHT_END                 = 0
+*   IT_ALV_GRAPHICS                   =
+*   IT_HYPERLINK                      =
+*   IT_ADD_FIELDCAT                   =
+*   IT_EXCEPT_QINFO                   =
+*   IR_SALV_FULLSCREEN_ADAPTER        =
+* IMPORTING
+*   E_EXIT_CAUSED_BY_CALLER           =
+*   ES_EXIT_CAUSED_BY_USER            =
+    TABLES
+      t_outtab                          = l_tab_doc_flat
+   EXCEPTIONS
+     program_error                     = 1
+     OTHERS                            = 2.
+
+*Error? ->show why          .
+  IF sy-subrc <> 0.
+    MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+            WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+  ENDIF.
+
+
+
+ENDFUNCTION.
+
+
